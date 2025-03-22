@@ -7,14 +7,24 @@
 
 import UIKit
 
-class SearchVC: UIViewController {
+protocol SearchVCProtocol: AnyObject {
+    func configureVC()
+}
+
+final class SearchVC: UIViewController {
+    
+    private let viewModel = SearchVM()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.backgroundColor = .brown
+        viewModel.view = self
+        viewModel.viewDidLoad()
     }
-
-
 }
 
+extension SearchVC: SearchVCProtocol {
+    
+    func configureVC() {
+        view.backgroundColor = .brown
+    }
+}

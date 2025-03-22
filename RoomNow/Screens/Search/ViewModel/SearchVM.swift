@@ -7,6 +7,16 @@
 
 import Foundation
 
+protocol SearchVMProtocol {
+    func viewDidLoad()
+}
+
 final class SearchVM {
-    
+    weak var view: SearchVCProtocol?
+}
+
+extension SearchVM: SearchVMProtocol {
+    func viewDidLoad() {
+        view?.configureVC()
+    }
 }
