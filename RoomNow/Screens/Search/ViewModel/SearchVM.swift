@@ -18,5 +18,6 @@ final class SearchVM {
 extension SearchVM: SearchVMProtocol {
     func viewDidLoad() {
         view?.configureVC()
+        view?.setupSearchButtons()
     }
 }
