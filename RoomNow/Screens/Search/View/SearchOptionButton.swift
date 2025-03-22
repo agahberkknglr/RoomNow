@@ -25,7 +25,7 @@ class SearchOptionButton: UIButton {
         self.layer.borderColor = UIColor.lightGray.cgColor
         self.setTitleColor(.black, for: .normal)
         self.contentHorizontalAlignment = .left
-        self.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
+        //self.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
         self.backgroundColor = .white
     }
 
