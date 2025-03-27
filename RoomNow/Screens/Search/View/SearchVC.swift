@@ -58,7 +58,7 @@ extension SearchVC: SearchVCProtocol {
     }
     
     @objc private func openDestinationSheet() {
-        presentBottomSheet(with: DestinationVC(), detents: [.medium(), .large()])
+        presentBottomSheet(with: DestinationVC(), detents: [.large()])
     }
 
     @objc private func openDateSheet() {
@@ -66,7 +66,7 @@ extension SearchVC: SearchVCProtocol {
     }
 
     @objc private func openRoomSheet() {
-        presentBottomSheet(with: DestinationVC(), detents: [.medium(), .large()])
+        presentBottomSheet(with: RoomVC(), detents: [.medium()])
     }
 
     private func presentBottomSheet(with viewController: UIViewController, detents: [UISheetPresentationController.Detent]) {
