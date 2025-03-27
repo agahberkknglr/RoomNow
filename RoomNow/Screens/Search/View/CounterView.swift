@@ -46,6 +46,10 @@ class CounterView: UIView {
         label.textAlignment = .center
         return label
     }()
+    
+    var value: Int {  // Public read-only property
+         return counter
+     }
 
     // Custom initializer to set a starting value
     init(startValue: Int = 0, minValue: Int = 0) {
@@ -109,5 +113,9 @@ class CounterView: UIView {
     private func updateButtonState() {
         minusButton.isEnabled = counter > minValue
         minusButton.alpha = counter > minValue ? 1.0 : 0.5
+    }
+    
+    func setValue(_ newValue: Int) {
+        counter = max(newValue, minValue)
     }
 }
