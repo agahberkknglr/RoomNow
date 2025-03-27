@@ -12,7 +12,17 @@ protocol RoomVCProtocols {
     //func configureButtons()
 }
 
+protocol RoomVCDelegate: AnyObject {
+    func didSelectRoomDetails(roomCount: Int, adults: Int, children: Int)
+}
+
 class RoomVC: UIViewController, RoomVCProtocols {
+    
+    weak var delegate: RoomVCDelegate?
+    
+    var selectedRooms: Int = 1
+    var selectedAdults: Int = 2
+    var selectedChildren: Int = 0
 
     private let titleLabel = UILabel()
     private let roomLabel = UILabel()
@@ -41,7 +51,18 @@ class RoomVC: UIViewController, RoomVCProtocols {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureVC()
+        applyButton.addTarget(self, action: #selector(applyButtonTapped), for: .touchUpInside)
 
+    }
+    
+    @objc private func applyButtonTapped() {
+        let rooms = roomCounter.value
+        let adults = adultsCounter.value
+        let children = childrenCounter.value
+        
+        delegate?.didSelectRoomDetails(roomCount: rooms, adults: adults, children: children)
+        
+        dismiss(animated: true)
     }
     
     func configureVC() {
@@ -57,6 +78,10 @@ class RoomVC: UIViewController, RoomVCProtocols {
         petLabel.text = "Travelling with pets?"
         petInfoLabel.text = "Asistance animals aren't consider pets."
         petInfoLabel.font = .systemFont(ofSize: 14, weight: .light)
+        
+        roomCounter.setValue(selectedRooms)
+        adultsCounter.setValue(selectedAdults)
+        childrenCounter.setValue(selectedChildren)
         
         petSwitch.isOn = false
         
