@@ -18,6 +18,11 @@ final class SearchVC: UIViewController{
     private var dateButton = SearchOptionButton()
     private var roomButton = SearchOptionButton()
     
+    private var selectedRooms: Int = 1
+    private var selectedAdults: Int = 2
+    private var selectedChildren: Int = 0
+    
+    
     private let viewModel = SearchVM()
 
     override func viewDidLoad() {
@@ -34,9 +39,9 @@ extension SearchVC: SearchVCProtocol {
     }
     
     func setupSearchButtons() {
-        destinationButton.setTitle("Select Destination", for: .normal)
-        dateButton.setTitle("Select Dates", for: .normal)
-        roomButton.setTitle("Select Rooms & Guests", for: .normal)
+        destinationButton.setTitle(" Select Destination", for: .normal)
+        dateButton.setTitle(" Select Dates", for: .normal)
+        roomButton.setTitle(" Select Rooms & Guests", for: .normal)
         
         destinationButton.addTarget(self, action: #selector(openDestinationSheet), for: .touchUpInside)
         dateButton.addTarget(self, action: #selector(openDateSheet), for: .touchUpInside)
@@ -66,7 +71,13 @@ extension SearchVC: SearchVCProtocol {
     }
 
     @objc private func openRoomSheet() {
-        presentBottomSheet(with: RoomVC(), detents: [.medium()])
+        let roomVC = RoomVC()
+        roomVC.delegate = self
+        roomVC.selectedRooms = selectedRooms
+        roomVC.selectedAdults = selectedAdults
+        roomVC.selectedChildren = selectedChildren
+        
+        presentBottomSheet(with: roomVC, detents: [.medium()])
     }
 
     private func presentBottomSheet(with viewController: UIViewController, detents: [UISheetPresentationController.Detent]) {
@@ -77,5 +88,18 @@ extension SearchVC: SearchVCProtocol {
             sheet.preferredCornerRadius = 16
         }
         present(navController, animated: true)
+    }
+}
+
+extension SearchVC: RoomVCDelegate {
+    func didSelectRoomDetails(roomCount: Int, adults: Int, children: Int) {
+        
+        selectedRooms = roomCount
+        selectedAdults = adults
+        selectedChildren = children
+        
+        let childrenText = children > 0 ? children > 1 ? "\(children) children" : "\(children) child" : "No children"
+        let title = " \(roomCount) room • \(adults) adults • \(childrenText)"
+        roomButton.setTitle(title, for: .normal)
     }
 }
