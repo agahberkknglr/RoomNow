@@ -22,6 +22,9 @@ final class SearchVC: UIViewController{
     private var selectedAdults: Int = 2
     private var selectedChildren: Int = 0
     
+    private var selectedStartDate: Date?
+    private var selectedEndDate: Date?
+    
     
     private let viewModel = SearchVM()
 
@@ -67,7 +70,13 @@ extension SearchVC: SearchVCProtocol {
     }
 
     @objc private func openDateSheet() {
-        presentBottomSheet(with: DestinationVC(), detents: [.medium()])
+        let dateVC = DateVC()
+        dateVC.delegate = self
+        
+        dateVC.selectedStartDate = selectedStartDate
+        dateVC.selectedEndDate = selectedEndDate
+        
+        presentBottomSheet(with: dateVC, detents: [.medium()])
     }
 
     @objc private func openRoomSheet() {
@@ -101,5 +110,25 @@ extension SearchVC: RoomVCDelegate {
         let childrenText = children > 0 ? children > 1 ? "\(children) children" : "\(children) child" : "No children"
         let title = " \(roomCount) room • \(adults) adults • \(childrenText)"
         roomButton.setTitle(title, for: .normal)
+    }
+}
+
+extension SearchVC: DateVCDelegate {
+    func didSelectDateRange(_ startDate: Date, _ endDate: Date) {
+        // Ensure startDate is always earlier than endDate
+        let sortedDates = [startDate, endDate].sorted()
+        
+        selectedStartDate = sortedDates.first
+        selectedEndDate = sortedDates.last
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "E, MMM d"
+        formatter.timeZone = TimeZone(identifier: "Europe/Istanbul")
+
+        let startDateString = formatter.string(from: sortedDates.first!)
+        let endDateString = formatter.string(from: sortedDates.last!)
+
+        let dateRange = " \(startDateString) - \(endDateString)"
+        dateButton.setTitle(dateRange, for: .normal)
     }
 }
