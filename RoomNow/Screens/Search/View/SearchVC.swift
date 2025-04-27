@@ -124,7 +124,6 @@ extension SearchVC: RoomVCDelegate {
 
 extension SearchVC: DateVCDelegate {
     func didSelectDateRange(_ startDate: Date, _ endDate: Date) {
-        // Ensure startDate is always earlier than endDate
         let sortedDates = [startDate, endDate].sorted()
         
         selectedStartDate = sortedDates.first
