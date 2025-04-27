@@ -7,13 +7,25 @@
 
 import UIKit
 
+protocol ResultVCProtocol: AnyObject {
+    func configureVC()
+}
+
 final class ResultVC: UIViewController {
+    
+    private let viewModel = ResultVM()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        viewModel.view = self
+        viewModel.viewDidLoad()
     }
 
 
+}
+
+extension ResultVC: ResultVCProtocol {
+    func configureVC() {
+        view.backgroundColor = .blue
+    }
 }
