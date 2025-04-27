@@ -17,6 +17,7 @@ final class SearchVC: UIViewController{
     private var destinationButton = SearchOptionButton()
     private var dateButton = SearchOptionButton()
     private var roomButton = SearchOptionButton()
+    private let searchButton = UIButton()
     
     private var selectedRooms: Int = 1
     private var selectedAdults: Int = 2
@@ -45,12 +46,17 @@ extension SearchVC: SearchVCProtocol {
         destinationButton.setTitle(" Select Destination", for: .normal)
         dateButton.setTitle(" Select Dates", for: .normal)
         roomButton.setTitle(" Select Rooms & Guests", for: .normal)
+        searchButton.setTitle("Search Now", for: .normal)
+        
+        searchButton.layer.cornerRadius = 10
+        searchButton.tintColor = .white
+        searchButton.backgroundColor = .systemGray5
         
         destinationButton.addTarget(self, action: #selector(openDestinationSheet), for: .touchUpInside)
         dateButton.addTarget(self, action: #selector(openDateSheet), for: .touchUpInside)
         roomButton.addTarget(self, action: #selector(openRoomSheet), for: .touchUpInside)
         
-        let stackView = UIStackView(arrangedSubviews: [destinationButton, dateButton, roomButton])
+        let stackView = UIStackView(arrangedSubviews: [destinationButton, dateButton, roomButton, searchButton])
         stackView.axis = .vertical
         stackView.spacing = 12
         stackView.distribution = .fillEqually
@@ -61,7 +67,10 @@ extension SearchVC: SearchVCProtocol {
             stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            destinationButton.heightAnchor.constraint(equalToConstant: 50)
+            destinationButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            searchButton.widthAnchor.constraint(equalToConstant: 100),
+            searchButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
     
