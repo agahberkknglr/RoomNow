@@ -7,6 +7,11 @@
 
 import UIKit
 
+protocol DestinationVCDelegate: AnyObject {
+    func didSelectCity(_ city: City)
+}
+
+
 final class DestinationVC: UIViewController {
     
     private let searchTextField: UITextField = {
@@ -35,6 +40,7 @@ final class DestinationVC: UIViewController {
     }()
 
     private let viewModel = DestinationVM()
+    weak var delegate: DestinationVCDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -42,7 +48,7 @@ final class DestinationVC: UIViewController {
         view.backgroundColor = .secondarySystemBackground
         setupUI()
         
-        //tableView.delegate = self
+        tableView.delegate = self
         tableView.dataSource = self
         searchTextField.delegate = self
         
@@ -110,5 +116,13 @@ extension DestinationVC: UITableViewDataSource {
         let city = viewModel.filteredCities[indexPath.row]
         cell.textLabel?.text = city.name
         return cell
+    }
+}
+
+extension DestinationVC: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedCity = viewModel.filteredCities[indexPath.row]
+        delegate?.didSelectCity(selectedCity)
+        dismiss(animated: true)
     }
 }

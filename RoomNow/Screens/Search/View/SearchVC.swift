@@ -75,7 +75,9 @@ extension SearchVC: SearchVCProtocol {
     }
     
     @objc private func openDestinationSheet() {
-        presentBottomSheet(with: DestinationVC(), detents: [.large()])
+        let destinationVC = DestinationVC()
+        destinationVC.delegate = self
+        presentBottomSheet(with: destinationVC, detents: [.large()])
     }
 
     @objc private func openDateSheet() {
@@ -138,5 +140,11 @@ extension SearchVC: DateVCDelegate {
 
         let dateRange = " \(startDateString) - \(endDateString)"
         dateButton.setTitle(dateRange, for: .normal)
+    }
+}
+
+extension SearchVC: DestinationVCDelegate {
+    func didSelectCity(_ city: City) {
+        destinationButton.setTitle(" \(city.name)", for: .normal)
     }
 }
