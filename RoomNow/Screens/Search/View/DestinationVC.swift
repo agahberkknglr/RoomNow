@@ -23,10 +23,9 @@ final class DestinationVC: UIViewController {
         tableView.isHidden = true
         return tableView
     }()
-    
-    private var allData: [String] = ["Antalya", "Manisa", "Mugla", "Izmir", "Ankara", "Istanbul"]
-    private var filteredData: [String] = []
 
+    private let viewModel = DestinationVM()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -38,8 +37,18 @@ final class DestinationVC: UIViewController {
         searchTextField.delegate = self
         
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+
         
-        filteredData = allData
+        viewModel.fetchCities { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success():
+                    self?.tableView.reloadData()
+                case .failure(let error):
+                    print("Failed to fetch cities: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 
     private func setupUI() {
@@ -64,30 +73,28 @@ final class DestinationVC: UIViewController {
 extension DestinationVC: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let searchText = (textField.text as NSString?)?.replacingCharacters(in: range, with: string) ?? ""
-        filterData(searchText)
+        viewModel.filterCities(with: searchText)
+        tableView.isHidden = viewModel.filteredCities.isEmpty
+        tableView.reloadData()
         return true
     }
     
     private func filterData(_ query: String) {
-        if query.isEmpty {
-            filteredData.removeAll()
-            tableView.isHidden = true
-        } else {
-            filteredData = allData.filter { $0.lowercased().range(of: query.lowercased()) != nil }
-            tableView.isHidden = filteredData.isEmpty
-        }
+        viewModel.filterCities(with: query)
+        tableView.isHidden = viewModel.filteredCities.isEmpty
         tableView.reloadData()
     }
 }
 
 extension DestinationVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return filteredData.count
+        return viewModel.filteredCities.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell") ?? UITableViewCell(style: .default, reuseIdentifier: "cell")
-        cell.textLabel?.text = filteredData[indexPath.row]
+        let city = viewModel.filteredCities[indexPath.row]
+        cell.textLabel?.text = city.name
         return cell
     }
 }
