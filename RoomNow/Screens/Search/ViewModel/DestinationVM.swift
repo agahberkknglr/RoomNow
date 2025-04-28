@@ -36,9 +36,8 @@ final class DestinationVM: DestinationVMProtocol {
     }
     
     func filterCities(with query: String) {
-        print("Searching: \(query)")
         guard !query.isEmpty else {
-            filteredCities = cities
+            filteredCities = []
             return
         }
         
