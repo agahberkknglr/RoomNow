@@ -9,7 +9,10 @@ import Foundation
 import FirebaseCore
 import FirebaseFirestore
 
-protocol FirebaseManagerProtocol {}
+protocol FirebaseManagerProtocol {
+    
+    func fetchCities(completion: @escaping (Result<[City], Error>) -> Void)
+}
 
 final class FirebaseManager {
     static let shared = FirebaseManager()
@@ -21,4 +24,21 @@ final class FirebaseManager {
     }
 }
 
-extension FirebaseManager: FirebaseManagerProtocol {}
+extension FirebaseManager: FirebaseManagerProtocol {
+    
+    func fetchCities(completion: @escaping (Result<[City], Error>) -> Void) {
+        let db = Firestore.firestore()
+        db.collection("cities").getDocuments { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            if let snapshot = snapshot {
+                let cities = snapshot.documents.compactMap { (queryDocumentSnapshot) -> City? in
+                    return try? queryDocumentSnapshot.data(as: City.self )
+                }
+                completion(.success(cities))
+            }
+        }
+    }
+}
