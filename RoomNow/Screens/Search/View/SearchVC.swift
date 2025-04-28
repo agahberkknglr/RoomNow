@@ -47,10 +47,11 @@ extension SearchVC: SearchVCProtocol {
         dateButton.setTitle(" Select Dates", for: .normal)
         roomButton.setTitle(" Select Rooms & Guests", for: .normal)
         searchButton.setTitle("Search Now", for: .normal)
-        
         searchButton.layer.cornerRadius = 10
         searchButton.tintColor = .white
         searchButton.backgroundColor = .systemGray5
+        checkSearchButtonState()
+        searchButton.addTarget(self, action: #selector(searchButtonTapped), for: .touchUpInside)
         
         destinationButton.addTarget(self, action: #selector(openDestinationSheet), for: .touchUpInside)
         dateButton.addTarget(self, action: #selector(openDateSheet), for: .touchUpInside)
@@ -109,6 +110,44 @@ extension SearchVC: SearchVCProtocol {
         }
         present(navController, animated: true)
     }
+    
+    private func checkSearchButtonState() {
+        let isDestinationSelected = destinationButton.titleLabel?.text != " Select Destination"
+        let isDateSelected = dateButton.titleLabel?.text != " Select Dates"
+        let isRoomSelected = roomButton.titleLabel?.text != " Select Rooms & Guests"
+        
+        let isFormValid = isDestinationSelected && isDateSelected && isRoomSelected
+        
+        searchButton.isEnabled = isFormValid
+        searchButton.backgroundColor = isFormValid ? .systemGray5 : .systemGray
+        searchButton.alpha = isFormValid ? 1.0 : 0.5
+    }
+    
+    @objc private func searchButtonTapped() {
+        guard
+            let destination = destinationButton.title(for: .normal),
+            destination != " Select Destination",
+            let startDate = selectedStartDate,
+            let endDate = selectedEndDate
+        else {
+            print("Error, empty search parameters")
+            return
+        }
+        
+        let totalGuestCount = selectedAdults + selectedChildren
+
+        let searchParameters = HotelSearchParameters(
+            destination: destination.trimmingCharacters(in: .whitespaces).lowercased(),
+            checkInDate: startDate,
+            checkOutDate: endDate,
+            guestCount: totalGuestCount,
+            roomCount: selectedRooms
+        )
+
+        let resultVC = ResultVC(searchParameters: searchParameters)
+        navigationController?.pushViewController(resultVC, animated: true)
+    }
+
 }
 
 extension SearchVC: RoomVCDelegate {
@@ -121,6 +160,7 @@ extension SearchVC: RoomVCDelegate {
         let childrenText = children > 0 ? children > 1 ? "\(children) children" : "\(children) child" : "No children"
         let title = " \(roomCount) room • \(adults) adults • \(childrenText)"
         roomButton.setTitle(title, for: .normal)
+        checkSearchButtonState()
     }
 }
 
@@ -140,11 +180,13 @@ extension SearchVC: DateVCDelegate {
 
         let dateRange = " \(startDateString) - \(endDateString)"
         dateButton.setTitle(dateRange, for: .normal)
+        checkSearchButtonState()
     }
 }
 
 extension SearchVC: DestinationVCDelegate {
     func didSelectCity(_ city: City) {
         destinationButton.setTitle(" \(city.name)", for: .normal)
+        checkSearchButtonState()
     }
 }
