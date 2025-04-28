@@ -23,6 +23,16 @@ final class DestinationVC: UIViewController {
         tableView.isHidden = true
         return tableView
     }()
+    
+    private let emptyLabel: UILabel = {
+        let label = UILabel()
+        label.text = "No cities found"
+        label.textAlignment = .center
+        label.textColor = .secondaryLabel
+        label.isHidden = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
 
     private let viewModel = DestinationVM()
     
@@ -54,6 +64,7 @@ final class DestinationVC: UIViewController {
     private func setupUI() {
         view.addSubview(searchTextField)
         view.addSubview(tableView)
+        view.addSubview(emptyLabel)
         
         NSLayoutConstraint.activate([
             searchTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
@@ -64,8 +75,18 @@ final class DestinationVC: UIViewController {
             tableView.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 10),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            emptyLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+
         ])
+    }
+    
+    private func updateUI() {
+        tableView.isHidden = viewModel.filteredCities.isEmpty
+        emptyLabel.isHidden = !viewModel.filteredCities.isEmpty
+        tableView.reloadData()
     }
 
 }
@@ -74,15 +95,8 @@ extension DestinationVC: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let searchText = (textField.text as NSString?)?.replacingCharacters(in: range, with: string) ?? ""
         viewModel.filterCities(with: searchText)
-        tableView.isHidden = viewModel.filteredCities.isEmpty
-        tableView.reloadData()
+        updateUI()
         return true
-    }
-    
-    private func filterData(_ query: String) {
-        viewModel.filterCities(with: query)
-        tableView.isHidden = viewModel.filteredCities.isEmpty
-        tableView.reloadData()
     }
 }
 
