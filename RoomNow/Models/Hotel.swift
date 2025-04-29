@@ -12,6 +12,7 @@ struct Hotel: Decodable {
     let name: String
     let city: String
     let rating: Double
+    let location: String
     let description: String
     let imageUrls: [String]
     let amenities: [String]
