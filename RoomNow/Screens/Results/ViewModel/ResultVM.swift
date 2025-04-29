@@ -15,7 +15,7 @@ protocol ResultVMProtocol {
 final class ResultVM {
     
     weak var view: ResultVCProtocol?
-    private let searchParameters: HotelSearchParameters
+    let searchParameters: HotelSearchParameters
     private(set) var hotels: [Hotel] = []
     
     init(searchParameters: HotelSearchParameters) {

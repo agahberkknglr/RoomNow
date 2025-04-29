@@ -80,7 +80,7 @@ extension ResultVC: UICollectionViewDataSource, UICollectionViewDelegate {
         }
         
         let hotel = viewModel.hotels[indexPath.item]
-        cell.configure(with: hotel)
+        cell.configure(with: hotel, searchParams: viewModel.searchParameters)
         return cell
     }
 }

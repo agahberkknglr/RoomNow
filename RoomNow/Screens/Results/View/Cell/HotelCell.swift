@@ -16,13 +16,14 @@ final class HotelCell: UICollectionViewCell {
     private let ratingLabel = UILabel()
     private let locationLabel = UILabel()
     private let priceLabel = UILabel()
+    private let roomTypeLabel = UILabel()
     private let infoLabel = UILabel()
-
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -38,7 +39,7 @@ final class HotelCell: UICollectionViewCell {
         hotelImageView.layer.cornerRadius = 12
         hotelImageView.clipsToBounds = true
         
-        hotelNameLabel.font = .boldSystemFont(ofSize: 16)
+        hotelNameLabel.font = .boldSystemFont(ofSize: 18)
         hotelNameLabel.numberOfLines = 2
         
         ratingLabel.font = .systemFont(ofSize: 14)
@@ -51,11 +52,14 @@ final class HotelCell: UICollectionViewCell {
         priceLabel.textColor = .white
         priceLabel.textAlignment = .right
         
+        roomTypeLabel.textColor = .white
+        roomTypeLabel.textAlignment = .right
+        
         infoLabel.font = .systemFont(ofSize: 14)
         infoLabel.textColor = .white
         infoLabel.textAlignment = .right
         
-        let stackView = UIStackView(arrangedSubviews: [hotelNameLabel, ratingLabel, locationLabel, priceLabel, infoLabel])
+        let stackView = UIStackView(arrangedSubviews: [hotelNameLabel, ratingLabel, locationLabel, roomTypeLabel, priceLabel, infoLabel])
         stackView.axis = .vertical
         stackView.spacing = 8
         
@@ -78,17 +82,36 @@ final class HotelCell: UICollectionViewCell {
         ])
     }
     
-    func configure(with hotel: Hotel) {
+    func configure(with hotel: Hotel, searchParams: HotelSearchParameters) {
         hotelNameLabel.text = hotel.name
         ratingLabel.text = "⭐️ \(hotel.rating)"
         locationLabel.text = "📍 \(hotel.location)"
         
-        let allRooms = hotel.roomTypes.flatMap { $0.rooms }
-        if let minPrice = allRooms.map({ $0.price }).min() {
-            priceLabel.text = "₺\(Int(minPrice))"
-        } else {
-            priceLabel.text = "-"
+        let availableRooms = hotel.roomTypes.flatMap { type in
+            type.rooms.map { room in (typeName: type.typeName, room: room) }
+        }.filter {
+            $0.room.bedCapacity >= searchParams.guestCount &&
+            $0.room.isAvailable(for: searchParams.checkInDate, checkOut: searchParams.checkOutDate)
         }
-        infoLabel.text = "No prepayment needed"
+        
+        
+        if let cheapest = availableRooms.min(by: { $0.room.price < $1.room.price }) {
+            let baseText = "Hotel room: "
+            let typeNameText = cheapest.typeName.capitalized
+            let fullText = baseText + typeNameText
+            let attributedString = NSMutableAttributedString(string: fullText)
+            
+            attributedString.addAttribute(.font,
+                                          value: UIFont.boldSystemFont(ofSize: 14),
+                                          range: NSRange(location: 0, length: baseText.count))
+            
+            attributedString.addAttribute(.font,
+                                          value: UIFont.systemFont(ofSize: 14),
+                                          range: NSRange(location: baseText.count, length: typeNameText.count))
+            
+            roomTypeLabel.attributedText = attributedString
+            priceLabel.text = "₺\(Int(cheapest.room.price))"
+            infoLabel.text = "No prepayment needed"
+        }
     }
 }
