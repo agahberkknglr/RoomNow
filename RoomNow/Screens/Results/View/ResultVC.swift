@@ -14,6 +14,8 @@ protocol ResultVCProtocol: AnyObject {
 final class ResultVC: UIViewController {
     
     private let viewModel: ResultVM
+    private var collectionView: UICollectionView!
+
 
     init(searchParameters: HotelSearchParameters) {
         self.viewModel = ResultVM(searchParameters: searchParameters)
@@ -34,12 +36,51 @@ final class ResultVC: UIViewController {
 extension ResultVC: ResultVCProtocol {
     func configureVC() {
         view.backgroundColor = .white
+        setupCollectionView()
         
         viewModel.fetchHotels {
             DispatchQueue.main.async {
-                print("Oteller geldi, CollectionView/TableView reload yapılacak.")
-                // burada reloadData çağıracağız (sonraki adımda)
+                self.collectionView.reloadData()
             }
         }
+    }
+    
+    private func setupCollectionView() {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.itemSize = CGSize(width: view.frame.width - 40, height: 150)
+        layout.minimumLineSpacing = 16
+        
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.register(HotelCell.self, forCellWithReuseIdentifier: HotelCell.identifier)
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.backgroundColor = .white
+        
+        view.addSubview(collectionView)
+        
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+}
+
+extension ResultVC: UICollectionViewDataSource, UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        viewModel.hotels.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HotelCell.identifier, for: indexPath) as? HotelCell else {
+            return UICollectionViewCell()
+        }
+        
+        let hotel = viewModel.hotels[indexPath.item]
+        cell.configure(with: hotel)
+        return cell
     }
 }
