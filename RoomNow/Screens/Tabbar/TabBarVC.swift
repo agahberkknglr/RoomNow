@@ -12,13 +12,22 @@ class TabBarVC: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let firstView = UINavigationController(rootViewController: SearchVC())
+        let searchVC = UINavigationController(rootViewController: SearchVC())
+        let savedVC = UINavigationController(rootViewController: SavedVC())
+        let bookingsVC = UINavigationController(rootViewController: BookingsVC())
+        let loginVC = UINavigationController(rootViewController: LoginVC())
         
-        firstView.tabBarItem.image = UIImage(systemName: "magnifyingglass")
+        searchVC.tabBarItem.image = UIImage(systemName: "magnifyingglass")
+        savedVC.tabBarItem.image = UIImage(systemName: "heart")
+        bookingsVC.tabBarItem.image = UIImage(systemName: "bag")
+        loginVC.tabBarItem.image = UIImage(systemName: "person.circle")
         
-        firstView.title = "Search"
+        searchVC.title = "Search"
+        savedVC.title = "Saved"
+        bookingsVC.title = "Bookings"
+        loginVC.title = "Login"
         
         tabBar.tintColor = .white
-        setViewControllers([firstView], animated: true)
+        setViewControllers([searchVC, savedVC, bookingsVC, loginVC], animated: true)
     }
 }
