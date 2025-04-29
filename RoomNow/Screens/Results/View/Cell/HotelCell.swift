@@ -18,6 +18,7 @@ final class HotelCell: UICollectionViewCell {
     private let priceLabel = UILabel()
     private let roomTypeLabel = UILabel()
     private let infoLabel = UILabel()
+    private let saveButton = UIButton()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -48,10 +49,11 @@ final class HotelCell: UICollectionViewCell {
         locationLabel.font = .systemFont(ofSize: 14)
         locationLabel.textColor = .white
         
-        priceLabel.font = .boldSystemFont(ofSize: 16)
+        priceLabel.font = .boldSystemFont(ofSize: 18)
         priceLabel.textColor = .white
         priceLabel.textAlignment = .right
         
+        roomTypeLabel.font = UIFont.systemFont(ofSize: 14)
         roomTypeLabel.textColor = .white
         roomTypeLabel.textAlignment = .right
         
@@ -59,15 +61,23 @@ final class HotelCell: UICollectionViewCell {
         infoLabel.textColor = .white
         infoLabel.textAlignment = .right
         
+        saveButton.setImage(UIImage(systemName: "heart"), for: .normal)
+        saveButton.tintColor = .white
+        saveButton.isUserInteractionEnabled = false
+        saveButton.setContentHuggingPriority(.required, for: .horizontal)
+        saveButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        
         let stackView = UIStackView(arrangedSubviews: [hotelNameLabel, ratingLabel, locationLabel, roomTypeLabel, priceLabel, infoLabel])
         stackView.axis = .vertical
         stackView.spacing = 8
         
         contentView.addSubview(hotelImageView)
         contentView.addSubview(stackView)
+        contentView.addSubview(saveButton)
         
         hotelImageView.translatesAutoresizingMaskIntoConstraints = false
         stackView.translatesAutoresizingMaskIntoConstraints = false
+        saveButton.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             hotelImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
@@ -75,8 +85,13 @@ final class HotelCell: UICollectionViewCell {
             hotelImageView.widthAnchor.constraint(equalToConstant: 120),
             hotelImageView.heightAnchor.constraint(equalToConstant: 230),
             
+            saveButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            saveButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
+            saveButton.widthAnchor.constraint(equalToConstant: 24),
+            saveButton.heightAnchor.constraint(equalToConstant: 24),
+            
             stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            stackView.leadingAnchor.constraint(equalTo: hotelImageView.trailingAnchor, constant: 8),
+            stackView.leadingAnchor.constraint(equalTo: hotelImageView.trailingAnchor, constant: 12),
             stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
             stackView.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -8)
         ])
