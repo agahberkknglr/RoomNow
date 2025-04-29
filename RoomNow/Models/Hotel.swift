@@ -28,10 +28,26 @@ struct HotelRoom: Decodable {
     let description: String
     let price: Double
     let roomNumber: String
-    //let bookedDates: BookedDates?
+    let bookedDates: [BookedDateRange]?
 }
 
-//struct BookedDates: Decodable {
-//
-//}
+struct BookedDateRange: Decodable {
+    let start: Date?
+    let end: Date?
+}
 
+extension HotelRoom {
+    func isAvailable(for checkIn: Date, checkOut: Date) -> Bool {
+        guard let bookedDates = bookedDates else { return true }
+        
+        for booking in bookedDates {
+            guard let start = booking.start, let end = booking.end else {
+                continue
+            }
+            if (checkIn < end) && (checkOut > start) {
+                return false
+            }
+        }
+        return true
+    }
+}
