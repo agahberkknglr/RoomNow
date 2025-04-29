@@ -35,7 +35,7 @@ final class ResultVC: UIViewController {
 
 extension ResultVC: ResultVCProtocol {
     func configureVC() {
-        view.backgroundColor = .white
+        view.backgroundColor = .brown
         setupCollectionView()
         
         viewModel.fetchHotels {
@@ -48,14 +48,14 @@ extension ResultVC: ResultVCProtocol {
     private func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
-        layout.itemSize = CGSize(width: view.frame.width - 40, height: 150)
+        layout.itemSize = CGSize(width: view.frame.width - 40, height: 250)
         layout.minimumLineSpacing = 16
         
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.register(HotelCell.self, forCellWithReuseIdentifier: HotelCell.identifier)
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.backgroundColor = .white
+        collectionView.backgroundColor = view.backgroundColor
         
         view.addSubview(collectionView)
         
