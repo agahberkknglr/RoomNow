@@ -59,15 +59,16 @@ extension FirebaseManager: FirebaseManagerProtocol {
                     return
                 }
                 
-               //let fetchedHotels = documents.compactMap { doc -> Hotel? in
-               //    try? doc.data(as: Hotel.self)
-               //}
-                let fetchedHotels = documents.compactMap { doc -> Hotel? in
-                    let hotel = try? doc.data(as: Hotel.self)
-                    
-                    if let hotel = hotel {
+                var fetchedHotels: [Hotel] = []
+                
+                for doc in documents {
+                    do {
+                        let hotel = try doc.data(as: Hotel.self)
+                        fetchedHotels.append(hotel)
+                        
                         print("Hotel fetched: \(hotel.name)")
                         print("RoomTypes count: \(hotel.roomTypes.count)")
+                        
                         for roomType in hotel.roomTypes {
                             print("- RoomType: \(roomType.typeName)")
                             print("- Rooms count: \(roomType.rooms.count)")
@@ -75,17 +76,16 @@ extension FirebaseManager: FirebaseManagerProtocol {
                                 print("-- RoomNumber: \(room.roomNumber), BedCapacity: \(room.bedCapacity)")
                             }
                         }
-                    } else {
-                        print("Hotel decode FAILED for document \(doc.documentID)")
+                    } catch {
+                        print("❌ Hotel decode FAILED for document \(doc.documentID): \(error)")
                     }
-                    
-                    return hotel
                 }
                 
                 let filteredHotels = fetchedHotels.filter { hotel in
                     for roomType in hotel.roomTypes {
                         for room in roomType.rooms {
-                            if room.bedCapacity >= searchParameters.guestCount {
+                            if room.bedCapacity >= searchParameters.guestCount &&
+                                room.isAvailable(for: searchParameters.checkInDate, checkOut: searchParameters.checkOutDate) {
                                 return true
                             }
                         }
@@ -96,4 +96,5 @@ extension FirebaseManager: FirebaseManagerProtocol {
                 completion(.success(filteredHotels))
             }
     }
+
 }
