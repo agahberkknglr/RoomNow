@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Hotel: Decodable {
+struct Hotel: Codable {
     var id: String?
     let name: String
     let city: String
@@ -19,12 +19,12 @@ struct Hotel: Decodable {
     let roomTypes: [RoomType]
 }
 
-struct RoomType: Decodable {
+struct RoomType: Codable {
     let typeName: String
     let rooms: [HotelRoom]
 }
 
-struct HotelRoom: Decodable {
+struct HotelRoom: Codable {
     let bedCapacity: Int
     let description: String
     let price: Double
@@ -32,7 +32,7 @@ struct HotelRoom: Decodable {
     let bookedDates: [BookedDateRange]?
 }
 
-struct BookedDateRange: Decodable {
+struct BookedDateRange: Codable {
     let start: Date?
     let end: Date?
 }
