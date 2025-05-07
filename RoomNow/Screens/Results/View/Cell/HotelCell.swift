@@ -17,7 +17,6 @@ final class HotelCell: UICollectionViewCell {
     private let locationLabel = UILabel()
     private let priceLabel = UILabel()
     private let roomTypeLabel = UILabel()
-    private let infoLabel = UILabel()
     private let saveButton = UIButton()
     
     override init(frame: CGRect) {
@@ -44,30 +43,25 @@ final class HotelCell: UICollectionViewCell {
         hotelNameLabel.numberOfLines = 2
         
         ratingLabel.font = .systemFont(ofSize: 14)
-        ratingLabel.textColor = .white
+        ratingLabel.textColor = .appPrimaryText
         
         locationLabel.font = .systemFont(ofSize: 14)
-        locationLabel.textColor = .white
+        locationLabel.textColor = .appPrimaryText
         
-        priceLabel.font = .boldSystemFont(ofSize: 18)
-        priceLabel.textColor = .white
+        priceLabel.font = .boldSystemFont(ofSize: 16)
+        priceLabel.textColor = .appPrimaryText
         priceLabel.textAlignment = .right
         
-        roomTypeLabel.font = UIFont.systemFont(ofSize: 14)
-        roomTypeLabel.textColor = .white
+        roomTypeLabel.textColor = .appPrimaryText
         roomTypeLabel.textAlignment = .right
         
-        infoLabel.font = .systemFont(ofSize: 14)
-        infoLabel.textColor = .white
-        infoLabel.textAlignment = .right
-        
         saveButton.setImage(UIImage(systemName: "heart"), for: .normal)
-        saveButton.tintColor = .white
+        saveButton.tintColor = .appPrimaryText
         saveButton.isUserInteractionEnabled = false
         saveButton.setContentHuggingPriority(.required, for: .horizontal)
         saveButton.setContentCompressionResistancePriority(.required, for: .horizontal)
         
-        let stackView = UIStackView(arrangedSubviews: [hotelNameLabel, ratingLabel, locationLabel, roomTypeLabel, priceLabel, infoLabel])
+        let stackView = UIStackView(arrangedSubviews: [hotelNameLabel, ratingLabel, locationLabel, roomTypeLabel, priceLabel])
         stackView.axis = .vertical
         stackView.spacing = 8
         
@@ -126,7 +120,6 @@ final class HotelCell: UICollectionViewCell {
             
             roomTypeLabel.attributedText = attributedString
             priceLabel.text = "₺\(Int(cheapest.room.price))"
-            infoLabel.text = "No prepayment needed"
         }
     }
 }

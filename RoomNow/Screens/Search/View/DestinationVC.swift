@@ -26,6 +26,7 @@ final class DestinationVC: UIViewController {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.isHidden = true
+        tableView.backgroundColor = .appBackground
         return tableView
     }()
     
@@ -33,7 +34,7 @@ final class DestinationVC: UIViewController {
         let label = UILabel()
         label.text = "No cities found"
         label.textAlignment = .center
-        label.textColor = .secondaryLabel
+        label.textColor = .appSecondaryText
         label.isHidden = true
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -45,7 +46,7 @@ final class DestinationVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .secondarySystemBackground
+        view.backgroundColor = .appBackground
         setupUI()
         
         tableView.delegate = self

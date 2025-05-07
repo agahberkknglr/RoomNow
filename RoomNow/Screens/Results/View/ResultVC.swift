@@ -35,7 +35,7 @@ final class ResultVC: UIViewController {
 
 extension ResultVC: ResultVCProtocol {
     func configureVC() {
-        view.backgroundColor = .brown
+        view.backgroundColor = .appBackground
         setupCollectionView()
         
         viewModel.fetchHotels {

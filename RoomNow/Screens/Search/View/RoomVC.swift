@@ -66,7 +66,7 @@ class RoomVC: UIViewController, RoomVCProtocols {
     }
     
     func configureVC() {
-        view.backgroundColor = .secondarySystemBackground
+        view.backgroundColor = .appBackground
         
         titleLabel.text = "Select rooms and guests"
         titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
@@ -78,6 +78,7 @@ class RoomVC: UIViewController, RoomVCProtocols {
         petLabel.text = "Travelling with pets?"
         petInfoLabel.text = "Asistance animals aren't consider pets."
         petInfoLabel.font = .systemFont(ofSize: 14, weight: .light)
+        petInfoLabel.textColor = .appSecondaryText
         
         roomCounter.setValue(selectedRooms)
         adultsCounter.setValue(selectedAdults)
@@ -131,8 +132,8 @@ class RoomVC: UIViewController, RoomVCProtocols {
         
         applyButton.setTitle("Apply", for: .normal)
         applyButton.layer.cornerRadius = 10
-        applyButton.tintColor = .white
-        applyButton.backgroundColor = .brown
+        applyButton.tintColor = .appPrimaryText
+        applyButton.backgroundColor = .appButtonBackground
         
 
         view.addSubview(stackView)

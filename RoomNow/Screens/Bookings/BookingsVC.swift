@@ -11,7 +11,7 @@ final class BookingsVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .brown
+        view.backgroundColor = .appBackground
         // Do any additional setup after loading the view.
     }
     

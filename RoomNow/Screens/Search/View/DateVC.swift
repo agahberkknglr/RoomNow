@@ -18,7 +18,7 @@ class DateVC: UIViewController {
         let label = UILabel()
         label.text = "Select dates"
         label.font = UIFont.boldSystemFont(ofSize: 20)
-        label.textColor = .white
+        label.textColor = .appPrimaryText
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -29,12 +29,13 @@ class DateVC: UIViewController {
         calendar.allowsMultipleSelection = true
         calendar.firstWeekday = 2
         calendar.scrollDirection = .vertical
-        calendar.appearance.borderRadius = 0
+        calendar.appearance.borderRadius = 1
         calendar.appearance.borderDefaultColor = .clear
-        calendar.appearance.headerTitleColor = .white
-        calendar.appearance.weekdayTextColor = .white
+        calendar.appearance.headerTitleColor = .appPrimaryText
+        calendar.appearance.weekdayTextColor = .appPrimaryText
         calendar.appearance.headerTitleAlignment = .right
         calendar.appearance.headerTitleOffset = CGPoint(x: -16, y: 0)
+        calendar.appearance.selectionColor = .appSecondaryAccent
         calendar.placeholderType = .none
         calendar.appearance.todayColor = .clear
         return calendar
@@ -50,7 +51,7 @@ class DateVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .secondarySystemBackground
+        view.backgroundColor = .appBackground
         setupUI()
         
         calendar.delegate = self
@@ -93,8 +94,8 @@ class DateVC: UIViewController {
         
         selectDatesButton.setTitle("Select Dates", for: .normal)
         selectDatesButton.layer.cornerRadius = 10
-        selectDatesButton.tintColor = .white
-        selectDatesButton.backgroundColor = .brown
+        selectDatesButton.tintColor = .appPrimaryText
+        selectDatesButton.backgroundColor = .appButtonBackground
 
         NSLayoutConstraint.activate([
             
@@ -165,13 +166,13 @@ extension DateVC: FSCalendarDelegateAppearance {
         let lastDayOfMonth = Calendar.current.date(byAdding: .month, value: 1, to: firstDayOfMonth)!
         
         if date == today {
-            return .systemBrown // Change only the text color for today's date
+            return .appAccent // Change only the text color for today's date
         } else if date < today && date >= firstDayOfMonth {
             return .lightGray // Gray out past dates in the current month
         } else if date < firstDayOfMonth {
             return .clear // Hide dates from previous months
         } else {
-            return .label // Default color for future dates
+            return .appPrimaryText // Default color for future dates
         }
     }
 

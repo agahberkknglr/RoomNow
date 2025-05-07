@@ -39,7 +39,7 @@ final class SearchVC: UIViewController{
 extension SearchVC: SearchVCProtocol {
     
     func configureVC() {
-        view.backgroundColor = .brown
+        view.backgroundColor = .appBackground
     }
     
     func setupSearchButtons() {
@@ -119,7 +119,7 @@ extension SearchVC: SearchVCProtocol {
         let isFormValid = isDestinationSelected && isDateSelected && isRoomSelected
         
         searchButton.isEnabled = isFormValid
-        searchButton.backgroundColor = isFormValid ? .systemGray5 : .systemGray
+        searchButton.backgroundColor = isFormValid ? .appButtonBackground : .appDisabled
         searchButton.alpha = isFormValid ? 1.0 : 0.5
     }
     
