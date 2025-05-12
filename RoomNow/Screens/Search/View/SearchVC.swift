@@ -7,55 +7,41 @@
 
 import UIKit
 
-protocol SearchVCProtocol: AnyObject {
-    func configureVC()
-    func setupSearchButtons()
-}
-
-final class SearchVC: UIViewController{
+final class SearchVC: UIViewController {
     
-    private var destinationButton = SearchOptionButton()
-    private var dateButton = SearchOptionButton()
-    private var roomButton = SearchOptionButton()
+    private let destinationButton = SearchOptionButton()
+    private let dateButton = SearchOptionButton()
+    private let roomButton = SearchOptionButton()
     private let searchButton = UIButton()
     
-    private var selectedRooms: Int = 1
-    private var selectedAdults: Int = 2
-    private var selectedChildren: Int = 0
+    private let viewModel: SearchVMProtocol
     
-    private var selectedStartDate: Date?
-    private var selectedEndDate: Date?
-    
-    
-    private let viewModel = SearchVM()
+    init(viewModel: SearchVMProtocol = SearchVM()) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+        self.viewModel.delegate = self
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel.view = self
         viewModel.viewDidLoad()
     }
-}
 
-extension SearchVC: SearchVCProtocol {
-    
-    func configureVC() {
+    private func configureUI() {
         view.backgroundColor = .appBackground
-    }
-    
-    func setupSearchButtons() {
-        destinationButton.setTitle(" Select Destination", for: .normal)
-        dateButton.setTitle(" Select Dates", for: .normal)
-        roomButton.setTitle(" Select Rooms & Guests", for: .normal)
-        searchButton.setTitle("Search Now", for: .normal)
-        searchButton.layer.cornerRadius = 10
-        searchButton.tintColor = .white
-        searchButton.backgroundColor = .systemGray5
-        checkSearchButtonState()
-        searchButton.addTarget(self, action: #selector(searchButtonTapped), for: .touchUpInside)
         
         destinationButton.addTarget(self, action: #selector(openDestinationSheet), for: .touchUpInside)
         dateButton.addTarget(self, action: #selector(openDateSheet), for: .touchUpInside)
         roomButton.addTarget(self, action: #selector(openRoomSheet), for: .touchUpInside)
+        searchButton.addTarget(self, action: #selector(searchButtonTapped), for: .touchUpInside)
+        
+        searchButton.setTitle("Search Now", for: .normal)
+        searchButton.layer.cornerRadius = 10
+        searchButton.tintColor = .white
         
         let stackView = UIStackView(arrangedSubviews: [destinationButton, dateButton, roomButton, searchButton])
         stackView.axis = .vertical
@@ -69,12 +55,30 @@ extension SearchVC: SearchVCProtocol {
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             destinationButton.heightAnchor.constraint(equalToConstant: 50),
-            
-            searchButton.widthAnchor.constraint(equalToConstant: 100),
             searchButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
-    
+
+    private func updateButtonStates() {
+        destinationButton.setTitle(viewModel.getDestinationTitle(), for: .normal)
+        dateButton.setTitle(viewModel.getDateButtonTitle(), for: .normal)
+        roomButton.setTitle(viewModel.getRoomButtonTitle(), for: .normal)
+
+        let isEnabled = viewModel.isSearchEnabled()
+        searchButton.isEnabled = isEnabled
+        searchButton.backgroundColor = isEnabled ? .appButtonBackground : .appDisabled
+        searchButton.alpha = isEnabled ? 1.0 : 0.5
+    }
+
+    @objc private func searchButtonTapped() {
+        guard let parameters = viewModel.getSearchParameters() else {
+            print("Missing search data")
+            return
+        }
+        let resultVC = ResultVC(searchParameters: parameters)
+        navigationController?.pushViewController(resultVC, animated: true)
+    }
+
     @objc private func openDestinationSheet() {
         let destinationVC = DestinationVC()
         destinationVC.delegate = self
@@ -83,110 +87,63 @@ extension SearchVC: SearchVCProtocol {
 
     @objc private func openDateSheet() {
         let dateVC = DateVC()
+        dateVC.selectedStartDate = viewModel.selectedStartDate
+        dateVC.selectedEndDate = viewModel.selectedEndDate
         dateVC.delegate = self
-        
-        dateVC.selectedStartDate = selectedStartDate
-        dateVC.selectedEndDate = selectedEndDate
-        
         presentBottomSheet(with: dateVC, detents: [.medium()])
     }
-
+    
     @objc private func openRoomSheet() {
-        let roomVC = RoomVC()
+        print("Open Room Sheet triggered")
+
+        guard let searchVM = viewModel as? SearchVM else {
+            print("Failed to cast ViewModel")
+            return
+        }
+
+        let roomVM = RoomVM(
+            rooms: searchVM.numberOfRooms,
+            adults: searchVM.numberOfAdults,
+            children: searchVM.numberOfChildren
+        )
+
+        let roomVC = RoomVC(viewModel: roomVM)
         roomVC.delegate = self
-        roomVC.selectedRooms = selectedRooms
-        roomVC.selectedAdults = selectedAdults
-        roomVC.selectedChildren = selectedChildren
-        
         presentBottomSheet(with: roomVC, detents: [.medium()])
     }
 
     private func presentBottomSheet(with viewController: UIViewController, detents: [UISheetPresentationController.Detent]) {
-        let navController = UINavigationController(rootViewController: viewController)
-        if let sheet = navController.sheetPresentationController {
+        let nav = UINavigationController(rootViewController: viewController)
+        if let sheet = nav.sheetPresentationController {
             sheet.detents = detents
             sheet.prefersGrabberVisible = true
             sheet.preferredCornerRadius = 16
         }
-        present(navController, animated: true)
-    }
-    
-    private func checkSearchButtonState() {
-        let isDestinationSelected = destinationButton.titleLabel?.text != " Select Destination"
-        let isDateSelected = dateButton.titleLabel?.text != " Select Dates"
-        let isRoomSelected = roomButton.titleLabel?.text != " Select Rooms & Guests"
-        
-        let isFormValid = isDestinationSelected && isDateSelected && isRoomSelected
-        
-        searchButton.isEnabled = isFormValid
-        searchButton.backgroundColor = isFormValid ? .appButtonBackground : .appDisabled
-        searchButton.alpha = isFormValid ? 1.0 : 0.5
-    }
-    
-    @objc private func searchButtonTapped() {
-        guard
-            let destination = destinationButton.title(for: .normal),
-            destination != " Select Destination",
-            let startDate = selectedStartDate,
-            let endDate = selectedEndDate
-        else {
-            print("Error, empty search parameters")
-            return
-        }
-        
-        let totalGuestCount = selectedAdults + selectedChildren
-
-        let searchParameters = HotelSearchParameters(
-            destination: destination.trimmingCharacters(in: .whitespaces).lowercased(),
-            checkInDate: startDate,
-            checkOutDate: endDate,
-            guestCount: totalGuestCount,
-            roomCount: selectedRooms
-        )
-
-        let resultVC = ResultVC(searchParameters: searchParameters)
-        navigationController?.pushViewController(resultVC, animated: true)
-    }
-
-}
-
-extension SearchVC: RoomVCDelegate {
-    func didSelectRoomDetails(roomCount: Int, adults: Int, children: Int) {
-        
-        selectedRooms = roomCount
-        selectedAdults = adults
-        selectedChildren = children
-        
-        let childrenText = children > 0 ? children > 1 ? "\(children) children" : "\(children) child" : "No children"
-        let title = " \(roomCount) room • \(adults) adults • \(childrenText)"
-        roomButton.setTitle(title, for: .normal)
-        checkSearchButtonState()
+        present(nav, animated: true)
     }
 }
 
-extension SearchVC: DateVCDelegate {
-    func didSelectDateRange(_ startDate: Date, _ endDate: Date) {
-        let sortedDates = [startDate, endDate].sorted()
-        
-        selectedStartDate = sortedDates.first
-        selectedEndDate = sortedDates.last
-        
-        let formatter = DateFormatter()
-        formatter.dateFormat = "E, MMM d"
-        formatter.timeZone = TimeZone(identifier: "Europe/Istanbul")
-
-        let startDateString = formatter.string(from: sortedDates.first!)
-        let endDateString = formatter.string(from: sortedDates.last!)
-
-        let dateRange = " \(startDateString) - \(endDateString)"
-        dateButton.setTitle(dateRange, for: .normal)
-        checkSearchButtonState()
+extension SearchVC: SearchVMDelegate {
+    func updateUI() {
+        configureUI()
+        updateButtonStates()
     }
 }
 
 extension SearchVC: DestinationVCDelegate {
     func didSelectCity(_ city: City) {
-        destinationButton.setTitle(" \(city.name)", for: .normal)
-        checkSearchButtonState()
+        viewModel.updateSelectedCity(city)
+    }
+}
+
+extension SearchVC: DateVCDelegate {
+    func didSelectDateRange(_ startDate: Date, _ endDate: Date) {
+        viewModel.updateSelectedDates(start: startDate, end: endDate)
+    }
+}
+
+extension SearchVC: RoomVCDelegate {
+    func didSelectRoomDetails(roomCount: Int, adults: Int, children: Int) {
+        viewModel.updateSelectedRoomInfo(rooms: roomCount, adults: adults, children: children)
     }
 }
