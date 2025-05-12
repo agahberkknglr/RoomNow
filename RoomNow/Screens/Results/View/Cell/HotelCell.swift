@@ -17,6 +17,8 @@ final class HotelCell: UICollectionViewCell {
     private let locationLabel = UILabel()
     private let priceLabel = UILabel()
     private let roomTypeLabel = UILabel()
+    private let roomBedLabel = UILabel()
+    private let infoLabel = UILabel()
     private let saveButton = UIButton()
     
     override init(frame: CGRect) {
@@ -55,13 +57,22 @@ final class HotelCell: UICollectionViewCell {
         roomTypeLabel.textColor = .appPrimaryText
         roomTypeLabel.textAlignment = .right
         
+        roomBedLabel.textColor = .appPrimaryText
+        roomBedLabel.textAlignment = .right
+        
+        infoLabel.font = .systemFont(ofSize: 12)
+        infoLabel.textAlignment = .right
+        infoLabel.textColor = .appSecondaryText
+        infoLabel.numberOfLines = 2
+        
+        
         saveButton.setImage(UIImage(systemName: "heart"), for: .normal)
         saveButton.tintColor = .appPrimaryText
         saveButton.isUserInteractionEnabled = false
         saveButton.setContentHuggingPriority(.required, for: .horizontal)
         saveButton.setContentCompressionResistancePriority(.required, for: .horizontal)
         
-        let stackView = UIStackView(arrangedSubviews: [hotelNameLabel, ratingLabel, locationLabel, roomTypeLabel, priceLabel])
+        let stackView = UIStackView(arrangedSubviews: [hotelNameLabel, ratingLabel, locationLabel, roomTypeLabel, roomBedLabel, priceLabel, infoLabel])
         stackView.axis = .vertical
         stackView.spacing = 8
         
@@ -119,7 +130,26 @@ final class HotelCell: UICollectionViewCell {
                                           range: NSRange(location: baseText.count, length: typeNameText.count))
             
             roomTypeLabel.attributedText = attributedString
+            let guests = String(repeating: "👤", count: cheapest.room.bedCapacity)
+           // roomBedLabel.text = "\(guests)"
             priceLabel.text = "₺\(Int(cheapest.room.price))"
+            
+            let nights = Calendar.current.dateComponents([.day], from: searchParams.checkInDate, to: searchParams.checkOutDate).day ?? 1
+            let perNightPrice = Int(cheapest.room.price)
+            let totalPrice = perNightPrice * nights
+
+            if nights > 1 {
+                priceLabel.setMixedStyleText(
+                    prefix: "\(nights) nights: ",
+                    suffix: "₺\(totalPrice)",
+                    prefixFont: .systemFont(ofSize: 12),
+                    suffixFont: .boldSystemFont(ofSize: 16),
+                    prefixColor: .appSecondaryText,
+                    suffixColor: .appPrimaryText )}
+            else {
+                priceLabel.text = "₺\(perNightPrice)"
+            }
+            infoLabel.text = "No prepayment needed\nFree cancellation"
         }
     }
 }
