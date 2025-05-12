@@ -8,50 +8,40 @@
 import Foundation
 
 protocol ResultVMProtocol {
-    func viewDidLoad()
-    func fetchHotels(completion: @escaping () -> Void)
+    var hotels: [Hotel] { get }
+    var searchParameters: HotelSearchParameters { get }
+    var delegate: ResultVMDelegate? { get set }
+
+    func fetchHotels()
 }
 
-final class ResultVM {
+protocol ResultVMDelegate: AnyObject {
+    func didFetchHotels()
+}
+
+final class ResultVM: ResultVMProtocol {
     
-    weak var view: ResultVCProtocol?
-    let searchParameters: HotelSearchParameters
+    weak var delegate: ResultVMDelegate?
     private(set) var hotels: [Hotel] = []
-    
+    let searchParameters: HotelSearchParameters
+
     init(searchParameters: HotelSearchParameters) {
         self.searchParameters = searchParameters
-        print(searchParameters)
     }
-}
 
-extension ResultVM: ResultVMProtocol {
-    
-    func viewDidLoad() {
-        view?.configureVC()
-    }
-    
-    func fetchHotels(completion: @escaping () -> Void) {
+    func fetchHotels() {
         FirebaseManager.shared.fetchHotels(searchParameters: searchParameters) { [weak self] result in
             guard let self = self else { return }
-            
             switch result {
             case .success(let hotels):
                 self.hotels = hotels
-                print(" Found \(hotels.count) hotels matching search criteria.")
-                            
-                            for hotel in hotels {
-                                print("Hotel Name: \(hotel.name)")
-                                print("City: \(hotel.city)")
-                                print("Stars: \(hotel.rating)")
-                                print("---")
-                            }
-                completion()
+                self.delegate?.didFetchHotels()
             case .failure(let error):
                 print("Failed to fetch hotels: \(error.localizedDescription)")
-                completion()
+                self.delegate?.didFetchHotels()
             }
         }
     }
-
 }
+
 

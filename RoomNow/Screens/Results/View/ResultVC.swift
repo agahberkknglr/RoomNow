@@ -13,23 +13,42 @@ protocol ResultVCProtocol: AnyObject {
 
 final class ResultVC: UIViewController {
     
-    private let viewModel: ResultVM
+    private let viewModel: ResultVMProtocol
     private var collectionView: UICollectionView!
-
+    private let emptyLabel: UILabel = {
+        let label = UILabel()
+        label.text = "No hotels found"
+        label.textAlignment = .center
+        label.textColor = .appSecondaryText
+        label.font = .systemFont(ofSize: 16)
+        label.isHidden = true
+        return label
+    }()
 
     init(searchParameters: HotelSearchParameters) {
-        self.viewModel = ResultVM(searchParameters: searchParameters)
+        let vm = ResultVM(searchParameters: searchParameters)
+        self.viewModel = vm
         super.init(nibName: nil, bundle: nil)
+        vm.delegate = self
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel.view = self
-        viewModel.viewDidLoad()
+        configureVC()
+        viewModel.fetchHotels()
+    }
+}
+
+extension ResultVC: ResultVMDelegate {
+    func didFetchHotels() {
+        DispatchQueue.main.async {
+            self.collectionView.reloadData()
+            self.emptyLabel.isHidden = self.viewModel.hotels.count > 0
+        }
     }
 }
 
@@ -37,12 +56,8 @@ extension ResultVC: ResultVCProtocol {
     func configureVC() {
         view.backgroundColor = .appBackground
         setupCollectionView()
-        
-        viewModel.fetchHotels {
-            DispatchQueue.main.async {
-                self.collectionView.reloadData()
-            }
-        }
+        setupEmptyLabel()
+        viewModel.fetchHotels()
     }
     
     private func setupCollectionView() {
@@ -65,6 +80,16 @@ extension ResultVC: ResultVCProtocol {
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+    
+    private func setupEmptyLabel() {
+        view.addSubview(emptyLabel)
+        emptyLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            emptyLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
 }
