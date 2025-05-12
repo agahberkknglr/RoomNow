@@ -94,7 +94,7 @@ extension ResultVC: ResultVCProtocol {
     }
 }
 
-extension ResultVC: UICollectionViewDataSource, UICollectionViewDelegate {
+extension ResultVC: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         viewModel.hotels.count
     }
@@ -107,5 +107,14 @@ extension ResultVC: UICollectionViewDataSource, UICollectionViewDelegate {
         let hotel = viewModel.hotels[indexPath.item]
         cell.configure(with: hotel, searchParams: viewModel.searchParameters)
         return cell
+    }
+}
+
+extension ResultVC: UICollectionViewDelegate{
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let selectedHotel = viewModel.hotels[indexPath.item]
+        let detailVM = HotelDetailVM(hotel: selectedHotel, searchParams: viewModel.searchParameters)
+        let detailVC = HotelDetailVC(viewModel: detailVM)
+        navigationController?.pushViewController(detailVC, animated: true)
     }
 }
