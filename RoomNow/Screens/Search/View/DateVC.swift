@@ -12,8 +12,11 @@ protocol DateVCDelegate: AnyObject {
     func didSelectDateRange(_ startDate: Date, _ endDate: Date)
 }
 
-class DateVC: UIViewController {
-    
+final class DateVC: UIViewController {
+
+    private let viewModel: DateVMProtocol
+    weak var delegate: DateVCDelegate?
+
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Select dates"
@@ -22,8 +25,8 @@ class DateVC: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-    
-    private let calendar:FSCalendar = {
+
+    private let calendar: FSCalendar = {
         let calendar = FSCalendar()
         calendar.translatesAutoresizingMaskIntoConstraints = false
         calendar.allowsMultipleSelection = true
@@ -37,151 +40,118 @@ class DateVC: UIViewController {
         calendar.appearance.headerTitleOffset = CGPoint(x: -16, y: 0)
         calendar.appearance.selectionColor = .appSecondaryAccent
         calendar.placeholderType = .none
-        calendar.appearance.todayColor = .clear
+        calendar.appearance.todayColor = .appButtonBackground
         return calendar
     }()
-    
-    private let selectDatesButton = UIButton()
-    
-    private var selectedDates:[Date] = []
+
+    private let selectDatesButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Select Dates", for: .normal)
+        button.layer.cornerRadius = 10
+        button.tintColor = .appPrimaryText
+        button.backgroundColor = .appButtonBackground
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
     var selectedStartDate: Date?
     var selectedEndDate: Date?
-    
-    weak var delegate: DateVCDelegate?
+
+    init(viewModel: DateVMProtocol = DateVM()) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .appBackground
         setupUI()
-        
+
         calendar.delegate = self
         calendar.dataSource = self
         selectDatesButton.addTarget(self, action: #selector(selectDatesButtonTapped), for: .touchUpInside)
-        
-        if let start = selectedStartDate, let end = selectedEndDate {
-            calendar.select(start)
-            calendar.select(end)
-            selectedDates = [start, end]
+
+        viewModel.preselectDates(start: selectedStartDate, end: selectedEndDate)
+
+        calendar.selectedDates.forEach { calendar.deselect($0) }
+        viewModel.selectedDates.forEach { calendar.select($0) }
+    }
+
+    @objc private func selectDatesButtonTapped() {
+        guard let start = viewModel.selectedStartDate,
+              let end = viewModel.selectedEndDate,
+              start != end else {
+            print("Invalid selection")
+            return
         }
 
-    }
-    
-    @objc private func selectDatesButtonTapped() {
-        print(selectedDates)
-        if selectedDates.count == 2 {
-            selectedDates.sort()
-            delegate?.didSelectDateRange(selectedDates.first!, selectedDates.last!)
-        }
+        delegate?.didSelectDateRange(start, end)
         dismiss(animated: true)
     }
 
-    
     private func setupUI() {
-        //view.addSubview(titleLabel)
-        //view.addSubview(calendar)
-        //view.addSubview(selectDatesButton)
-        
-        let stackView: UIStackView = {
-            let stackView = UIStackView(arrangedSubviews: [titleLabel, calendar, selectDatesButton])
-            stackView.axis = .vertical
-            stackView.distribution = .fillProportionally
-            stackView.spacing = 10
-            stackView.translatesAutoresizingMaskIntoConstraints = false
-            return stackView
-        }()
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, calendar, selectDatesButton])
+        stackView.axis = .vertical
+        stackView.distribution = .fillProportionally
+        stackView.spacing = 10
+        stackView.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(stackView)
-        
-        selectDatesButton.setTitle("Select Dates", for: .normal)
-        selectDatesButton.layer.cornerRadius = 10
-        selectDatesButton.tintColor = .appPrimaryText
-        selectDatesButton.backgroundColor = .appButtonBackground
 
         NSLayoutConstraint.activate([
-            
             stackView.topAnchor.constraint(equalTo: view.topAnchor, constant: 32),
             stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             stackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
-            //titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            //titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            //
-            //calendar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
-            //calendar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            //calendar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+
             calendar.heightAnchor.constraint(equalToConstant: 300),
-            
-            selectDatesButton.widthAnchor.constraint(equalToConstant: 100),
             selectDatesButton.heightAnchor.constraint(equalToConstant: 50)
-            
-            
         ])
-        
     }
 }
+
+// MARK: - FSCalendarDelegate
 
 extension DateVC: FSCalendarDelegate {
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
-        let istanbulTimeZone = TimeZone(identifier: "Europe/Istanbul")!
-        var calendarComponents = Calendar.current.dateComponents(in: istanbulTimeZone, from: date)
-        calendarComponents.timeZone = istanbulTimeZone
-        let istanbulDate = Calendar.current.date(from: calendarComponents)!
+        let updated = viewModel.selectDate(date)
 
-        if selectedDates.count < 2 {
-            selectedDates.append(istanbulDate)
-        } else {
-            if let firstDate = selectedDates.first {
-                calendar.deselect(firstDate)
-                selectedDates.removeFirst()
-            }
-            selectedDates.append(istanbulDate)
-        }
+        calendar.selectedDates.forEach { calendar.deselect($0) }
+        updated.forEach { calendar.select($0) }
     }
-    
-    private func formattedDateRange() -> String? {
-        guard selectedDates.count == 2 else { return nil }
 
-        let formatter = DateFormatter()
-        formatter.dateFormat = "E, MMM d"
-        formatter.timeZone = TimeZone(identifier: "Europe/Istanbul")
-
-        let startDate = formatter.string(from: selectedDates.first!)
-        let endDate = formatter.string(from: selectedDates.last!)
-
-        return "\(startDate) - \(endDate)"
-    }
-    
     func calendar(_ calendar: FSCalendar, shouldSelect date: Date, at monthPosition: FSCalendarMonthPosition) -> Bool {
-        return date >= Date()
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let selected = calendar.startOfDay(for: date)
+        return selected >= today
     }
 }
+
+// MARK: - FSCalendarDelegateAppearance
 
 extension DateVC: FSCalendarDelegateAppearance {
     func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, titleDefaultColorFor date: Date) -> UIColor? {
         let today = Calendar.current.startOfDay(for: Date())
 
-        // Get first and last day of the current month
         let components = Calendar.current.dateComponents([.year, .month], from: today)
         let firstDayOfMonth = Calendar.current.date(from: components)!
         let lastDayOfMonth = Calendar.current.date(byAdding: .month, value: 1, to: firstDayOfMonth)!
-        
+
         if date == today {
-            return .appAccent // Change only the text color for today's date
+            return .appAccent
         } else if date < today && date >= firstDayOfMonth {
-            return .lightGray // Gray out past dates in the current month
+            return .lightGray
         } else if date < firstDayOfMonth {
-            return .clear // Hide dates from previous months
+            return .clear
         } else {
-            return .appPrimaryText // Default color for future dates
+            return .appPrimaryText
         }
     }
-
-    
-    
 }
 
-extension DateVC: FSCalendarDataSource {
-
-}
-
-
+extension DateVC: FSCalendarDataSource {}
