@@ -5,44 +5,67 @@
 //  Created by Agah Berkin Güler on 28.04.2025.
 //
 
+import Foundation
+
+protocol DestinationVMDelegate: AnyObject {
+    func didUpdateCityList()
+    func didFailToLoadCities(error: Error)
+}
+
 protocol DestinationVMProtocol: AnyObject {
-    var cities: [City] { get }
-    var filteredCities: [City] { get }
-    
-    func fetchCities(completion: @escaping (Result<Void, Error>) -> Void)
+    var delegate: DestinationVMDelegate? { get set }
+    var numberOfCities: Int { get }
+    func city(at index: Int) -> City?
+    func fetchCities()
     func filterCities(with query: String)
 }
 
 final class DestinationVM: DestinationVMProtocol {
-    private let firebaseManager: FirebaseManagerProtocol
-    private(set) var cities: [City] = []
-    private(set) var filteredCities: [City] = []
     
+    weak var delegate: DestinationVMDelegate?
+    
+    private let firebaseManager: FirebaseManagerProtocol
+    private var allCities: [City] = []
+    private var filteredCities: [City] = []
+
     init(firebaseManager: FirebaseManagerProtocol = FirebaseManager.shared) {
         self.firebaseManager = firebaseManager
     }
-    
-    func fetchCities(completion: @escaping (Result<Void, Error>) -> Void) {
+
+    var numberOfCities: Int {
+        return filteredCities.count
+    }
+
+    func city(at index: Int) -> City? {
+        guard index >= 0 && index < filteredCities.count else { return nil }
+        return filteredCities[index]
+    }
+
+    func fetchCities() {
         firebaseManager.fetchCities { [weak self] result in
-            switch result {
-            case .success(let cities):
-                self?.cities = cities
-                self?.filteredCities = cities
-                completion(.success(()))
-            case .failure(let error):
-                completion(.failure(error))
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let cities):
+                    self?.allCities = cities
+                    self?.filteredCities = cities
+                    self?.delegate?.didUpdateCityList()
+                case .failure(let error):
+                    self?.delegate?.didFailToLoadCities(error: error)
+                }
             }
         }
     }
-    
+
     func filterCities(with query: String) {
         guard !query.isEmpty else {
             filteredCities = []
+            delegate?.didUpdateCityList()
             return
         }
-        
-        filteredCities = cities.filter { city in
-            city.name.lowercased().hasPrefix(query.lowercased())
+
+        filteredCities = allCities.filter {
+            $0.name.lowercased().hasPrefix(query.lowercased())
         }
+        delegate?.didUpdateCityList()
     }
 }
