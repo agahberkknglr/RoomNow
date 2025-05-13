@@ -51,6 +51,8 @@ final class HotelDetailVM: HotelDetailVMProtocol {
 
     private let hotel: Hotel
     private let searchParams: HotelSearchParameters
+    
+    
 
     init(hotel: Hotel, searchParams: HotelSearchParameters) {
         self.hotel = hotel
@@ -73,7 +75,10 @@ final class HotelDetailVM: HotelDetailVMProtocol {
     var hotelName: String { hotel.name }
     var location: String { hotel.location }
     var ratingText: String { "⭐️ \(hotel.rating)" }
-    var imageUrls: [String] { hotel.imageUrls }
+    //var imageUrls: [String] { hotel.imageUrls }
+    var imageUrls: [String] {
+        return ["hotelph", "hotelph", "hotelph", "hotelph"]
+    }
 
     var checkInDateText: String {
         format(date: searchParams.checkInDate)

@@ -62,6 +62,7 @@ extension HotelDetailVC: HotelDetailVCProtocol {
     
     func registerTableView() {
         tableView.registerCell(type: HotelTitleCell.self)
+        tableView.registerCell(type: HotelImageCell.self)
     }
 }
 
@@ -85,13 +86,20 @@ extension HotelDetailVC: UITableViewDataSource {
             cell.configure(name: viewModel.hotelName, location: viewModel.location, rating: viewModel.ratingText)
             return cell
 
-       // case .imageGallery:
-       //     guard let cell = tableView.dequeueReusableCell(withIdentifier: ImageGalleryCell.identifier, for: indexPath) //as? ImageGalleryCell,
-       //           let imageUrls = section.data as? [String] else {
-       //         return UITableViewCell()
-       //     }
-       //     cell.configure(with: imageUrls)
-       //     return cell
+        case .imageGallery:
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: HotelImageCell.self), for: indexPath) as? HotelImageCell,
+                  let imageUrls = section.data as? [String] else {
+                return UITableViewCell()
+            }
+            cell.configure(with: imageUrls)
+            return cell
+        //case .imageGallery:
+        //    guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: HotelImageCell.self), for: indexPath) as? HotelImageCell,
+        //          let imageUrls = section.data as? [String] else {
+        //        return UITableViewCell()
+        //    }
+        //    cell.configure(with: imageUrls)
+        //    return cell
 
         default:
             let cell = UITableViewCell()
