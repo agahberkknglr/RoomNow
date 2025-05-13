@@ -41,6 +41,29 @@ final class ResultVC: UIViewController {
         configureVC()
         viewModel.fetchHotels()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        setTitleFromSearchParams()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.navigationItem.title =  ""
+    }
+    
+    private func setTitleFromSearchParams() {
+        let city = viewModel.searchParameters.destination.capitalized
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        formatter.timeZone = TimeZone(identifier: "Europe/Istanbul")
+
+        let checkIn = formatter.string(from: viewModel.searchParameters.checkInDate)
+        let checkOut = formatter.string(from: viewModel.searchParameters.checkOutDate)
+
+        self.title = "\(city)    \(checkIn) - \(checkOut)"
+    }
 }
 
 extension ResultVC: ResultVMDelegate {
