@@ -80,6 +80,11 @@ final class DateVC: UIViewController {
         calendar.selectedDates.forEach { calendar.deselect($0) }
         viewModel.selectedDates.forEach { calendar.select($0) }
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
 
     @objc private func selectDatesButtonTapped() {
         guard let start = viewModel.selectedStartDate,

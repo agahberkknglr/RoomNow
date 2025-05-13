@@ -60,7 +60,7 @@ final class SearchVC: UIViewController {
     }
 
     private func updateButtonStates() {
-        destinationButton.setTitle(viewModel.getDestinationTitle(), for: .normal)
+        destinationButton.setTitle(viewModel.getDestinationTitle().capitalized, for: .normal)
         dateButton.setTitle(viewModel.getDateButtonTitle(), for: .normal)
         roomButton.setTitle(viewModel.getRoomButtonTitle(), for: .normal)
 

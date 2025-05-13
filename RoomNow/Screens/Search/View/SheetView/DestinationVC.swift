@@ -21,7 +21,7 @@ final class DestinationVC: UIViewController {
         tf.autocapitalizationType = .none
         tf.smartQuotesType = .no
         tf.smartDashesType = .no
-        tf.smartInsertDeleteType = .no       
+        tf.smartInsertDeleteType = .no
         tf.translatesAutoresizingMaskIntoConstraints = false
         return tf
     }()
@@ -75,6 +75,11 @@ final class DestinationVC: UIViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         viewModel.fetchCities()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: false)
+    }
 
     private func setupUI() {
         view.addSubview(searchTextField)
@@ -83,7 +88,7 @@ final class DestinationVC: UIViewController {
         view.addSubview(initialPlaceholderLabel)
 
         NSLayoutConstraint.activate([
-            searchTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+            searchTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 40),
             searchTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             searchTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             searchTextField.heightAnchor.constraint(equalToConstant: 40),
