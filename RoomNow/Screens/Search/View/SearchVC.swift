@@ -76,6 +76,7 @@ final class SearchVC: UIViewController {
             return
         }
         let resultVC = ResultVC(searchParameters: parameters)
+        resultVC.hidesBottomBarWhenPushed = true 
         navigationController?.pushViewController(resultVC, animated: true)
     }
 
@@ -94,8 +95,6 @@ final class SearchVC: UIViewController {
     }
     
     @objc private func openRoomSheet() {
-        print("Open Room Sheet triggered")
-
         guard let searchVM = viewModel as? SearchVM else {
             print("Failed to cast ViewModel")
             return
