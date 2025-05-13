@@ -63,6 +63,7 @@ extension HotelDetailVC: HotelDetailVCProtocol {
     func registerTableView() {
         tableView.registerCell(type: HotelTitleCell.self)
         tableView.registerCell(type: HotelImageCell.self)
+        tableView.registerCell(type: HotelCheckInOutCell.self)
     }
 }
 
@@ -100,7 +101,14 @@ extension HotelDetailVC: UITableViewDataSource {
         //    }
         //    cell.configure(with: imageUrls)
         //    return cell
-
+        
+        case .checkInOut:
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: HotelCheckInOutCell.self), for: indexPath) as? HotelCheckInOutCell else {
+                return UITableViewCell()
+            }
+            cell.configure(checkIn: viewModel.checkInDateText, checkOut: viewModel.checkOutDateText)
+            return cell
+            
         default:
             let cell = UITableViewCell()
             cell.textLabel?.text = "Section: \(section.type)"

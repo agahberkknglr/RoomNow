@@ -46,7 +46,7 @@ final class HotelImageCell: UITableViewCell {
         for (index, name) in imageNames.enumerated() {
             let imageView = UIImageView()
             imageView.image = UIImage(named: name)
-            imageView.contentMode = .scaleAspectFit
+            imageView.contentMode = .scaleAspectFill
             imageView.clipsToBounds = true
             imageView.frame = CGRect(x: CGFloat(index) * width, y: 0, width: width, height: height)
             scrollView.addSubview(imageView)
