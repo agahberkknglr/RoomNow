@@ -28,7 +28,7 @@ final class TabBarVC: UITabBarController {
         loginVC.title = "Login"
         
         tabBar.tintColor = .appAccent
-        tabBar.backgroundColor = .appBackground
+        tabBar.backgroundColor = .appSecondaryBackground
         setViewControllers([searchVC, savedVC, bookingsVC, loginVC], animated: true)
     }
 }
