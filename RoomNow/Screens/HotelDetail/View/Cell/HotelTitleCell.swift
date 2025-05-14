@@ -34,7 +34,6 @@ final class HotelTitleCell: UITableViewCell {
         vstack.axis = .vertical
         vstack.spacing = 4
         vstack.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(vstack)
         
         let hstack = UIStackView(arrangedSubviews: [vstack, ratingLabel])
         hstack.axis = .horizontal
@@ -46,7 +45,7 @@ final class HotelTitleCell: UITableViewCell {
 
         nameLabel.font = .boldSystemFont(ofSize: 20)
         nameLabel.numberOfLines = 2
-        locationLabel.textColor = .secondaryLabel
+        locationLabel.textColor = .appSecondaryText
         ratingLabel.textColor = .systemYellow
         ratingLabel.textAlignment = .right
     }
