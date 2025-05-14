@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreLocation
 
 // MARK: - Protocol
 
@@ -33,9 +34,12 @@ protocol HotelDetailVMProtocol: AnyObject {
     var imageUrls: [String] { get }
     var checkInDateText: String { get }
     var checkOutDateText: String { get }
+    var checkInDate: Date { get }
+    var checkOutDate: Date { get }
     var guestInfoText: String { get }
     var cheapestRoom: HotelDetailVM.RoomDisplayData? { get }
-    var amenities: [String] { get }
+    var mockCoordinate: CLLocationCoordinate2D { get }
+    var amenities: [Amenity] { get }
     var description: String { get }
 }
 
@@ -87,6 +91,14 @@ final class HotelDetailVM: HotelDetailVMProtocol {
     var checkOutDateText: String {
         format(date: searchParams.checkOutDate)
     }
+    
+    var checkInDate: Date {
+        searchParams.checkInDate
+    }
+    
+    var checkOutDate: Date {
+        searchParams.checkOutDate
+    }
 
     var guestInfoText: String {
         "\(searchParams.roomCount) room • \(searchParams.guestCount) guests"
@@ -108,8 +120,12 @@ final class HotelDetailVM: HotelDetailVMProtocol {
         }.min(by: { $0.price < $1.price })
     }
 
-    var amenities: [String] {
-        hotel.amenities
+    var mockCoordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: 41.0082, longitude: 28.9784) // Istanbul
+    }
+    
+    var amenities: [Amenity] {
+        hotel.amenities.compactMap { Amenity.from(string: $0) }
     }
 
     var description: String {
