@@ -32,6 +32,16 @@ final class HotelCheckInOutCell: UITableViewCell {
         view.pinToEdges(of: contentView, withInsets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
         view.backgroundColor = .clear
         
+        checkInDateLabel.textColor = .appPrimaryText
+        checkOutDateLabel.textColor = .appPrimaryText
+        checkInLabel.text = "Check-in"
+        checkInLabel.textColor = .secondaryLabel
+        checkInLabel.font = .systemFont(ofSize: 13, weight: .medium)
+        checkOutLabel.text = "Check-out"
+        checkOutLabel.textColor = .secondaryLabel
+        checkOutLabel.font = .systemFont(ofSize: 13, weight: .medium)
+
+        
         let vstackIn = UIStackView(arrangedSubviews: [checkInLabel, checkInDateLabel])
         vstackIn.axis = .vertical
         vstackIn.spacing = 4
@@ -42,7 +52,6 @@ final class HotelCheckInOutCell: UITableViewCell {
         vstackOut.axis = .vertical
         vstackOut.spacing = 4
         vstackOut.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(vstackOut)
         
         let hstack = UIStackView(arrangedSubviews: [vstackIn, divider, vstackOut])
         hstack.axis = .horizontal
@@ -62,16 +71,6 @@ final class HotelCheckInOutCell: UITableViewCell {
     
     func configure(checkIn: String, checkOut: String) {
         checkInDateLabel.text = checkIn
-        checkInDateLabel.textColor = .appPrimaryText
         checkOutDateLabel.text = checkOut
-        checkOutDateLabel.textColor = .appPrimaryText
-        
-        checkInLabel.text = "Check-in"
-        checkInLabel.textColor = .secondaryLabel
-        checkInLabel.font = .systemFont(ofSize: 13, weight: .medium)
-        checkOutLabel.text = "Check-out"
-        checkOutLabel.textColor = .secondaryLabel
-        checkOutLabel.font = .systemFont(ofSize: 13, weight: .medium)
-
     }
 }
