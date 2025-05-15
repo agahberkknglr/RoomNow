@@ -41,6 +41,8 @@ protocol HotelDetailVMProtocol: AnyObject {
     var mockCoordinate: CLLocationCoordinate2D { get }
     var amenities: [Amenity] { get }
     var description: String { get }
+    var hotelForNavigation: Hotel { get }
+    var searchParamsForNavigation: HotelSearchParameters { get }
 }
 
 final class HotelDetailVM: HotelDetailVMProtocol {
@@ -56,8 +58,9 @@ final class HotelDetailVM: HotelDetailVMProtocol {
     private let hotel: Hotel
     private let searchParams: HotelSearchParameters
     
+    var hotelForNavigation: Hotel { hotel }
+    var searchParamsForNavigation: HotelSearchParameters { searchParams }
     
-
     init(hotel: Hotel, searchParams: HotelSearchParameters) {
         self.hotel = hotel
         self.searchParams = searchParams
