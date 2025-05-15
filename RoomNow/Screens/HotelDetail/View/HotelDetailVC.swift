@@ -11,12 +11,15 @@ protocol HotelDetailVCProtocol: AnyObject {
     func configureVC()
     func setupTableView()
     func registerTableView()
+    func setupSelectRoomButton()
 }
 
 final class HotelDetailVC: UIViewController {
     
     private let viewModel: HotelDetailVMProtocol
     private let tableView = UITableView(frame: .zero, style: .plain)
+    private let selectRoomButton = UIButton()
+    private let buttonView = UIView()
     
     private var isDescriptionExpanded = false
 
@@ -34,6 +37,7 @@ final class HotelDetailVC: UIViewController {
         configureVC()
         setupTableView()
         registerTableView()
+        setupSelectRoomButton()
     }
 }
 
@@ -51,7 +55,6 @@ extension HotelDetailVC: HotelDetailVCProtocol {
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
         tableView.separatorStyle = .singleLine
@@ -71,6 +74,49 @@ extension HotelDetailVC: HotelDetailVCProtocol {
         tableView.registerCell(type: HotelMapCell.self)
         tableView.registerCell(type: HotelAmenitiesCell.self)
         tableView.registerCell(type: HotelDescriptionCell.self)
+    }
+    
+    func setupSelectRoomButton() {
+        selectRoomButton.setTitle("Select Room", for: .normal)
+        selectRoomButton.backgroundColor = .appButtonBackground
+        selectRoomButton.setTitleColor(.appAccent, for: .normal)
+        selectRoomButton.layer.cornerRadius = 8
+        selectRoomButton.titleLabel?.font = .boldSystemFont(ofSize: 16)
+        
+        selectRoomButton.addTarget(self, action: #selector(selectRoomTapped), for: .touchUpInside)
+        
+        buttonView.backgroundColor = .appSecondaryBackground
+        
+        buttonView.addSubview(selectRoomButton)
+        view.addSubview(buttonView)
+        
+        buttonView.translatesAutoresizingMaskIntoConstraints = false
+        selectRoomButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            buttonView.topAnchor.constraint(equalTo: tableView.bottomAnchor),
+            buttonView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            buttonView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            buttonView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            selectRoomButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            selectRoomButton.topAnchor.constraint(equalTo: buttonView.topAnchor, constant: 16),
+            selectRoomButton.leadingAnchor.constraint(equalTo: buttonView.leadingAnchor, constant: 16),
+            selectRoomButton.trailingAnchor.constraint(equalTo: buttonView.trailingAnchor, constant: -16),
+            selectRoomButton.bottomAnchor.constraint(equalTo: buttonView.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            
+        ])
+    }
+    
+    @objc private func selectRoomTapped() {
+        navigateToRoomTypeSelection()
+    }
+    
+    private func navigateToRoomTypeSelection() {
+        let hotel = viewModel.hotelForNavigation
+        let params = viewModel.searchParamsForNavigation
+        let vc = RoomSelectionVC(hotel: hotel, searchParams: params)
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
@@ -174,5 +220,11 @@ extension HotelDetailVC: UITableViewDataSource {
 }
 
 extension HotelDetailVC: UITableViewDelegate {
-
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let section = viewModel.sections[indexPath.section]
+        
+        if section.type == .cheapestRoom {
+            navigateToRoomTypeSelection()
+        }
+    }
 }
