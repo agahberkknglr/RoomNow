@@ -42,6 +42,7 @@ final class HotelCell: UICollectionViewCell {
         hotelImageView.clipsToBounds = true
         
         hotelNameLabel.font = .boldSystemFont(ofSize: 18)
+        hotelNameLabel.textColor = .appPrimaryText
         hotelNameLabel.numberOfLines = 2
         
         ratingLabel.font = .systemFont(ofSize: 14)

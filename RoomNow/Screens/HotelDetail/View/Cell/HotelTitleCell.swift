@@ -44,6 +44,7 @@ final class HotelTitleCell: UITableViewCell {
         hstack.pinToEdges(of: view, withInsets: UIEdgeInsets(top: 16, left: 8, bottom: 16, right: 8))
 
         nameLabel.font = .boldSystemFont(ofSize: 20)
+        nameLabel.textColor = .appPrimaryText
         nameLabel.numberOfLines = 2
         locationLabel.textColor = .appSecondaryText
         ratingLabel.textColor = .systemYellow
