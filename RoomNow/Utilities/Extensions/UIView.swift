@@ -10,7 +10,6 @@ import UIKit
 extension UIView {
     func pinToEdges(of superview: UIView, withInsets insets: UIEdgeInsets = .zero) {
         translatesAutoresizingMaskIntoConstraints = false
-        superview.addSubview(self)
         NSLayoutConstraint.activate([
             topAnchor.constraint(equalTo: superview.topAnchor, constant: insets.top),
             leadingAnchor.constraint(equalTo: superview.leadingAnchor, constant: insets.left),

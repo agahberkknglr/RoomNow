@@ -25,7 +25,7 @@ final class HotelRoomGuestInfoCell: UITableViewCell {
 
     private func setupUI() {
         contentView.backgroundColor = .appBackground
-        
+        contentView.addSubview(view)
         view.pinToEdges(of: contentView, withInsets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
         view.backgroundColor = .clear
         
