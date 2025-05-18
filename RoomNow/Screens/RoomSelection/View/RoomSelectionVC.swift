@@ -7,14 +7,17 @@
 
 import UIKit
 
-final class RoomSelectionVC: UIViewController {
-    private let hotel: Hotel
-    private let searchParams: HotelSearchParameters
+import UIKit
 
+final class RoomSelectionVC: UIViewController {
+    
+    private let viewModel: RoomSelectionVMProtocol
+    private let tableView = UITableView()
+    
     init(hotel: Hotel, searchParams: HotelSearchParameters) {
-        self.hotel = hotel
-        self.searchParams = searchParams
+        self.viewModel = RoomSelectionVM(hotel: hotel, searchParams: searchParams)
         super.init(nibName: nil, bundle: nil)
+        self.title = "Select a Room"
     }
 
     required init?(coder: NSCoder) {
@@ -24,6 +27,55 @@ final class RoomSelectionVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .appBackground
-        title = "Available Rooms"
+        setupTableView()
     }
+
+    private func setupTableView() {
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.backgroundColor = .clear
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.separatorStyle = .none
+
+        tableView.registerCell(type: RoomTypeCell.self)
+
+        view.addSubview(tableView)
+
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+    }
+}
+
+extension RoomSelectionVC: UITableViewDataSource {
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        viewModel.availableRooms.count
+    }
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        1
+    }
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 200
+    }
+
+    //func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    //    viewModel.availableRooms[section].typeName.capitalized
+    //}
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let roomType = viewModel.availableRooms[indexPath.section]
+        let cell = tableView.dequeue(RoomTypeCell.self, for: indexPath)
+        cell.configure(typeName: roomType.typeName, rooms: roomType.rooms)
+        return cell
+    }
+}
+
+extension RoomSelectionVC: UITableViewDelegate {
+    
 }
