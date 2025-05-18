@@ -134,18 +134,14 @@ extension HotelDetailVC: UITableViewDataSource {
         let section = viewModel.sections[indexPath.section]
         switch section.type {
         case .title:
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: HotelTitleCell.self), for: indexPath) as? HotelTitleCell else {
-                return UITableViewCell()
-            }
+            let cell = tableView.dequeue(HotelTitleCell.self, for: indexPath)
+
             cell.configure(name: viewModel.hotelName, location: viewModel.location, rating: viewModel.ratingText)
             return cell
 
         case .imageGallery:
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: HotelImageCell.self), for: indexPath) as? HotelImageCell,
-                  let imageUrls = section.data as? [String] else {
-                return UITableViewCell()
-            }
-            cell.configure(with: imageUrls)
+            let cell = tableView.dequeue(HotelImageCell.self, for: indexPath)
+            cell.configure(with: viewModel.imageUrls)
             return cell
         //case .imageGallery:
         //    guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: HotelImageCell.self), for: indexPath) as? HotelImageCell,
@@ -156,43 +152,31 @@ extension HotelDetailVC: UITableViewDataSource {
         //    return cell
         
         case .checkInOut:
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: HotelCheckInOutCell.self), for: indexPath) as? HotelCheckInOutCell else {
-                return UITableViewCell()
-            }
+            let cell = tableView.dequeue(HotelCheckInOutCell.self, for: indexPath)
             cell.configure(checkIn: viewModel.checkInDateText, checkOut: viewModel.checkOutDateText)
             return cell
         
         case .roomGuestInfo:
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: HotelRoomGuestInfoCell.self), for: indexPath) as? HotelRoomGuestInfoCell else {
-                return UITableViewCell()
-            }
+            let cell = tableView.dequeue(HotelRoomGuestInfoCell.self, for: indexPath)
             cell.configure(info: viewModel.guestInfoText)
             return cell
             
         case .cheapestRoom:
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: HotelCheapestRoomCell.self), for: indexPath) as? HotelCheapestRoomCell else {
-                return UITableViewCell()
-            }
+            let cell = tableView.dequeue(HotelCheapestRoomCell.self, for: indexPath)
             cell.configure(price: viewModel.cheapestRoom?.price ?? 0, startDate: viewModel.checkInDate, endDate: viewModel.checkOutDate)
             return cell
             
         case .map:
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: HotelMapCell.self), for: indexPath) as? HotelMapCell else {
-                return UITableViewCell()
-            }
+            let cell = tableView.dequeue(HotelMapCell.self, for: indexPath)
             cell.configure(locationText: viewModel.location, mockCoordinate: viewModel.mockCoordinate)
             return cell
             
         case .amenities:
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: HotelAmenitiesCell.self), for: indexPath) as? HotelAmenitiesCell else {
-                return UITableViewCell()
-            }
+            let cell = tableView.dequeue(HotelAmenitiesCell.self, for: indexPath)
             cell.configure(with: viewModel.amenities)
             return cell
         case .description:
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: HotelDescriptionCell.self), for: indexPath) as? HotelDescriptionCell else {
-                return UITableViewCell()
-            }
+            let cell = tableView.dequeue(HotelDescriptionCell.self, for: indexPath)
             cell.configure(with: viewModel.description, isExpanded: isDescriptionExpanded)
             cell.onToggle = { [weak self] in
                 guard let self = self else { return }
@@ -222,7 +206,6 @@ extension HotelDetailVC: UITableViewDataSource {
 extension HotelDetailVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let section = viewModel.sections[indexPath.section]
-        
         if section.type == .cheapestRoom {
             navigateToRoomTypeSelection()
         }
