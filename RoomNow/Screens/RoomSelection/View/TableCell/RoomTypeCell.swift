@@ -7,9 +7,6 @@
 
 import UIKit
 
-
-/// content view need background color
-
 final class RoomTypeCell: UITableViewCell {
 
     private let titleLabel = UILabel()
@@ -25,6 +22,7 @@ final class RoomTypeCell: UITableViewCell {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
+        contentView.backgroundColor = .appBackground
         titleLabel.font = .boldSystemFont(ofSize: 16)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
