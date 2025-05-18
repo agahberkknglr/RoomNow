@@ -10,15 +10,15 @@ import UIKit
 final class RoomTypeCell: UITableViewCell {
 
     private let titleLabel = UILabel()
-    private let collectionView: UICollectionView
-
+    private var collectionView: UICollectionView
     private var rooms: [HotelRoom] = []
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.itemSize = CGSize(width: 240, height: 200)
+        layout.itemSize = CGSize(width: 240, height: 250)
         layout.minimumLineSpacing = 12
+        layout.sectionInset = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
@@ -43,8 +43,7 @@ final class RoomTypeCell: UITableViewCell {
             collectionView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
             collectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 0),
             collectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: 0),
-            collectionView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12),
-            collectionView.heightAnchor.constraint(equalToConstant: 140)
+            collectionView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
         ])
     }
 

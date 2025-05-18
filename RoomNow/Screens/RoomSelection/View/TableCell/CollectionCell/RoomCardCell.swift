@@ -12,12 +12,17 @@ final class RoomCardCell: UICollectionViewCell {
     private let titleLabel = UILabel()
     private let descLabel = UILabel()
     private let priceLabel = UILabel()
+    private let cardView = UIView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        contentView.backgroundColor = .appSecondaryBackground
-        contentView.layer.cornerRadius = 10
-        contentView.clipsToBounds = true
+        contentView.backgroundColor = .clear
+        contentView.addSubview(cardView)
+        cardView.layer.borderColor = UIColor.systemPink.cgColor
+        cardView.layer.cornerRadius = 10
+        cardView.clipsToBounds = true
+        cardView.pinToEdges(of: contentView)
+        cardView.backgroundColor = .appSecondaryBackground
 
         titleLabel.font = .boldSystemFont(ofSize: 14)
         descLabel.font = .systemFont(ofSize: 12)
@@ -29,15 +34,11 @@ final class RoomCardCell: UICollectionViewCell {
         let stack = UIStackView(arrangedSubviews: [titleLabel, descLabel, priceLabel])
         stack.axis = .vertical
         stack.spacing = 4
+        stack.distribution = .fillEqually
         stack.translatesAutoresizingMaskIntoConstraints = false
 
-        contentView.addSubview(stack)
-        NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            stack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            stack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
-            stack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
-        ])
+        cardView.addSubview(stack)
+        stack.pinToEdges(of: cardView, withInsets: UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8))
     }
 
     required init?(coder: NSCoder) {
