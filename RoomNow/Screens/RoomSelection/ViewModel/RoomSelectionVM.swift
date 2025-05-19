@@ -10,17 +10,36 @@ import Foundation
 protocol RoomSelectionVMProtocol {
     var availableRooms: [RoomType] { get }
     var hotelName: String { get }
+    var numberOfNights: Int { get }
+    var checkInDate: Date { get }
+    var checkOutDate: Date { get }
+    var guestCount: Int { get }
+    var roomCount: Int { get }
+    var hotel: Hotel { get }
     func filterAvailableRooms()
 }
 
 final class RoomSelectionVM: RoomSelectionVMProtocol {
     
-    private let hotel: Hotel
+    private(set) var hotel: Hotel
     private let searchParams: HotelSearchParameters
     
     private(set) var availableRooms: [RoomType] = []
     
     var hotelName: String { hotel.name }
+
+    var checkInDate: Date { searchParams.checkInDate }
+
+    var checkOutDate: Date { searchParams.checkOutDate }
+
+    var guestCount: Int { searchParams.guestCount }
+
+    var roomCount: Int { searchParams.roomCount }
+
+    var numberOfNights: Int {
+        let nights = Calendar.current.dateComponents([.day], from: checkInDate, to: checkOutDate).day ?? 1
+        return max(nights, 1)
+    }
     
     init(hotel: Hotel, searchParams: HotelSearchParameters) {
         self.hotel = hotel

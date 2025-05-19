@@ -12,11 +12,14 @@ final class RoomTypeCell: UITableViewCell {
     private let titleLabel = UILabel()
     private var collectionView: UICollectionView
     private var rooms: [HotelRoom] = []
+    private var nights: Int = 1
+    private var startDate: Date?
+    private var endDate: Date?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.itemSize = CGSize(width: 240, height: 250)
+        layout.itemSize = CGSize(width: 240, height: 200)
         layout.minimumLineSpacing = 12
         layout.sectionInset = UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -51,9 +54,12 @@ final class RoomTypeCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(typeName: String, rooms: [HotelRoom]) {
+    func configure(typeName: String, rooms: [HotelRoom], forNights: Int, startDate: Date, endDate: Date) {
         self.titleLabel.text = typeName.capitalized
         self.rooms = rooms
+        self.nights = forNights
+        self.startDate = startDate
+        self.endDate = endDate
         collectionView.reloadData()
     }
 }
@@ -65,7 +71,10 @@ extension RoomTypeCell: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeue(RoomCardCell.self, for: indexPath)
-        cell.configure(with: rooms[indexPath.item])
+        guard let start = startDate, let end = endDate else {
+            return cell
+        }
+        cell.configure(with: rooms[indexPath.item], forNights: nights, startDate: start, endDate: end)
         return cell
     }
 }
