@@ -41,7 +41,8 @@ final class SearchVC: UIViewController {
         
         searchButton.setTitle("Search Now", for: .normal)
         searchButton.layer.cornerRadius = 10
-        searchButton.tintColor = .white
+        searchButton.tintColor = .appPrimaryText
+        searchButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
         
         let stackView = UIStackView(arrangedSubviews: [destinationButton, dateButton, roomButton, searchButton])
         stackView.axis = .vertical
@@ -67,6 +68,7 @@ final class SearchVC: UIViewController {
         let isEnabled = viewModel.isSearchEnabled()
         searchButton.isEnabled = isEnabled
         searchButton.backgroundColor = isEnabled ? .appButtonBackground : .appDisabled
+        searchButton.setTitleColor(isEnabled ? .appAccent : .appPrimaryText, for: .normal)
         searchButton.alpha = isEnabled ? 1.0 : 0.5
     }
 
