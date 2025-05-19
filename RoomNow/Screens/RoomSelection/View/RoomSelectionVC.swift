@@ -55,7 +55,7 @@ extension RoomSelectionVC: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 300
+        return 250
     }
 
     //func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -65,7 +65,7 @@ extension RoomSelectionVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let roomType = viewModel.availableRooms[indexPath.section]
         let cell = tableView.dequeue(RoomTypeCell.self, for: indexPath)
-        cell.configure(typeName: roomType.typeName, rooms: roomType.rooms)
+        cell.configure(typeName: roomType.typeName, rooms: roomType.rooms, forNights: viewModel.numberOfNights, startDate: viewModel.checkInDate, endDate: viewModel.checkOutDate)
         return cell
     }
 }
