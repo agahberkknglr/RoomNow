@@ -58,6 +58,7 @@ final class HotelCheapestRoomCell: UITableViewCell {
     
     func configure(price: Double, startDate: Date, endDate: Date){
         let nights = Calendar.current.dateComponents([.day], from: startDate, to: endDate).day ?? 1
+        let totalPrice = price * Double(nights)
         
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d"
@@ -67,6 +68,6 @@ final class HotelCheapestRoomCell: UITableViewCell {
         let end = formatter.string(from: endDate)
         
         titleLabel.text = "Price for \(nights) night\(nights > 1 ? "s" : "") (\(start) - \(end))"
-        priceLabel.text = "₺\(Int(price))"
+        priceLabel.text = "₺\(Int(totalPrice))"
     }
 }
