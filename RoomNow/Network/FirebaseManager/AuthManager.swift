@@ -58,6 +58,23 @@ final class AuthManager {
             }
         }
     }
+    
+    func fetchUserData(completion: @escaping (Result<[String: Any], Error>) -> Void) {
+        guard let uid = currentUser?.uid else {
+            completion(.failure(NSError(domain: "No user ID", code: -1)))
+            return
+        }
+        let db = Firestore.firestore()
+        db.collection("users").document(uid).getDocument { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+            } else if let data = snapshot?.data() {
+                completion(.success(data))
+            } else {
+                completion(.failure(NSError(domain: "No user data found", code: -1)))
+            }
+        }
+    }
 
     func login(email: String, password: String, completion: @escaping (Result<Void, Error>) -> Void) {
         Auth.auth().signIn(withEmail: email, password: password) { _, error in
@@ -85,6 +102,12 @@ final class AuthManager {
             } else {
                 completion(.success(()))
             }
+        }
+    }
+    
+    func observeAuthState(_ callback: @escaping (User?) -> Void) {
+        Auth.auth().addStateDidChangeListener { _, user in
+            callback(user)
         }
     }
 }
