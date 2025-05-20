@@ -10,6 +10,16 @@ import UIKit
 final class RegisterVC: UIViewController {
 
     private let viewModel: RegisterVMProtocol = RegisterVM()
+    
+    private let nameField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Fullname"
+        tf.borderStyle = .roundedRect
+        tf.keyboardType = .default
+        tf.autocorrectionType = .no
+        tf.returnKeyType = .next
+        return tf
+    }()
 
     private let emailField: UITextField = {
         let tf = UITextField()
@@ -17,7 +27,26 @@ final class RegisterVC: UIViewController {
         tf.autocapitalizationType = .none
         tf.borderStyle = .roundedRect
         tf.keyboardType = .emailAddress
+        tf.returnKeyType = .next
         return tf
+    }()
+    
+    private let dobField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Date of Birth"
+        tf.borderStyle = .roundedRect
+        tf.returnKeyType = .done
+        return tf
+    }()
+    
+    private let genderPicker: UISegmentedControl = {
+        let sg = UISegmentedControl(items: ["Male", "Female", "Other"])
+        sg.selectedSegmentIndex = 0
+        sg.setTitleTextAttributes([.foregroundColor: UIColor.appSecondaryText], for: .normal)
+        sg.setTitleTextAttributes([.foregroundColor: UIColor.appAccent], for: .selected)
+        sg.backgroundColor = .appSecondaryBackground
+        sg.selectedSegmentTintColor = .appButtonBackground
+        return sg
     }()
 
     private let passwordField: UITextField = {
@@ -25,6 +54,7 @@ final class RegisterVC: UIViewController {
         tf.placeholder = "Password"
         tf.isSecureTextEntry = true
         tf.borderStyle = .roundedRect
+        tf.returnKeyType = .next
         return tf
     }()
 
@@ -46,24 +76,67 @@ final class RegisterVC: UIViewController {
         label.isHidden = true
         return label
     }()
+    
+    private let datePicker: UIDatePicker = {
+        let picker = UIDatePicker()
+        picker.datePickerMode = .date
+        picker.maximumDate = Calendar.current.date(byAdding: .year, value: -10, to: Date())
+        picker.preferredDatePickerStyle = .wheels
+        return picker
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .appBackground
+        nameField.delegate = self
+        emailField.delegate = self
+        passwordField.delegate = self
+        dobField.delegate = self
+        dobField.inputView = datePicker
+        datePicker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
         setupUI()
         registerButton.addTarget(self, action: #selector(registerTapped), for: .touchUpInside)
+        dobToolbar()
+    }
+    
+    private func dobToolbar() {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(doneTapped))
+        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        toolbar.setItems([flexibleSpace, doneButton], animated: false)
+
+        dobField.inputAccessoryView = toolbar
+    }
+    
+    @objc private func doneTapped() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        dobField.text = formatter.string(from: datePicker.date)
+        dobField.resignFirstResponder()
+    }
+    
+    @objc private func dateChanged() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        dobField.text = formatter.string(from: datePicker.date)
     }
 
     @objc private func registerTapped() {
         guard
+            let name = nameField.text, !name.isEmpty,
             let email = emailField.text, !email.isEmpty,
-            let password = passwordField.text, !password.isEmpty
+            let password = passwordField.text, !password.isEmpty,
+            let dob = dobField.text, !dob.isEmpty
         else {
             showError("Please fill in all fields")
             return
         }
 
-        viewModel.register(email: email, password: password) { [weak self] errorMessage in
+        let gender = genderPicker.titleForSegment(at: genderPicker.selectedSegmentIndex) ?? "Other"
+
+        viewModel.register(email: email, password: password, username: name, dateOfBirth: dob, gender: gender) { [weak self] errorMessage in
             DispatchQueue.main.async {
                 if let errorMessage = errorMessage {
                     self?.showError(errorMessage)
@@ -89,8 +162,15 @@ final class RegisterVC: UIViewController {
     }
 
     private func setupUI() {
-        view.backgroundColor = .appBackground
-        let stack = UIStackView(arrangedSubviews: [emailField, passwordField, registerButton, errorLabel])
+        let stack = UIStackView(arrangedSubviews: [
+            nameField,
+            emailField,
+            passwordField,
+            dobField,
+            genderPicker,
+            registerButton,
+            errorLabel
+        ])
         stack.axis = .vertical
         stack.spacing = 12
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -102,6 +182,24 @@ final class RegisterVC: UIViewController {
             stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             registerButton.heightAnchor.constraint(equalToConstant: 44)
         ])
+    }
+}
+
+extension RegisterVC: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        switch textField {
+        case nameField:
+            emailField.becomeFirstResponder()
+        case emailField:
+            passwordField.becomeFirstResponder()
+        case passwordField:
+            dobField.becomeFirstResponder()
+        case dobField:
+            dobField.resignFirstResponder()
+        default:
+            textField.resignFirstResponder()
+        }
+        return true
     }
 }
 
