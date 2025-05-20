@@ -18,6 +18,8 @@ final class RegisterVC: UIViewController {
         tf.keyboardType = .default
         tf.autocorrectionType = .no
         tf.returnKeyType = .next
+        tf.textContentType = .name
+        tf.backgroundColor = .appSecondaryBackground
         return tf
     }()
 
@@ -28,6 +30,8 @@ final class RegisterVC: UIViewController {
         tf.borderStyle = .roundedRect
         tf.keyboardType = .emailAddress
         tf.returnKeyType = .next
+        tf.textContentType = .emailAddress
+        tf.backgroundColor = .appSecondaryBackground
         return tf
     }()
     
@@ -36,6 +40,7 @@ final class RegisterVC: UIViewController {
         tf.placeholder = "Date of Birth"
         tf.borderStyle = .roundedRect
         tf.returnKeyType = .done
+        tf.backgroundColor = .appSecondaryBackground
         return tf
     }()
     
@@ -55,6 +60,8 @@ final class RegisterVC: UIViewController {
         tf.isSecureTextEntry = true
         tf.borderStyle = .roundedRect
         tf.returnKeyType = .next
+        tf.textContentType = .oneTimeCode
+        tf.backgroundColor = .appSecondaryBackground
         return tf
     }()
 
@@ -80,23 +87,23 @@ final class RegisterVC: UIViewController {
     private let datePicker: UIDatePicker = {
         let picker = UIDatePicker()
         picker.datePickerMode = .date
-        picker.maximumDate = Calendar.current.date(byAdding: .year, value: -10, to: Date())
+        picker.maximumDate = Calendar.current.date(byAdding: .year, value: -15, to: Date())
         picker.preferredDatePickerStyle = .wheels
         return picker
     }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .appBackground
-        nameField.delegate = self
-        emailField.delegate = self
-        passwordField.delegate = self
-        dobField.delegate = self
+        setupUI()
+        tfNavigation()
+        dobPrickerTarget()
+        dobToolbar()
+        registerAction()
+    }
+    
+    private func dobPrickerTarget(){
         dobField.inputView = datePicker
         datePicker.addTarget(self, action: #selector(dateChanged), for: .valueChanged)
-        setupUI()
-        registerButton.addTarget(self, action: #selector(registerTapped), for: .touchUpInside)
-        dobToolbar()
     }
     
     private func dobToolbar() {
@@ -123,6 +130,10 @@ final class RegisterVC: UIViewController {
         dobField.text = formatter.string(from: datePicker.date)
     }
 
+    private func registerAction() {
+        registerButton.addTarget(self, action: #selector(registerTapped), for: .touchUpInside)
+    }
+    
     @objc private func registerTapped() {
         guard
             let name = nameField.text, !name.isEmpty,
@@ -162,6 +173,8 @@ final class RegisterVC: UIViewController {
     }
 
     private func setupUI() {
+        view.backgroundColor = .appBackground
+        setNavigation(title: "Register")
         let stack = UIStackView(arrangedSubviews: [
             nameField,
             emailField,
@@ -182,6 +195,13 @@ final class RegisterVC: UIViewController {
             stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             registerButton.heightAnchor.constraint(equalToConstant: 44)
         ])
+    }
+    
+    private func tfNavigation(){
+        nameField.delegate = self
+        emailField.delegate = self
+        passwordField.delegate = self
+        dobField.delegate = self
     }
 }
 
