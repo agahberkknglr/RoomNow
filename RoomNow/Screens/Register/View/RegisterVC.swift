@@ -31,6 +31,7 @@ final class RegisterVC: UIViewController {
         tf.keyboardType = .emailAddress
         tf.returnKeyType = .next
         tf.textContentType = .emailAddress
+        tf.autocorrectionType = .no
         tf.backgroundColor = .appSecondaryBackground
         return tf
     }()
