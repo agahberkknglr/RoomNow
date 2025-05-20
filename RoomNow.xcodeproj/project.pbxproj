@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		080470E62D963F6900AAFEA8 /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 080470E52D963F6900AAFEA8 /* FSCalendar */; };
 		0844737C2DBE8218003D384B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 0844737B2DBE8218003D384B /* FirebaseFirestore */; };
+		0887F3122DDC0D7B002FC2FE /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 0887F3112DDC0D7B002FC2FE /* FirebaseAuth */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				080470E62D963F6900AAFEA8 /* FSCalendar in Frameworks */,
+				0887F3122DDC0D7B002FC2FE /* FirebaseAuth in Frameworks */,
 				0844737C2DBE8218003D384B /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -87,6 +89,7 @@
 			packageProductDependencies = (
 				080470E52D963F6900AAFEA8 /* FSCalendar */,
 				0844737B2DBE8218003D384B /* FirebaseFirestore */,
+				0887F3112DDC0D7B002FC2FE /* FirebaseAuth */,
 			);
 			productName = RoomNow;
 			productReference = 080470AE2D8D602F00AAFEA8 /* RoomNow.app */;
@@ -382,6 +385,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0844737A2DBE8218003D384B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		0887F3112DDC0D7B002FC2FE /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0844737A2DBE8218003D384B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
