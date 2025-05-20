@@ -17,6 +17,8 @@ final class LoginVC: UIViewController {
         tf.autocapitalizationType = .none
         tf.keyboardType = .emailAddress
         tf.borderStyle = .roundedRect
+        tf.textContentType = .emailAddress
+        tf.backgroundColor = .appSecondaryBackground
         return tf
     }()
 
@@ -25,6 +27,8 @@ final class LoginVC: UIViewController {
         tf.placeholder = "Password"
         tf.isSecureTextEntry = true
         tf.borderStyle = .roundedRect
+        tf.textContentType = .password
+        tf.backgroundColor = .appSecondaryBackground
         return tf
     }()
 
@@ -114,6 +118,7 @@ final class LoginVC: UIViewController {
 
     private func setupUI() {
         view.backgroundColor = .appBackground
+        setNavigation(title: "Login")
         let stack = UIStackView(arrangedSubviews: [emailField, passwordField, loginButton, registerLabel, errorLabel])
         stack.axis = .vertical
         stack.spacing = 12
