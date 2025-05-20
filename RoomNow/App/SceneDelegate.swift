@@ -21,12 +21,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         configureGlobalNavigationBarAppearance()
         
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        let window = UIWindow(windowScene: windowScene)
-        let tabBarVC = TabBarVC()
-        window.makeKeyAndVisible()
-        window.rootViewController = tabBarVC
-        window.overrideUserInterfaceStyle = .dark
-        self.window = window
+        AuthManager.shared.observeAuthState { user in
+            DispatchQueue.main.async {
+                let window = UIWindow(windowScene: windowScene)
+                let tabBarVC = TabBarVC()
+                window.makeKeyAndVisible()
+                window.rootViewController = tabBarVC
+                window.overrideUserInterfaceStyle = .dark
+
+                if user == nil {
+                    print(" User is not logged in")
+                    tabBarVC.reloadTabsAfterLogout()
+                } else {
+                    print(" User is logged in: \(user!.email ?? "Unknown")")
+                }
+
+                window.rootViewController = tabBarVC
+                self.window = window
+                window.makeKeyAndVisible()
+            }
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
