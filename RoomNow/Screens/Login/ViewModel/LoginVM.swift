@@ -9,6 +9,7 @@ import Foundation
 
 protocol LoginVMProtocol {
     func login(email: String, password: String, completion: @escaping (String?) -> Void)
+    func resetPassword(email: String, completion: @escaping (Result<Void, Error>) -> Void)
 }
 
 final class LoginVM: LoginVMProtocol {
@@ -22,5 +23,9 @@ final class LoginVM: LoginVMProtocol {
                 completion(error.localizedDescription)
             }
         }
+    }
+    
+    func resetPassword(email: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        AuthManager.shared.sendPasswordReset(email: email, completion: completion)
     }
 }

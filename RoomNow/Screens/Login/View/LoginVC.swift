@@ -18,6 +18,8 @@ final class LoginVC: UIViewController {
         tf.keyboardType = .emailAddress
         tf.borderStyle = .roundedRect
         tf.textContentType = .emailAddress
+        tf.returnKeyType = .next
+        tf.autocorrectionType = .no
         tf.backgroundColor = .appSecondaryBackground
         return tf
     }()
@@ -28,6 +30,8 @@ final class LoginVC: UIViewController {
         tf.isSecureTextEntry = true
         tf.borderStyle = .roundedRect
         tf.textContentType = .password
+        tf.returnKeyType = .done
+        tf.autocorrectionType = .no
         tf.backgroundColor = .appSecondaryBackground
         return tf
     }()
@@ -44,7 +48,7 @@ final class LoginVC: UIViewController {
 
     private let errorLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .systemRed
+        label.textColor = .appWarning
         label.numberOfLines = 0
         label.font = .systemFont(ofSize: 14)
         label.textAlignment = .center
@@ -61,12 +65,24 @@ final class LoginVC: UIViewController {
         label.isUserInteractionEnabled = true
         return label
     }()
+    
+    private let forgotPasswordLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = .appAccent
+        label.text = "Forgot Password?"
+        label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 14)
+        label.textAlignment = .center
+        label.isUserInteractionEnabled = true
+        return label
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         loginButtonTarget()
         registerAction()
+        forgotPasswordAction()
         tfNavigation()
     }
     
@@ -108,7 +124,32 @@ final class LoginVC: UIViewController {
     @objc private func openRegister() {
         navigationController?.pushViewController(RegisterVC(), animated: true)
     }
+    
+    private func forgotPasswordAction() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(forgotPasswordTapped))
+        forgotPasswordLabel.addGestureRecognizer(tap)
+    }
 
+    @objc private func forgotPasswordTapped() {
+        showInputAlert(
+            title: "Reset Password",
+            message: "Enter your email",
+            placeholder: "Email"
+        ) { [weak self] email in
+            guard let email = email, !email.isEmpty else { return }
+            self?.viewModel.resetPassword(email: email) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success:
+                        self?.showAlert(title: "Success", message: "Reset link sent to \(email)")
+                    case .failure(let error):
+                        self?.showAlert(title: "Error", message: error.localizedDescription)
+                    }
+                }
+            }
+        }
+    }
+    
     private func showError(_ message: String) {
         errorLabel.text = message
         errorLabel.isHidden = false
@@ -125,7 +166,7 @@ final class LoginVC: UIViewController {
     private func setupUI() {
         view.backgroundColor = .appBackground
         setNavigation(title: "Login")
-        let stack = UIStackView(arrangedSubviews: [emailField, passwordField, loginButton, registerLabel, errorLabel])
+        let stack = UIStackView(arrangedSubviews: [emailField, passwordField, forgotPasswordLabel, loginButton, registerLabel, errorLabel])
         stack.axis = .vertical
         stack.spacing = 12
         stack.translatesAutoresizingMaskIntoConstraints = false
