@@ -67,6 +67,12 @@ final class LoginVC: UIViewController {
         setupUI()
         loginButtonTarget()
         registerAction()
+        tfNavigation()
+    }
+    
+    private func tfNavigation() {
+        emailField.delegate = self
+        passwordField.delegate = self
     }
     
     private func loginButtonTarget() {
@@ -134,4 +140,19 @@ final class LoginVC: UIViewController {
         ])
     }
 }
+
+extension LoginVC: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        switch textField {
+        case emailField:
+            passwordField.becomeFirstResponder()
+        case passwordField:
+            passwordField.resignFirstResponder()
+        default:
+            textField.resignFirstResponder()
+        }
+        return true
+    }
+}
+
 
