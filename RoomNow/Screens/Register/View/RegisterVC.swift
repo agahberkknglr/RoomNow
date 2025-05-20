@@ -54,6 +54,7 @@ final class RegisterVC: UIViewController {
         return sg
     }()
 
+    /// Text ContentType .newPassword some error about iCloud Keychain is disabled for simulator
     private let passwordField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Password"
