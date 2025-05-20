@@ -11,24 +11,49 @@ final class TabBarVC: UITabBarController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupTabs()
+    }
 
+    private func setupTabs() {
         let searchVC = UINavigationController(rootViewController: SearchVC())
-        let savedVC = UINavigationController(rootViewController: SavedVC())
-        let bookingsVC = UINavigationController(rootViewController: BookingsVC())
-        let loginVC = UINavigationController(rootViewController: LoginVC())
-        
-        searchVC.tabBarItem.image = UIImage(systemName: "magnifyingglass")
-        savedVC.tabBarItem.image = UIImage(systemName: "heart")
-        bookingsVC.tabBarItem.image = UIImage(systemName: "bag")
-        loginVC.tabBarItem.image = UIImage(systemName: "person.circle")
-        
         searchVC.title = "Search"
+        searchVC.tabBarItem.image = UIImage(systemName: "magnifyingglass")
+
+        let savedVC = UINavigationController(rootViewController: SavedVC())
         savedVC.title = "Saved"
+        savedVC.tabBarItem.image = UIImage(systemName: "heart")
+
+        let bookingsVC = UINavigationController(rootViewController: BookingsVC())
         bookingsVC.title = "Bookings"
-        loginVC.title = "Login"
-        
+        bookingsVC.tabBarItem.image = UIImage(systemName: "bag")
+
+        let isLoggedIn = AuthManager.shared.currentUser != nil
+
+        let accountVC: UINavigationController
+        if isLoggedIn {
+            accountVC = UINavigationController(rootViewController: ProfileVC())
+            accountVC.title = "Profile"
+            accountVC.tabBarItem.image = UIImage(systemName: "person.fill")
+        } else {
+            accountVC = UINavigationController(rootViewController: LoginVC())
+            accountVC.title = "Login"
+            accountVC.tabBarItem.image = UIImage(systemName: "person.circle")
+        }
+
         tabBar.tintColor = .appAccent
         tabBar.backgroundColor = .appSecondaryBackground
-        setViewControllers([searchVC, savedVC, bookingsVC, loginVC], animated: true)
+
+        setViewControllers([searchVC, savedVC, bookingsVC, accountVC], animated: false)
     }
+    
+    func reloadTabsAfterLogin() {
+        setupTabs()
+        selectedIndex = 3
+    }
+    
+    func reloadTabsAfterLogout() {
+        setupTabs()
+        selectedIndex = 3
+    }
+
 }
