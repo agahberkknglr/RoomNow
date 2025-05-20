@@ -33,6 +33,7 @@ final class LoginVC: UIViewController {
         button.setTitle("Login", for: .normal)
         button.backgroundColor = .appButtonBackground
         button.setTitleColor(.appAccent, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
         button.layer.cornerRadius = 8
         return button
     }()
@@ -46,13 +47,28 @@ final class LoginVC: UIViewController {
         label.isHidden = true
         return label
     }()
+    
+    private let registerLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Don't have an account? Register"
+        label.textColor = .appAccent
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 14)
+        label.isUserInteractionEnabled = true
+        return label
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        loginButtonTarget()
+        registerAction()
+    }
+    
+    private func loginButtonTarget() {
         loginButton.addTarget(self, action: #selector(loginTapped), for: .touchUpInside)
     }
-
+    
     @objc private func loginTapped() {
         guard
             let email = emailField.text, !email.isEmpty,
@@ -73,6 +89,15 @@ final class LoginVC: UIViewController {
             }
         }
     }
+    
+    private func registerAction() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(openRegister))
+        registerLabel.addGestureRecognizer(tap)
+    }
+    
+    @objc private func openRegister() {
+        navigationController?.pushViewController(RegisterVC(), animated: true)
+    }
 
     private func showError(_ message: String) {
         errorLabel.text = message
@@ -89,7 +114,7 @@ final class LoginVC: UIViewController {
 
     private func setupUI() {
         view.backgroundColor = .appBackground
-        let stack = UIStackView(arrangedSubviews: [emailField, passwordField, loginButton, errorLabel])
+        let stack = UIStackView(arrangedSubviews: [emailField, passwordField, loginButton, registerLabel, errorLabel])
         stack.axis = .vertical
         stack.spacing = 12
         stack.translatesAutoresizingMaskIntoConstraints = false
