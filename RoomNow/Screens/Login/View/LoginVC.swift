@@ -31,8 +31,8 @@ final class LoginVC: UIViewController {
     private let loginButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Login", for: .normal)
-        button.backgroundColor = .systemBlue
-        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .appButtonBackground
+        button.setTitleColor(.appAccent, for: .normal)
         button.layer.cornerRadius = 8
         return button
     }()
@@ -80,7 +80,7 @@ final class LoginVC: UIViewController {
     }
 
     private func navigateAfterLogin() {
-        print("✅ Login successful")
+        print("Login successful")
         if let tabBarVC = self.tabBarController as? TabBarVC {
             tabBarVC.reloadTabsAfterLogin()
             tabBarVC.selectedIndex = 3
@@ -88,7 +88,7 @@ final class LoginVC: UIViewController {
     }
 
     private func setupUI() {
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .appBackground
         let stack = UIStackView(arrangedSubviews: [emailField, passwordField, loginButton, errorLabel])
         stack.axis = .vertical
         stack.spacing = 12
