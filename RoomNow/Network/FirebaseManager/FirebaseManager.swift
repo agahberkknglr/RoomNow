@@ -8,6 +8,7 @@
 import Foundation
 import FirebaseCore
 import FirebaseFirestore
+import FirebaseAuth
 
 protocol FirebaseManagerProtocol {
     func fetchHotelsAsJSON()
@@ -161,6 +162,57 @@ extension FirebaseManager: FirebaseManagerProtocol {
     }
     
     
+    func isHotelSaved(for hotelId: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.success(false))
+            return
+        }
+
+        let docRef = Firestore.firestore()
+            .collection("users")
+            .document(uid)
+            .collection("savedHotels")
+            .document(hotelId)
+
+        docRef.getDocument { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(snapshot?.exists == true))
+            }
+        }
+    }
+
+    func toggleSavedHotel(hotelId: String, isCurrentlySaved: Bool, completion: @escaping (Result<Bool, Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "User not logged in", code: 401)))
+            return
+        }
+
+        let docRef = Firestore.firestore()
+            .collection("users")
+            .document(uid)
+            .collection("savedHotels")
+            .document(hotelId)
+
+        if isCurrentlySaved {
+            docRef.delete { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(false)) // now not saved
+                }
+            }
+        } else {
+            docRef.setData(["hotelId": hotelId]) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(true)) // now saved
+                }
+            }
+        }
+    }
     
     
     
