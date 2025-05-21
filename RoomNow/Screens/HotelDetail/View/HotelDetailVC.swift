@@ -22,6 +22,7 @@ final class HotelDetailVC: UIViewController {
     private let buttonView = UIView()
     
     private var isDescriptionExpanded = false
+    private var didHideTitle = false
 
     init(viewModel: HotelDetailVMProtocol) {
         self.viewModel = viewModel
@@ -44,6 +45,26 @@ final class HotelDetailVC: UIViewController {
 extension HotelDetailVC: HotelDetailVCProtocol {
     func configureVC() {
         view.backgroundColor = .appBackground
+        setNavigation(title: "", rightButtons: [makeBarButton(systemName: "heart", action: #selector(heartTapped))])
+        viewModel.loadSavedStatus { [weak self] in
+            DispatchQueue.main.async {
+                self?.updateHeartIcon()
+            }
+        }
+    }
+
+    
+    @objc private func heartTapped() {
+        viewModel.toggleSavedStatus { [weak self] in
+            DispatchQueue.main.async {
+                self?.updateHeartIcon()
+            }
+        }
+    }
+
+    private func updateHeartIcon() {
+        let iconName = viewModel.isSaved ? "heart.fill" : "heart"
+        navigationItem.rightBarButtonItem?.image = UIImage(systemName: iconName)
     }
     
     func setupTableView() {
@@ -208,6 +229,25 @@ extension HotelDetailVC: UITableViewDelegate {
         let section = viewModel.sections[indexPath.section]
         if section.type == .cheapestRoom {
             navigateToRoomTypeSelection()
+        }
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        // Get section 0's rect
+        let sectionRect = tableView.rect(forSection: 0)
+
+        // Convert to the view's coordinate space
+        let frameInView = tableView.convert(sectionRect, to: view)
+
+        // Decide a threshold — let's say halfway off the screen
+        let threshold = -sectionRect.height / 4
+
+        if frameInView.origin.y <= threshold && !didHideTitle {
+            didHideTitle = true
+            navigationItem.title = viewModel.hotelName.capitalized // Replace with dynamic hotel name if needed
+        } else if frameInView.origin.y > threshold && didHideTitle {
+            didHideTitle = false
+            navigationItem.title = "" // or nil, or initial title
         }
     }
 }

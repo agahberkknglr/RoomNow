@@ -7,6 +7,8 @@
 
 import Foundation
 import CoreLocation
+import FirebaseAuth
+import FirebaseFirestore
 
 // MARK: - Protocol
 
@@ -43,6 +45,10 @@ protocol HotelDetailVMProtocol: AnyObject {
     var description: String { get }
     var hotelForNavigation: Hotel { get }
     var searchParamsForNavigation: HotelSearchParameters { get }
+    var isSaved: Bool { get set }
+
+    func loadSavedStatus(completion: @escaping () -> Void)
+    func toggleSavedStatus(completion: @escaping () -> Void)
 }
 
 final class HotelDetailVM: HotelDetailVMProtocol {
@@ -140,6 +146,43 @@ final class HotelDetailVM: HotelDetailVMProtocol {
         formatter.dateFormat = "MMM d"
         formatter.timeZone = TimeZone(identifier: "Europe/Istanbul")
         return formatter.string(from: date)
+    }
+    
+    var isSaved: Bool = false
+
+    func loadSavedStatus(completion: @escaping () -> Void) {
+        guard let hotelId = hotel.id else {
+            print(" Hotel ID is nil")
+            completion()
+            return
+        }
+        FirebaseManager.shared.isHotelSaved(for: hotelId) { [weak self] result in
+            switch result {
+            case .success(let saved):
+                self?.isSaved = saved
+            case .failure(let error):
+                print(" Failed to load saved status:", error.localizedDescription)
+                self?.isSaved = false
+            }
+            completion()
+        }
+    }
+
+    func toggleSavedStatus(completion: @escaping () -> Void) {
+        guard let hotelId = hotel.id else {
+            print(" Hotel ID is nil")
+            completion()
+            return
+        }
+        FirebaseManager.shared.toggleSavedHotel(hotelId: hotelId, isCurrentlySaved: isSaved) { [weak self] result in
+            switch result {
+            case .success(let newState):
+                self?.isSaved = newState
+            case .failure(let error):
+                print(" Failed to toggle saved state:", error.localizedDescription)
+            }
+            completion()
+        }
     }
 }
 
