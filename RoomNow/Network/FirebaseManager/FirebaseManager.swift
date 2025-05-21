@@ -214,6 +214,51 @@ extension FirebaseManager: FirebaseManagerProtocol {
         }
     }
     
+    func saveHotel(_ hotel: SavedHotel, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "User not logged in", code: 401)))
+            return
+        }
+
+        do {
+            let data = try Firestore.Encoder().encode(hotel)
+            Firestore.firestore()
+                .collection("users")
+                .document(uid)
+                .collection("savedHotels")
+                .document(hotel.hotelId)
+                .setData(data, completion: { error in
+                    if let error = error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(()))
+                    }
+                })
+        } catch {
+            completion(.failure(error))
+        }
+    }
+
+    func deleteSavedHotel(hotelId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "User not logged in", code: 401)))
+            return
+        }
+
+        Firestore.firestore()
+            .collection("users")
+            .document(uid)
+            .collection("savedHotels")
+            .document(hotelId)
+            .delete { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
+            }
+    }
+
     
     
     
