@@ -174,14 +174,33 @@ final class HotelDetailVM: HotelDetailVMProtocol {
             completion()
             return
         }
-        FirebaseManager.shared.toggleSavedHotel(hotelId: hotelId, isCurrentlySaved: isSaved) { [weak self] result in
-            switch result {
-            case .success(let newState):
-                self?.isSaved = newState
-            case .failure(let error):
-                print(" Failed to toggle saved state:", error.localizedDescription)
+        
+        if isSaved {
+            FirebaseManager.shared.deleteSavedHotel(hotelId: hotelId) { [weak self] result in
+                if case .success = result {
+                    self?.isSaved = false
+                }
+                completion()
             }
-            completion()
+        } else {
+            let saved = SavedHotel(
+                hotelId: hotelId,
+                hotelName: hotel.name,
+                savedAt: Date(),
+                checkInDate: searchParams.checkInDate,
+                checkOutDate: searchParams.checkOutDate,
+                guestCount: searchParams.guestCount,
+                roomCount: searchParams.roomCount,
+                selectedRoomNumber: cheapestRoom?.roomNumber
+            )
+            
+            FirebaseManager.shared.saveHotel(saved) { [weak self] result in
+                if case .success = result {
+                    self?.isSaved = true
+                }
+                completion()
+            }
+            
         }
     }
 }
