@@ -69,10 +69,11 @@ final class HotelCell: UICollectionViewCell {
         
         saveButton.setImage(UIImage(systemName: "heart"), for: .normal)
         saveButton.tintColor = .appPrimaryText
-        saveButton.isUserInteractionEnabled = false
+        saveButton.isUserInteractionEnabled = true
         saveButton.setContentHuggingPriority(.required, for: .horizontal)
         saveButton.setContentCompressionResistancePriority(.required, for: .horizontal)
-        
+        saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+
         let stackView = UIStackView(arrangedSubviews: [hotelNameLabel, ratingLabel, locationLabel, roomTypeLabel, roomBedLabel, priceLabel, infoLabel])
         stackView.axis = .vertical
         stackView.spacing = 8
@@ -131,7 +132,7 @@ final class HotelCell: UICollectionViewCell {
                                           range: NSRange(location: baseText.count, length: typeNameText.count))
             
             roomTypeLabel.attributedText = attributedString
-            let guests = String(repeating: "👤", count: cheapest.room.bedCapacity)
+           // let guests = String(repeating: "👤", count: cheapest.room.bedCapacity)
            // roomBedLabel.text = "\(guests)"
             priceLabel.text = "₺\(Int(cheapest.room.price))"
             
@@ -152,5 +153,9 @@ final class HotelCell: UICollectionViewCell {
             }
             infoLabel.text = "No prepayment needed\nFree cancellation"
         }
+    }
+    
+    @objc private func saveButtonTapped() {
+        print("tapped")
     }
 }
