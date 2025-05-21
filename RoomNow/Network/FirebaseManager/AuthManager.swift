@@ -134,45 +134,8 @@ final class AuthManager {
         }
     }
 
-
     
-    func updateProfileImage(base64String: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let uid = currentUser?.uid else {
-            completion(.failure(NSError(domain: "", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])))
-            return
-        }
 
-        let db = Firestore.firestore()
-        db.collection("users").document(uid).updateData([
-            "profileImageBase64": base64String
-        ]) { error in
-            if let error = error {
-                completion(.failure(error))
-            } else {
-                completion(.success(()))
-            }
-        }
-    }
-    
-    func updateUserData(_ user: AppUser, completion: @escaping (Result<Void, Error>) -> Void) {
-        let db = Firestore.firestore()
-        
-        let updatedData: [String: Any] = [
-            "username": user.username,
-            "gender": user.gender,
-            "dateOfBirth": user.dateOfBirth,
-            "email": user.email,
-            "profileImageUrl": user.profileImageUrl ?? ""
-        ]
-        
-        db.collection("users").document(user.uid).updateData(updatedData) { error in
-            if let error = error {
-                completion(.failure(error))
-            } else {
-                completion(.success(()))
-            }
-        }
-    }
 
 }
 
