@@ -17,7 +17,7 @@ final class AuthManager {
         return Auth.auth().currentUser
     }
 
-    func register(email: String, password: String, username: String, dateOfBirth: String, gender: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    func register(email: String, password: String, username: String, dateOfBirth: String, gender: String, profileImageBase64: String? = nil, completion: @escaping (Result<Void, Error>) -> Void) {
         Auth.auth().createUser(withEmail: email, password: password) { result, error in
             if let error = error {
                 completion(.failure(error))
@@ -35,43 +35,32 @@ final class AuthManager {
                 username: username,
                 dateOfBirth: dateOfBirth,
                 gender: gender,
+                profileImageBase64: profileImageBase64,
                 completion: completion
             )
         }
     }
     
-    private func createUserDocument(for user: User, email: String, username: String, dateOfBirth: String, gender: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    private func createUserDocument( for user: User, email: String, username: String, dateOfBirth: String, gender: String, profileImageBase64: String? = nil, completion: @escaping (Result<Void, Error>) -> Void) {
         let db = Firestore.firestore()
-        let userData: [String: Any] = [
+        
+        var userData: [String: Any] = [
             "email": email,
             "username": username,
             "dateOfBirth": dateOfBirth,
             "gender": gender,
             "createdAt": FieldValue.serverTimestamp()
         ]
+        
+        if let base64 = profileImageBase64 {
+            userData["profileImageBase64"] = base64
+        }
 
         db.collection("users").document(user.uid).setData(userData) { error in
             if let error = error {
                 completion(.failure(error))
             } else {
                 completion(.success(()))
-            }
-        }
-    }
-    
-    func fetchUserData(completion: @escaping (Result<[String: Any], Error>) -> Void) {
-        guard let uid = currentUser?.uid else {
-            completion(.failure(NSError(domain: "No user ID", code: -1)))
-            return
-        }
-        let db = Firestore.firestore()
-        db.collection("users").document(uid).getDocument { snapshot, error in
-            if let error = error {
-                completion(.failure(error))
-            } else if let data = snapshot?.data() {
-                completion(.success(data))
-            } else {
-                completion(.failure(NSError(domain: "No user data found", code: -1)))
             }
         }
     }
@@ -110,5 +99,80 @@ final class AuthManager {
             callback(user)
         }
     }
+    
+    func fetchUserData(completion: @escaping (Result<AppUser, Error>) -> Void) {
+        guard let uid = currentUser?.uid else {
+            completion(.failure(NSError(domain: "No user ID", code: -1)))
+            return
+        }
+
+        let db = Firestore.firestore()
+        db.collection("users").document(uid).getDocument { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard var data = snapshot?.data() else {
+                completion(.failure(NSError(domain: "No user data found", code: -1)))
+                return
+            }
+
+            // Add UID to data
+            data["uid"] = uid
+
+            // ✅ Remove 'createdAt' if not needed
+            data.removeValue(forKey: "createdAt")
+
+            do {
+                let jsonData = try JSONSerialization.data(withJSONObject: data)
+                let user = try JSONDecoder().decode(AppUser.self, from: jsonData)
+                completion(.success(user))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+
+
+    
+    func updateProfileImage(base64String: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let uid = currentUser?.uid else {
+            completion(.failure(NSError(domain: "", code: 401, userInfo: [NSLocalizedDescriptionKey: "User not logged in"])))
+            return
+        }
+
+        let db = Firestore.firestore()
+        db.collection("users").document(uid).updateData([
+            "profileImageBase64": base64String
+        ]) { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+    
+    func updateUserData(_ user: AppUser, completion: @escaping (Result<Void, Error>) -> Void) {
+        let db = Firestore.firestore()
+        
+        let updatedData: [String: Any] = [
+            "username": user.username,
+            "gender": user.gender,
+            "dateOfBirth": user.dateOfBirth,
+            "email": user.email,
+            "profileImageUrl": user.profileImageUrl ?? ""
+        ]
+        
+        db.collection("users").document(user.uid).updateData(updatedData) { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
 }
 
