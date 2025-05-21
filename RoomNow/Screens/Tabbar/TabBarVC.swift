@@ -33,7 +33,7 @@ final class TabBarVC: UITabBarController {
         if isLoggedIn {
             accountVC = UINavigationController(rootViewController: ProfileVC())
             accountVC.title = "Profile"
-            accountVC.tabBarItem.image = UIImage(systemName: "person.fill")
+            accountVC.tabBarItem.image = UIImage(systemName: "person.circle.fill")
         } else {
             accountVC = UINavigationController(rootViewController: LoginVC())
             accountVC.title = "Login"
