@@ -117,7 +117,6 @@ extension FirebaseManager: FirebaseManagerProtocol {
             for document in documents {
                 var data = document.data()
 
-                // Convert FIRTimestamp to ISO8601 string
                 data = self.convertTimestampsToString(in: data)
 
                 data["id"] = document.documentID
@@ -160,6 +159,16 @@ extension FirebaseManager: FirebaseManagerProtocol {
         }
         return result
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     func uploadHotelsToFirestore() {
         let db = Firestore.firestore()
@@ -206,7 +215,6 @@ extension FirebaseManager: FirebaseManagerProtocol {
         }
     }
 
-    
     func loadHotelJSON() -> [[String: Any]]? {
         guard let url = Bundle.main.url(forResource: "antalya_hotels_dual_roomtypes", withExtension: "json"),
               let data = try? Data(contentsOf: url),
