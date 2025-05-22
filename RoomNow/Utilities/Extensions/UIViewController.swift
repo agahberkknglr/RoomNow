@@ -7,6 +7,8 @@
 
 import UIKit
 
+private var loadingIndicatorKey: UInt8 = 0
+
 extension UIViewController {
 
     func setNavigation(title: String, rightButtons: [UIBarButtonItem] = []) {
@@ -58,5 +60,32 @@ extension UIViewController {
         alert.addAction(cancel)
 
         present(alert, animated: true)
+    }
+    
+    private var loadingIndicator: UIActivityIndicatorView {
+        if let existing = objc_getAssociatedObject(self, &loadingIndicatorKey) as? UIActivityIndicatorView {
+            return existing
+        }
+
+        let spinner = UIActivityIndicatorView(style: .large)
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        spinner.hidesWhenStopped = true
+
+        view.addSubview(spinner)
+        NSLayoutConstraint.activate([
+            spinner.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            spinner.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+
+        objc_setAssociatedObject(self, &loadingIndicatorKey, spinner, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        return spinner
+    }
+
+    func showLoadingIndicator() {
+        loadingIndicator.startAnimating()
+    }
+
+    func hideLoadingIndicator() {
+        loadingIndicator.stopAnimating()
     }
 }
