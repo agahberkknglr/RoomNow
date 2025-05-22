@@ -88,7 +88,7 @@ extension ResultVC: ResultVCProtocol {
     private func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
-        layout.itemSize = CGSize(width: view.frame.width - 40, height: 250)
+        layout.itemSize = CGSize(width: view.frame.width - 40, height: 230)
         layout.minimumLineSpacing = 16
         
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -101,7 +101,7 @@ extension ResultVC: ResultVCProtocol {
         
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)

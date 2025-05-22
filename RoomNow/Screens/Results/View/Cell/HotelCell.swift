@@ -14,7 +14,9 @@ final class HotelCell: UICollectionViewCell {
     private let hotelImageView = UIImageView()
     private let hotelNameLabel = UILabel()
     private let ratingLabel = UILabel()
+    private let ratingImage = UIImageView()
     private let locationLabel = UILabel()
+    private let locationImage = UIImageView()
     private let priceLabel = UILabel()
     private let roomTypeLabel = UILabel()
     private let roomBedLabel = UILabel()
@@ -45,8 +47,20 @@ final class HotelCell: UICollectionViewCell {
         hotelNameLabel.textColor = .appPrimaryText
         hotelNameLabel.numberOfLines = 2
         
+        ratingImage.contentMode = .scaleAspectFit
+        ratingImage.image = UIImage(systemName: "star.fill")
+        ratingImage.layer.cornerRadius = 12
+        ratingImage.clipsToBounds = true
+        ratingImage.tintColor = .appAccent
+        
         ratingLabel.font = .systemFont(ofSize: 14)
         ratingLabel.textColor = .appPrimaryText
+        
+        locationImage.contentMode = .scaleAspectFit
+        locationImage.image = UIImage(systemName: "mappin")
+        locationImage.layer.cornerRadius = 12
+        locationImage.clipsToBounds = true
+        locationImage.tintColor = .appAccent
         
         locationLabel.font = .systemFont(ofSize: 14)
         locationLabel.textColor = .appPrimaryText
@@ -66,15 +80,22 @@ final class HotelCell: UICollectionViewCell {
         infoLabel.textColor = .appSecondaryText
         infoLabel.numberOfLines = 2
         
-        
         saveButton.setImage(UIImage(systemName: "heart"), for: .normal)
-        saveButton.tintColor = .appPrimaryText
+        saveButton.tintColor = .appAccent
         saveButton.isUserInteractionEnabled = true
         saveButton.setContentHuggingPriority(.required, for: .horizontal)
         saveButton.setContentCompressionResistancePriority(.required, for: .horizontal)
         saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+        
+        let ratStack = UIStackView(arrangedSubviews: [ratingImage, ratingLabel])
+        ratStack.axis = .horizontal
+        ratStack.spacing = 4
+        
+        let locStack = UIStackView(arrangedSubviews: [locationImage, locationLabel])
+        locStack.axis = .horizontal
+        locStack.spacing = 4
 
-        let stackView = UIStackView(arrangedSubviews: [hotelNameLabel, ratingLabel, locationLabel, roomTypeLabel, roomBedLabel, priceLabel, infoLabel])
+        let stackView = UIStackView(arrangedSubviews: [hotelNameLabel, ratStack, locStack, roomTypeLabel, roomBedLabel, priceLabel, infoLabel])
         stackView.axis = .vertical
         stackView.spacing = 8
         
@@ -90,7 +111,13 @@ final class HotelCell: UICollectionViewCell {
             hotelImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             hotelImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor,constant: 8),
             hotelImageView.widthAnchor.constraint(equalToConstant: 120),
-            hotelImageView.heightAnchor.constraint(equalToConstant: 230),
+            hotelImageView.heightAnchor.constraint(equalToConstant: 210),
+            
+            ratingImage.heightAnchor.constraint(equalToConstant: 24),
+            ratingImage.widthAnchor.constraint(equalToConstant: 24),
+            
+            locationImage.widthAnchor.constraint(equalToConstant: 24),
+            locationImage.widthAnchor.constraint(equalToConstant: 24),
             
             saveButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             saveButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
@@ -109,7 +136,7 @@ final class HotelCell: UICollectionViewCell {
 
         hotelNameLabel.text = viewModel.hotelName
         ratingLabel.text = viewModel.hotelRatingText
-        locationLabel.text = "📍 \(viewModel.hotelLocation)"
+        locationLabel.text = "\(viewModel.hotelLocation)"
 
         if let cheapest = viewModel.cheapestAvailableRoom {
             let baseText = "Hotel room: "
