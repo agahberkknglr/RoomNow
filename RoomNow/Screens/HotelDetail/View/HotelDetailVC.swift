@@ -55,9 +55,13 @@ extension HotelDetailVC: HotelDetailVCProtocol {
 
     
     @objc private func heartTapped() {
-        viewModel.toggleSavedStatus { [weak self] in
-            DispatchQueue.main.async {
-                self?.updateHeartIcon()
+        if viewModel.isSaved {
+            showUnsaveConfirmation()
+        } else {
+            viewModel.toggleSavedStatus { [weak self] in
+                DispatchQueue.main.async {
+                    self?.updateHeartIcon()
+                }
             }
         }
     }
@@ -65,6 +69,26 @@ extension HotelDetailVC: HotelDetailVCProtocol {
     private func updateHeartIcon() {
         let iconName = viewModel.isSaved ? "heart.fill" : "heart"
         navigationItem.rightBarButtonItem?.image = UIImage(systemName: iconName)
+    }
+    
+    private func showUnsaveConfirmation() {
+        let alert = UIAlertController(
+            title: "Remove Hotel",
+            message: "Are you sure you want to remove this hotel from your saved list?",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+        alert.addAction(UIAlertAction(title: "Remove", style: .destructive, handler: { [weak self] _ in
+            self?.viewModel.toggleSavedStatus {
+                DispatchQueue.main.async {
+                    self?.updateHeartIcon()
+                }
+            }
+        }))
+
+        present(alert, animated: true)
     }
     
     func setupTableView() {
@@ -233,21 +257,16 @@ extension HotelDetailVC: UITableViewDelegate {
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        // Get section 0's rect
         let sectionRect = tableView.rect(forSection: 0)
-
-        // Convert to the view's coordinate space
         let frameInView = tableView.convert(sectionRect, to: view)
-
-        // Decide a threshold — let's say halfway off the screen
         let threshold = -sectionRect.height / 4
 
         if frameInView.origin.y <= threshold && !didHideTitle {
             didHideTitle = true
-            navigationItem.title = viewModel.hotelName.capitalized // Replace with dynamic hotel name if needed
+            navigationItem.title = viewModel.hotelName.capitalized
         } else if frameInView.origin.y > threshold && didHideTitle {
             didHideTitle = false
-            navigationItem.title = "" // or nil, or initial title
+            navigationItem.title = ""
         }
     }
 }
