@@ -17,4 +17,15 @@ extension UIView {
             bottomAnchor.constraint(equalTo: superview.bottomAnchor, constant: -insets.bottom)
         ])
     }
+    
+    func findViewController() -> UIViewController? {
+        var responder: UIResponder? = self
+        while let next = responder?.next {
+            if let vc = next as? UIViewController {
+                return vc
+            }
+            responder = next
+        }
+        return nil
+    }
 }
