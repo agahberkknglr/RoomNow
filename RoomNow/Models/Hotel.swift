@@ -52,3 +52,19 @@ extension HotelRoom {
         return true
     }
 }
+
+extension Hotel {
+    static func mockFromSaved(_ saved: SavedHotel) -> Hotel {
+        return Hotel(
+            id: saved.hotelId,
+            name: saved.hotelName,
+            city: saved.city,
+            rating: 4.5,
+            location: "",
+            description: "",
+            imageUrls: [],
+            amenities: [],
+            roomTypes: []
+        )
+    }
+}
