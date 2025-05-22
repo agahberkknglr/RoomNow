@@ -101,10 +101,9 @@ extension SavedVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let city = viewModel.cityNames[indexPath.row]
         let hotels = viewModel.hotels(for: city)
-        print(city)
-        print(hotels[0].hotelName)
-        //let hotelListVC = SavedHotelVC(city: city, hotels: hotels)
-        //navigationController?.pushViewController(hotelListVC, animated: true)
+        let hotelListVC = SavedHotelsVC(city: city, hotels: hotels)
+        hotelListVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(hotelListVC, animated: true)
     }
 }
 
