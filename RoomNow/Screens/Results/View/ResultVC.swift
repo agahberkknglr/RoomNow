@@ -90,7 +90,7 @@ extension ResultVC: ResultVCProtocol {
         layout.minimumLineSpacing = 16
         
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.register(HotelCell.self, forCellWithReuseIdentifier: HotelCell.identifier)
+        collectionView.register(HotelCell.self)
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.backgroundColor = view.backgroundColor
@@ -123,12 +123,12 @@ extension ResultVC: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: HotelCell.identifier, for: indexPath) as? HotelCell else {
-            return UICollectionViewCell()
-        }
-        
+        let cell = collectionView.dequeue(HotelCell.self, for: indexPath)
         let hotel = viewModel.hotels[indexPath.item]
-        cell.configure(with: hotel, searchParams: viewModel.searchParameters)
+        let viewModel = HotelCellVM(hotel: hotel, searchParams: viewModel.searchParameters)
+        cell.configure(with: viewModel)
+
+        //cell.configure(with: hotel, searchParams: viewModel.searchParameters)
         return cell
     }
 }
