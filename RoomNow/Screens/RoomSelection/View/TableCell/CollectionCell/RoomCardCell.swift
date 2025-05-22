@@ -8,6 +8,9 @@
 import UIKit
 
 final class RoomCardCell: UICollectionViewCell {
+    
+    var onSelectTapped: (() -> Void)?
+    private var currentRoom: HotelRoom?
 
     private let titleLabel = UILabel()
     private let bedsLabel = UILabel()
@@ -88,7 +91,9 @@ final class RoomCardCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(with room: HotelRoom, forNights nights: Int, startDate: Date, endDate: Date) {
+    func configure(with room: HotelRoom, forNights nights: Int, startDate: Date, endDate: Date, isSelected: Bool) {
+        currentRoom = room
+        
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d"
         formatter.timeZone = TimeZone(identifier: "Europe/Istanbul")
@@ -104,9 +109,15 @@ final class RoomCardCell: UICollectionViewCell {
         dateLabel.text = "Price for \(nights) night\(nights > 1 ? "s" : "") (\(start) - \(end))"
         let totalPrice = Int(room.price) * nights
         priceLabel.text = "₺\(Int(totalPrice))"
+        
+        selectButton.setTitle(isSelected ? "Selected" : "Select", for: .normal)
+        cardView.layer.borderColor = isSelected ? UIColor.appAccent.cgColor : UIColor.clear.cgColor
+        cardView.layer.borderWidth = isSelected ? 2 : 0
     }
     
     @objc private func selectButtonTapped() {
-        print("Select button tapped for room card.")
+        print(" Button tapped")
+
+        onSelectTapped?()
     }
 }

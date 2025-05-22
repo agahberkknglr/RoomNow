@@ -7,11 +7,18 @@
 
 import UIKit
 
+protocol RoomTypeCellDelegate: AnyObject {
+    func didSelectRoom(_ room: HotelRoom)
+}
+
 final class RoomTypeCell: UITableViewCell {
+
+    weak var delegate: RoomTypeCellDelegate?
 
     private let titleLabel = UILabel()
     private var collectionView: UICollectionView
     private var rooms: [HotelRoom] = []
+    private var selectedRooms: [HotelRoom] = []
     private var nights: Int = 1
     private var startDate: Date?
     private var endDate: Date?
@@ -54,9 +61,10 @@ final class RoomTypeCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(typeName: String, rooms: [HotelRoom], forNights: Int, startDate: Date, endDate: Date) {
+    func configure(typeName: String, rooms: [HotelRoom], selectedRooms: [HotelRoom], forNights: Int, startDate: Date, endDate: Date) {
         self.titleLabel.text = typeName.capitalized
         self.rooms = rooms
+        self.selectedRooms = selectedRooms
         self.nights = forNights
         self.startDate = startDate
         self.endDate = endDate
@@ -74,7 +82,16 @@ extension RoomTypeCell: UICollectionViewDataSource {
         guard let start = startDate, let end = endDate else {
             return cell
         }
-        cell.configure(with: rooms[indexPath.item], forNights: nights, startDate: start, endDate: end)
+        let room = rooms[indexPath.item]
+        let isSelected = selectedRooms.contains(where: { $0.roomNumber == room.roomNumber })
+
+        cell.configure(with: rooms[indexPath.item], forNights: nights, startDate: start, endDate: end, isSelected: isSelected)
+        cell.onSelectTapped = { [weak self] in
+            let room = self?.rooms[indexPath.item]
+            if let room = room {
+                self?.delegate?.didSelectRoom(room)
+            }
+        }
         return cell
     }
 }

@@ -16,7 +16,13 @@ protocol RoomSelectionVMProtocol {
     var guestCount: Int { get }
     var roomCount: Int { get }
     var hotel: Hotel { get }
+    
+    var selectedRooms: [HotelRoom] { get }
+    var isSelectionComplete: Bool { get }
+    
     func filterAvailableRooms()
+    func toggleSelection(for room: HotelRoom)
+    func isRoomSelected(_ room: HotelRoom) -> Bool
 }
 
 final class RoomSelectionVM: RoomSelectionVMProtocol {
@@ -25,6 +31,7 @@ final class RoomSelectionVM: RoomSelectionVMProtocol {
     private let searchParams: HotelSearchParameters
     
     private(set) var availableRooms: [RoomType] = []
+    private(set) var selectedRooms: [HotelRoom] = []
     
     var hotelName: String { hotel.name }
 
@@ -55,5 +62,22 @@ final class RoomSelectionVM: RoomSelectionVMProtocol {
             }
             return filtered.isEmpty ? nil : RoomType(typeName: type.typeName, rooms: filtered)
         }
+    }
+    
+    func toggleSelection(for room: HotelRoom) {
+        if let index = selectedRooms.firstIndex(where: { $0.roomNumber == room.roomNumber }) {
+            selectedRooms.remove(at: index)
+        } else {
+            guard selectedRooms.count < roomCount else { return }
+            selectedRooms.append(room)
+        }
+    }
+
+    func isRoomSelected(_ room: HotelRoom) -> Bool {
+        selectedRooms.contains(where: { $0.roomNumber == room.roomNumber })
+    }
+
+    var isSelectionComplete: Bool {
+        selectedRooms.count == roomCount
     }
 }
