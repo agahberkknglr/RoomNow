@@ -281,6 +281,19 @@ extension FirebaseManager: FirebaseManagerProtocol {
             }
     }
     
+    func fetchHotel(by id: String, completion: @escaping (Result<Hotel, Error>) -> Void) {
+        Firestore.firestore().collection("hotels").document(id).getDocument { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+            } else if let snapshot = snapshot, snapshot.exists,
+                      let data = try? snapshot.data(as: Hotel.self) {
+                completion(.success(data))
+            } else {
+                completion(.failure(NSError(domain: "Hotel not found", code: 404)))
+            }
+        }
+    }
+    
     
     
     
