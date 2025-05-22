@@ -17,7 +17,13 @@ final class SavedHotelCell: UICollectionViewCell {
     private let priceLabel = UILabel()
     private let imageView = UIImageView()
     private let saveButton = UIButton()
-        
+    
+    private let cityImage = UIImageView()
+    private let dateImage = UIImageView()
+    private let roomImage = UIImageView()
+    private let guestImage = UIImageView()
+    private let nightImage = UIImageView()
+    
     var onSaveTapped: (() -> Void)?
 
     override init(frame: CGRect) {
@@ -30,10 +36,10 @@ final class SavedHotelCell: UICollectionViewCell {
     }
 
     private func setupUI() {
-        contentView.layer.cornerRadius = 12
-        contentView.layer.borderWidth = 1
-        contentView.layer.borderColor = UIColor.appDivider.cgColor
-        contentView.clipsToBounds = true
+        //contentView.layer.cornerRadius = 12
+        //contentView.layer.borderWidth = 1
+        //contentView.layer.borderColor = UIColor.appDivider.cgColor
+        //contentView.clipsToBounds = true
         contentView.backgroundColor = .appBackground
 
         nameLabel.font = .boldSystemFont(ofSize: 18)
@@ -42,18 +48,38 @@ final class SavedHotelCell: UICollectionViewCell {
 
         cityLabel.font = .systemFont(ofSize: 14)
         cityLabel.textColor = .appPrimaryText
+        
+        cityImage.image = UIImage(systemName: "mappin")
+        cityImage.contentMode = .scaleAspectFit
+        cityImage.tintColor = .appAccent
 
         dateLabel.font = .systemFont(ofSize: 14)
         dateLabel.textColor = .appPrimaryText
         
+        dateImage.image = UIImage(systemName: "calendar")
+        dateImage.contentMode = .scaleAspectFit
+        dateImage.tintColor = .appAccent
+        
         guestLabel.font = .systemFont(ofSize: 14)
         guestLabel.textColor = .appPrimaryText
+        
+        guestImage.image = UIImage(systemName: "person.crop.circle")
+        guestImage.contentMode = .scaleAspectFit
+        guestImage.tintColor = .appAccent
         
         roomLabel.font = .systemFont(ofSize: 14)
         roomLabel.textColor = .appPrimaryText
         
+        roomImage.image = UIImage(systemName: "bed.double.fill")
+        roomImage.contentMode = .scaleAspectFit
+        roomImage.tintColor = .appAccent
+        
         priceLabel.font = .systemFont(ofSize: 14)
         priceLabel.textColor = .appPrimaryText
+        
+        nightImage.image = UIImage(systemName: "moon.stars")
+        nightImage.contentMode = .scaleAspectFit
+        nightImage.tintColor = .appAccent
 
         imageView.image = UIImage(named: "hotelph")
         imageView.contentMode = .scaleAspectFill
@@ -66,8 +92,28 @@ final class SavedHotelCell: UICollectionViewCell {
         saveButton.setContentHuggingPriority(.required, for: .horizontal)
         saveButton.setContentCompressionResistancePriority(.required, for: .horizontal)
         saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+        
+        let cityStack = UIStackView(arrangedSubviews: [cityImage, cityLabel])
+        cityStack.axis = .horizontal
+        cityStack.spacing = 4
+        
+        let dateStack = UIStackView(arrangedSubviews: [dateImage, dateLabel])
+        dateStack.axis = .horizontal
+        dateStack.spacing = 4
+        
+        let roomStack = UIStackView(arrangedSubviews: [roomImage, roomLabel])
+        roomStack.axis = .horizontal
+        roomStack.spacing = 4
+        
+        let guestStack = UIStackView(arrangedSubviews: [guestImage, guestLabel])
+        guestStack.axis = .horizontal
+        guestStack.spacing = 4
+        
+        let nightStack = UIStackView(arrangedSubviews: [nightImage, priceLabel])
+        nightStack.axis = .horizontal
+        nightStack.spacing = 4
 
-        let stackView = UIStackView(arrangedSubviews: [nameLabel, cityLabel, dateLabel, roomLabel, guestLabel, priceLabel])
+        let stackView = UIStackView(arrangedSubviews: [nameLabel, cityStack, dateStack, roomStack, guestStack, nightStack])
         stackView.axis = .vertical
         stackView.spacing = 8
         contentView.addSubview(stackView)
@@ -83,6 +129,17 @@ final class SavedHotelCell: UICollectionViewCell {
             imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor,constant: 8),
             imageView.widthAnchor.constraint(equalToConstant: 120),
             imageView.heightAnchor.constraint(equalToConstant: 180),
+            
+            cityImage.widthAnchor.constraint(equalToConstant: 24),
+            cityImage.heightAnchor.constraint(equalToConstant: 24),
+            dateImage.widthAnchor.constraint(equalToConstant: 24),
+            dateImage.heightAnchor.constraint(equalToConstant: 24),
+            roomImage.widthAnchor.constraint(equalToConstant: 24),
+            roomImage.heightAnchor.constraint(equalToConstant: 24),
+            guestImage.widthAnchor.constraint(equalToConstant: 24),
+            guestImage.heightAnchor.constraint(equalToConstant: 24),
+            nightImage.widthAnchor.constraint(equalToConstant: 24),
+            nightImage.heightAnchor.constraint(equalToConstant: 24),
             
             saveButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             saveButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
@@ -102,7 +159,7 @@ final class SavedHotelCell: UICollectionViewCell {
         roomLabel.text = "\(saved.roomCount) \(saved.roomCount == 1 ? "room" : "rooms")"
         guestLabel.text = "\(saved.guestCount) \(saved.guestCount == 1 ? "guest" : "guests")"
         priceLabel.text = "\(saved.numberOfNights) nights: ₺\(saved.totalPrice)"
-        cityLabel.text = "\(saved.city.capitalized) – \(saved.location)"
+        cityLabel.text = "\(saved.city.capitalized), \(saved.location)"
 
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d"
