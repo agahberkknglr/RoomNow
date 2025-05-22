@@ -68,6 +68,7 @@ final class HotelCellVM {
             let saved = SavedHotel(
                 hotelId: hotelId,
                 hotelName: hotel.name,
+                city: hotel.city,
                 savedAt: Date(),
                 checkInDate: searchParams.checkInDate,
                 checkOutDate: searchParams.checkOutDate,
