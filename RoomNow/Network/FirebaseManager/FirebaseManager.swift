@@ -259,7 +259,27 @@ extension FirebaseManager: FirebaseManagerProtocol {
             }
     }
 
-    
+    func fetchSavedHotels(completion: @escaping (Result<[SavedHotel], Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "Not logged in", code: 401)))
+            return
+        }
+
+        Firestore.firestore()
+            .collection("users")
+            .document(uid)
+            .collection("savedHotels")
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                } else if let docs = snapshot?.documents {
+                    let hotels = docs.compactMap { try? $0.data(as: SavedHotel.self) }
+                    completion(.success(hotels))
+                } else {
+                    completion(.success([]))
+                }
+            }
+    }
     
     
     
