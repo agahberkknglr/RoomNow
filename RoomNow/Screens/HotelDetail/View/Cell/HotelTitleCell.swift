@@ -13,6 +13,7 @@ final class HotelTitleCell: UITableViewCell {
     private let nameLabel = UILabel()
     private let locationLabel = UILabel()
     private let ratingLabel = UILabel()
+    private let ratingImage = UIImageView()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -35,9 +36,14 @@ final class HotelTitleCell: UITableViewCell {
         vstack.spacing = 4
         vstack.translatesAutoresizingMaskIntoConstraints = false
         
-        let hstack = UIStackView(arrangedSubviews: [vstack, ratingLabel])
+        let ratStack = UIStackView(arrangedSubviews: [ratingImage, ratingLabel])
+        ratStack.axis = .horizontal
+        ratStack.spacing = 4
+        
+        let hstack = UIStackView(arrangedSubviews: [vstack, ratStack])
         hstack.axis = .horizontal
         hstack.spacing = 4
+        hstack.distribution = .equalSpacing
         hstack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(hstack)
 
@@ -47,8 +53,13 @@ final class HotelTitleCell: UITableViewCell {
         nameLabel.textColor = .appPrimaryText
         nameLabel.numberOfLines = 2
         locationLabel.textColor = .appSecondaryText
-        ratingLabel.textColor = .systemYellow
-        ratingLabel.textAlignment = .right
+        ratingLabel.textColor = .appAccent
+        ratingLabel.textAlignment = .left
+        ratingImage.contentMode = .scaleAspectFit
+        ratingImage.image = UIImage(systemName: "star.fill")
+        ratingImage.layer.cornerRadius = 12
+        ratingImage.clipsToBounds = true
+        ratingImage.tintColor = .appAccent
     }
 
     func configure(name: String, location: String, rating: String) {
