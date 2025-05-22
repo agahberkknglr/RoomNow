@@ -12,10 +12,26 @@ final class SavedVC: UIViewController {
     private let viewModel = SavedVM()
 
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
+    private let emptyView: UILabel = {
+        let label = UILabel()
+        label.text = "You haven't saved any hotels yet."
+        label.textAlignment = .center
+        label.textColor = .secondaryLabel
+        label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.isHidden = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        fetchData()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         fetchData()
     }
 
@@ -31,21 +47,38 @@ final class SavedVC: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(tableView)
+        view.addSubview(emptyView)
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            emptyView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            emptyView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 32),
+            emptyView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -32)
         ])
     }
 
     private func fetchData() {
+        showLoadingIndicator()
+        emptyView.isHidden = true
+        tableView.isHidden = true
+        
         viewModel.fetchSavedData { [weak self] in
             DispatchQueue.main.async {
-                self?.tableView.reloadData()
+                guard let self = self else { return }
+                self.hideLoadingIndicator()
+
+                let hasData = !self.viewModel.cityNames.isEmpty
+                self.tableView.isHidden = !hasData
+                self.emptyView.isHidden = hasData
+                self.tableView.reloadData()
             }
         }
     }
+
 }
 
 // MARK: - TableView DataSource
