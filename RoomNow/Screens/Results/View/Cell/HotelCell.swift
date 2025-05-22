@@ -9,7 +9,7 @@ import UIKit
 
 final class HotelCell: UICollectionViewCell {
     
-    static let identifier = "HotelCell"
+    private var viewModel: HotelCellVM?
     
     private let hotelImageView = UIImageView()
     private let hotelNameLabel = UILabel()
@@ -104,41 +104,25 @@ final class HotelCell: UICollectionViewCell {
         ])
     }
     
-    func configure(with hotel: Hotel, searchParams: HotelSearchParameters) {
-        hotelNameLabel.text = hotel.name
-        ratingLabel.text = "⭐️ \(hotel.rating)"
-        locationLabel.text = "📍 \(hotel.location)"
-        
-        let availableRooms = hotel.roomTypes.flatMap { type in
-            type.rooms.map { room in (typeName: type.typeName, room: room) }
-        }.filter {
-            $0.room.bedCapacity >= searchParams.guestCount &&
-            $0.room.isAvailable(for: searchParams.checkInDate, checkOut: searchParams.checkOutDate)
-        }
-        
-        
-        if let cheapest = availableRooms.min(by: { $0.room.price < $1.room.price }) {
+    func configure(with viewModel: HotelCellVM) {
+        self.viewModel = viewModel
+
+        hotelNameLabel.text = viewModel.hotelName
+        ratingLabel.text = viewModel.hotelRatingText
+        locationLabel.text = "📍 \(viewModel.hotelLocation)"
+
+        if let cheapest = viewModel.cheapestAvailableRoom {
             let baseText = "Hotel room: "
             let typeNameText = cheapest.typeName.capitalized
             let fullText = baseText + typeNameText
-            let attributedString = NSMutableAttributedString(string: fullText)
-            
-            attributedString.addAttribute(.font,
-                                          value: UIFont.boldSystemFont(ofSize: 14),
-                                          range: NSRange(location: 0, length: baseText.count))
-            
-            attributedString.addAttribute(.font,
-                                          value: UIFont.systemFont(ofSize: 14),
-                                          range: NSRange(location: baseText.count, length: typeNameText.count))
-            
-            roomTypeLabel.attributedText = attributedString
-           // let guests = String(repeating: "👤", count: cheapest.room.bedCapacity)
-           // roomBedLabel.text = "\(guests)"
-            priceLabel.text = "₺\(Int(cheapest.room.price))"
-            
-            let nights = Calendar.current.dateComponents([.day], from: searchParams.checkInDate, to: searchParams.checkOutDate).day ?? 1
-            let perNightPrice = Int(cheapest.room.price)
-            let totalPrice = perNightPrice * nights
+            let attributed = NSMutableAttributedString(string: fullText)
+
+            attributed.addAttribute(NSAttributedString.Key.font, value: UIFont.boldSystemFont(ofSize: 14), range: NSRange(location: 0, length: baseText.count))
+            attributed.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: 14), range: NSRange(location: baseText.count, length: typeNameText.count))
+            roomTypeLabel.attributedText = attributed
+
+            let nights = Calendar.current.dateComponents([.day], from: viewModel.checkInDate, to: viewModel.checkOutDate).day ?? 1
+            let totalPrice = nights * Int(cheapest.room.price)
 
             if nights > 1 {
                 priceLabel.setMixedStyleText(
@@ -147,15 +131,60 @@ final class HotelCell: UICollectionViewCell {
                     prefixFont: .systemFont(ofSize: 12),
                     suffixFont: .boldSystemFont(ofSize: 16),
                     prefixColor: .appSecondaryText,
-                    suffixColor: .appPrimaryText )}
-            else {
-                priceLabel.text = "₺\(perNightPrice)"
+                    suffixColor: .appPrimaryText
+                )
+            } else {
+                priceLabel.text = "₺\(Int(cheapest.room.price))"
             }
+
             infoLabel.text = "No prepayment needed\nFree cancellation"
         }
+
+        viewModel.loadSavedStatus { [weak self] in
+            DispatchQueue.main.async {
+                self?.updateHeartIcon()
+            }
+        }
+    }
+
+    @objc private func saveButtonTapped() {
+        guard let viewModel = viewModel else { return }
+
+        if viewModel.isSaved {
+            showUnsaveConfirmation()
+        } else {
+            viewModel.toggleSaveStatus { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.updateHeartIcon()
+                }
+            }
+        }
+    }
+
+    private func updateHeartIcon() {
+        let iconName = viewModel?.isSaved == true ? "heart.fill" : "heart"
+        saveButton.setImage(UIImage(systemName: iconName), for: .normal)
     }
     
-    @objc private func saveButtonTapped() {
-        print("tapped")
+    private func showUnsaveConfirmation() {
+        guard let vc = self.findViewController() else { return }
+
+        let alert = UIAlertController(
+            title: "Remove Hotel",
+            message: "Are you sure you want to remove this hotel from your saved list?",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Remove", style: .destructive, handler: { [weak self] _ in
+            self?.viewModel?.toggleSaveStatus { isSaved in
+                DispatchQueue.main.async {
+                    self?.updateHeartIcon()
+                }
+            }
+        }))
+
+        vc.present(alert, animated: true)
     }
+
 }
