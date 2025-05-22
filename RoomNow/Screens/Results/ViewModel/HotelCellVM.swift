@@ -65,16 +65,26 @@ final class HotelCellVM {
                 completion(self?.isSaved ?? false)
             }
         } else {
+            let nights = Calendar.current.dateComponents([.day], from: checkInDate, to: checkOutDate).day ?? 1
+            guard let cheapest = cheapestAvailableRoom else {
+                completion(false)
+                return
+            }
+            let totalPrice = nights * Int(cheapest.room.price)
+
             let saved = SavedHotel(
                 hotelId: hotelId,
                 hotelName: hotel.name,
                 city: hotel.city,
+                location: hotel.location,
                 savedAt: Date(),
                 checkInDate: searchParams.checkInDate,
                 checkOutDate: searchParams.checkOutDate,
                 guestCount: searchParams.guestCount,
                 roomCount: searchParams.roomCount,
-                selectedRoomNumber: cheapestAvailableRoom?.room.roomNumber
+                selectedRoomNumber: cheapestAvailableRoom?.room.roomNumber,
+                totalPrice: totalPrice,
+                numberOfNights: nights
             )
 
             FirebaseManager.shared.saveHotel(saved) { [weak self] result in
