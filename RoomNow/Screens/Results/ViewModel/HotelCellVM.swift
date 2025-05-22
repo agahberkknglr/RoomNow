@@ -25,7 +25,7 @@ final class HotelCellVM {
     var hotelId: String? { hotel.id }
     var hotelName: String { hotel.name }
     var hotelLocation: String { hotel.location }
-    var hotelRatingText: String { "⭐️ \(hotel.rating)" }
+    var hotelRatingText: String { "\(hotel.rating)" }
 
     var cheapestAvailableRoom: (typeName: String, room: HotelRoom)? {
         return hotel.roomTypes
