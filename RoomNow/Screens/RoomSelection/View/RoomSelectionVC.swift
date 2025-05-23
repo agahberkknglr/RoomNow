@@ -27,7 +27,7 @@ final class RoomSelectionVC: UIViewController {
     init(hotel: Hotel, searchParams: HotelSearchParameters) {
         self.viewModel = RoomSelectionVM(hotel: hotel, searchParams: searchParams)
         super.init(nibName: nil, bundle: nil)
-        self.title = "Select a Room"
+        self.title = "Select Room"
     }
 
     required init?(coder: NSCoder) {
