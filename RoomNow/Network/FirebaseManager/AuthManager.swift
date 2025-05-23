@@ -16,7 +16,8 @@ final class AuthManager {
     var currentUser: User? {
         return Auth.auth().currentUser
     }
-
+    var currentAppUser: AppUser?
+    
     func register(email: String, password: String, username: String, dateOfBirth: String, gender: String, profileImageBase64: String? = nil, completion: @escaping (Result<Void, Error>) -> Void) {
         Auth.auth().createUser(withEmail: email, password: password) { result, error in
             if let error = error {
@@ -118,24 +119,17 @@ final class AuthManager {
                 return
             }
 
-            // Add UID to data
             data["uid"] = uid
-
-            // ✅ Remove 'createdAt' if not needed
             data.removeValue(forKey: "createdAt")
 
             do {
                 let jsonData = try JSONSerialization.data(withJSONObject: data)
                 let user = try JSONDecoder().decode(AppUser.self, from: jsonData)
+                self.currentAppUser = user
                 completion(.success(user))
             } catch {
                 completion(.failure(error))
             }
         }
     }
-
-    
-
-
 }
-
