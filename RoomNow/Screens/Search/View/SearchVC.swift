@@ -38,11 +38,7 @@ final class SearchVC: UIViewController {
         dateButton.addTarget(self, action: #selector(openDateSheet), for: .touchUpInside)
         roomButton.addTarget(self, action: #selector(openRoomSheet), for: .touchUpInside)
         searchButton.addTarget(self, action: #selector(searchButtonTapped), for: .touchUpInside)
-        
-        searchButton.setTitle("Search Now", for: .normal)
-        searchButton.layer.cornerRadius = 10
-        searchButton.tintColor = .appPrimaryText
-        searchButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+        searchButton.applyPrimaryStyle(with: "Search Now")
         
         let stackView = UIStackView(arrangedSubviews: [destinationButton, dateButton, roomButton, searchButton])
         stackView.axis = .vertical
@@ -67,7 +63,6 @@ final class SearchVC: UIViewController {
 
         let isEnabled = viewModel.isSearchEnabled()
         searchButton.isEnabled = isEnabled
-        searchButton.backgroundColor = isEnabled ? .appButtonBackground : .appDisabled
         searchButton.setTitleColor(isEnabled ? .appAccent : .appPrimaryText, for: .normal)
         searchButton.alpha = isEnabled ? 1.0 : 0.5
     }

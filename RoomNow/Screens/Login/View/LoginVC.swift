@@ -37,12 +37,8 @@ final class LoginVC: UIViewController {
     }()
 
     private let loginButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Login", for: .normal)
-        button.backgroundColor = .appButtonBackground
-        button.setTitleColor(.appAccent, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
-        button.layer.cornerRadius = 8
+        let button = UIButton()
+        button.applyPrimaryStyle(with: "Login")
         return button
     }()
 

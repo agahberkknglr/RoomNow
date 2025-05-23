@@ -125,11 +125,8 @@ final class RoomVC: UIViewController, RoomVCProtocols {
         petStackView.spacing = 10
         petStackView.addArrangedSubview(petLabel)
         petStackView.addArrangedSubview(petSwitch)
-
-        applyButton.setTitle("Apply", for: .normal)
-        applyButton.layer.cornerRadius = 10
-        applyButton.tintColor = .appPrimaryText
-        applyButton.backgroundColor = .appButtonBackground
+        
+        applyButton.applyPrimaryStyle(with: "Apply")
 
         let stackView = UIStackView(arrangedSubviews: [
             titleLabel,

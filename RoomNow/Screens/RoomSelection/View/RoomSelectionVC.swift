@@ -16,10 +16,7 @@ final class RoomSelectionVC: UIViewController {
     
     private let continueButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Continue Reservation", for: .normal)
-        button.backgroundColor = .appButtonBackground
-        button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 8
+        button.applyPrimaryStyle(with: "Continue Reservation")
         button.isHidden = true
         return button
     }()
@@ -68,9 +65,9 @@ final class RoomSelectionVC: UIViewController {
     
     @objc private func continueTapped() {
         let vm = PersonalInfoVM(
-            selectedRooms: viewModel.selectedRooms,
             hotel: viewModel.hotel,
-            searchParams: viewModel.searchParams
+            searchParams: viewModel.searchParams,
+            selectedRooms: viewModel.selectedRooms
         )
         let vc = PersonalInfoVC(viewModel: vm)
         navigationController?.pushViewController(vc, animated: true)

@@ -45,11 +45,7 @@ final class RoomCardCell: UICollectionViewCell {
         priceLabel.font = .boldSystemFont(ofSize: 14)
         priceLabel.textColor = .appAccent
         
-        selectButton.setTitle("Select", for: .normal)
-        selectButton.setTitleColor(.appAccent, for: .normal)
-        selectButton.titleLabel?.font = .systemFont(ofSize: 14, weight: .bold)
-        selectButton.backgroundColor = .appButtonBackground
-        selectButton.layer.cornerRadius = 8
+        selectButton.applyPrimaryStyle(with: "Select")
         selectButton.translatesAutoresizingMaskIntoConstraints = false
         selectButton.addTarget(self, action: #selector(selectButtonTapped), for: .touchUpInside)
         

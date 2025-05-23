@@ -72,9 +72,6 @@ final class ProfileVC: UIViewController {
     private let logoutButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Log Out", for: .normal)
-        button.backgroundColor = .appButtonBackground
-        button.setTitleColor(.appAccent, for: .normal)
-        button.layer.cornerRadius = 8
         return button
     }()
 
@@ -93,9 +90,10 @@ final class ProfileVC: UIViewController {
     private func setupUI() {
         view.backgroundColor = .appBackground
         setNavigation(title: "Profile")
+        
+        logoutButton.applyLogOutStyle()
 
         let stack = UIStackView(arrangedSubviews: [
-
             usernameField,
             emailField,
             dobField,

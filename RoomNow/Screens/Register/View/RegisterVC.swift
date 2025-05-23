@@ -69,10 +69,7 @@ final class RegisterVC: UIViewController {
 
     private let registerButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Register", for: .normal)
-        button.backgroundColor = .appButtonBackground
-        button.setTitleColor(.appAccent, for: .normal)
-        button.layer.cornerRadius = 8
+        button.applyPrimaryStyle(with: "Register")
         return button
     }()
 

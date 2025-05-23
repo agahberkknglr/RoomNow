@@ -46,11 +46,7 @@ final class DateVC: UIViewController {
 
     private let selectDatesButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Select Dates", for: .normal)
-        button.layer.cornerRadius = 10
-        button.tintColor = .appPrimaryText
-        button.backgroundColor = .appButtonBackground
-        button.translatesAutoresizingMaskIntoConstraints = false
+        button.applyPrimaryStyle(with: "Select Dates")
         return button
     }()
 
