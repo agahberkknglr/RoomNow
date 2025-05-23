@@ -80,18 +80,29 @@ final class PersonalInfoVC: UIViewController {
     }
 
     @objc private func continueTapped() {
-        viewModel.fullName = fullNameField.text ?? ""
-        viewModel.email = emailField.text ?? ""
-        viewModel.phone = phoneField.text ?? ""
-        viewModel.note = noteField.text ?? ""
-
-        guard viewModel.isFormValid else {
-            showAlert("Please fill in all required fields.")
+        guard
+            let fullName = fullNameField.text, !fullName.isEmpty,
+            let email = emailField.text, !email.isEmpty,
+            let phone = phoneField.text, !phone.isEmpty
+        else {
+            showAlert("Please fill all fields.")
             return
         }
 
-        // TODO: Navigate to Summary screen, pass selectedRooms + personalInfo
-        print("✅ Proceed with info:", viewModel.fullName, viewModel.email, viewModel.phone)
+        let note = noteField.text // optional
+
+        let summaryVM = ReservationVM(
+            hotel: viewModel.hotel,
+            searchParams: viewModel.searchParams,
+            selectedRooms: viewModel.selectedRooms,
+            fullName: fullName,
+            email: email,
+            phone: phone,
+            note: note
+        )
+
+        let summaryVC = ReservationVC(viewModel: summaryVM)
+        navigationController?.pushViewController(summaryVC, animated: true)
     }
 
     private func showAlert(_ message: String) {
