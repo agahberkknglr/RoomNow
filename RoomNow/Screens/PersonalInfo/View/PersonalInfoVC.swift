@@ -35,6 +35,18 @@ final class PersonalInfoVC: UIViewController {
         setupFields()
         setupLayout()
         setupActions()
+        notifyVM()
+    }
+    
+    private func notifyVM() {
+        viewModel.notifyViewUpdate = { [weak self] in
+            guard let self = self else { return }
+            self.fullNameField.text = self.viewModel.fullName
+            self.emailField.text = self.viewModel.email
+        }
+
+        fullNameField.text = viewModel.fullName
+        emailField.text = viewModel.email
     }
 
     private func setupFields() {
@@ -47,8 +59,6 @@ final class PersonalInfoVC: UIViewController {
         emailField.placeholder = "Email"
         phoneField.placeholder = "Phone"
         noteField.placeholder = "Note (Optional)"
-        fullNameField.text = viewModel.fullName
-        emailField.text = viewModel.email
     }
 
     private func setupLayout() {
@@ -61,10 +71,7 @@ final class PersonalInfoVC: UIViewController {
         stack.addArrangedSubview(noteField)
         stack.addArrangedSubview(continueButton)
 
-        continueButton.setTitle("Review Reservation", for: .normal)
-        continueButton.backgroundColor = .appButtonBackground
-        continueButton.setTitleColor(.white, for: .normal)
-        continueButton.layer.cornerRadius = 8
+        continueButton.applyPrimaryStyle(with: "Review Reservation")
 
         view.addSubview(stack)
 
