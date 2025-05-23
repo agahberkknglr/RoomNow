@@ -16,6 +16,7 @@ protocol RoomSelectionVMProtocol {
     var guestCount: Int { get }
     var roomCount: Int { get }
     var hotel: Hotel { get }
+    var searchParams: HotelSearchParameters { get }
     
     var selectedRooms: [HotelRoom] { get }
     var isSelectionComplete: Bool { get }
@@ -28,7 +29,7 @@ protocol RoomSelectionVMProtocol {
 final class RoomSelectionVM: RoomSelectionVMProtocol {
     
     private(set) var hotel: Hotel
-    private let searchParams: HotelSearchParameters
+    private let _searchParams: HotelSearchParameters
     
     private(set) var availableRooms: [RoomType] = []
     private(set) var selectedRooms: [HotelRoom] = []
@@ -42,6 +43,10 @@ final class RoomSelectionVM: RoomSelectionVMProtocol {
     var guestCount: Int { searchParams.guestCount }
 
     var roomCount: Int { searchParams.roomCount }
+    
+    var searchParams: HotelSearchParameters {
+        return self._searchParams
+    }
 
     var numberOfNights: Int {
         let nights = Calendar.current.dateComponents([.day], from: checkInDate, to: checkOutDate).day ?? 1
@@ -50,7 +55,7 @@ final class RoomSelectionVM: RoomSelectionVMProtocol {
     
     init(hotel: Hotel, searchParams: HotelSearchParameters) {
         self.hotel = hotel
-        self.searchParams = searchParams
+        self._searchParams = searchParams
         filterAvailableRooms()
     }
     
