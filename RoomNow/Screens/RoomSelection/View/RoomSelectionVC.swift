@@ -67,9 +67,13 @@ final class RoomSelectionVC: UIViewController {
     }
     
     @objc private func continueTapped() {
-        let selected = viewModel.selectedRooms
-        // TODO: Navigate to PersonalInfoVC or Summary screen
-        print("Continue tapped with \(selected.count) selected rooms.")
+        let vm = PersonalInfoVM(
+            selectedRooms: viewModel.selectedRooms,
+            hotel: viewModel.hotel,
+            searchParams: viewModel.searchParams
+        )
+        let vc = PersonalInfoVC(viewModel: vm)
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     private func updateContinueButtonVisibility() {
