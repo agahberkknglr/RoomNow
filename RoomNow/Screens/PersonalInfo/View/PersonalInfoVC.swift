@@ -31,6 +31,7 @@ final class PersonalInfoVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .appBackground
+        title = "Personal Information"
         setupFields()
         setupLayout()
         setupActions()
