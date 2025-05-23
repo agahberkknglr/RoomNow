@@ -71,6 +71,7 @@ final class AuthManager {
             if let error = error {
                 completion(.failure(error))
             } else {
+                self.fetchUserData { _ in }
                 completion(.success(()))
             }
         }
@@ -79,6 +80,7 @@ final class AuthManager {
     func logout(completion: @escaping (Result<Void, Error>) -> Void) {
         do {
             try Auth.auth().signOut()
+            self.currentAppUser = nil
             completion(.success(()))
         } catch {
             completion(.failure(error))
