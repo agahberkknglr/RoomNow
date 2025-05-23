@@ -47,8 +47,8 @@ final class ReservationVC: UIViewController {
 
     private func setupConfirmButton() {
         confirmButton.setTitle("Confirm Reservation", for: .normal)
-        confirmButton.setTitleColor(.white, for: .normal)
-        confirmButton.backgroundColor = .appAccent
+        confirmButton.setTitleColor(.appAccent, for: .normal)
+        confirmButton.backgroundColor = .appButtonBackground
         confirmButton.layer.cornerRadius = 8
         confirmButton.titleLabel?.font = .boldSystemFont(ofSize: 16)
         confirmButton.addTarget(self, action: #selector(confirmTapped), for: .touchUpInside)
