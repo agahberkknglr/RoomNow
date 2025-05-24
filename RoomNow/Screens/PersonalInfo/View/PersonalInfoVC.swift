@@ -33,7 +33,7 @@ final class PersonalInfoVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .appBackground
-        title = "Personal Information"
+        title = "Your Personal Information"
         setupTableView()
         setupContinueButton()
         notifyVM()
@@ -50,7 +50,6 @@ final class PersonalInfoVC: UIViewController {
         tableView.backgroundColor = .clear
         tableView.separatorStyle = .none
         tableView.allowsSelection = false
-        //tableView.delegate = self
         tableView.dataSource = self
         tableView.registerCell(type: PersonalInfoCell.self)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -102,7 +101,7 @@ final class PersonalInfoVC: UIViewController {
     
     private func setupContinueButton() {
         continueButton.translatesAutoresizingMaskIntoConstraints = false
-        continueButton.applyPrimaryStyle(with: "Review Reservation")
+        continueButton.applyPrimaryStyle(with: "Next Step")
         continueButton.addTarget(self, action: #selector(continueTapped), for: .touchUpInside)
         buttonView.addSubview(continueButton)
         view.addSubview(buttonView)
