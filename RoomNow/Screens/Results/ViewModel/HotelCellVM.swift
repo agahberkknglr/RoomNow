@@ -14,27 +14,38 @@ final class HotelCellVM {
     var checkInDate: Date { searchParams.checkInDate }
     var checkOutDate: Date { searchParams.checkOutDate }
     var guestCount: Int { searchParams.guestCount }
-    
+    var roomCombination: [(room: HotelRoom, typeName: String)] = []
+
     private(set) var isSaved: Bool = false
 
     init(hotel: Hotel, searchParams: HotelSearchParameters) {
         self.hotel = hotel
         self.searchParams = searchParams
+        self.roomCombination = findValidRoomCombination(from: hotel)
     }
 
     var hotelId: String? { hotel.id }
     var hotelName: String { hotel.name }
     var hotelLocation: String { hotel.location }
     var hotelRatingText: String { "\(hotel.rating)" }
+    
+    private func findValidRoomCombination(from hotel: Hotel) -> [(room: HotelRoom, typeName: String)] {
+        let allRooms: [(HotelRoom, String)] = hotel.roomTypes.flatMap { type in
+            type.rooms.filter {
+                $0.isAvailable(for: searchParams.checkInDate, checkOut: searchParams.checkOutDate)
+            }.map { ($0, type.typeName) }
+        }
+        
+        let roomCombos = allRooms.combinations(ofCount: searchParams.roomCount)
 
-    var cheapestAvailableRoom: (typeName: String, room: HotelRoom)? {
-        return hotel.roomTypes
-            .flatMap { type in type.rooms.map { (typeName: type.typeName, room: $0) } }
-            .filter {
-                $0.room.bedCapacity >= searchParams.guestCount &&
-                $0.room.isAvailable(for: searchParams.checkInDate, checkOut: searchParams.checkOutDate)
+        for combo in roomCombos {
+            let totalBeds = combo.reduce(0) { $0 + $1.0.bedCapacity }
+            if totalBeds >= searchParams.guestCount {
+                return combo
             }
-            .min(by: { $0.room.price < $1.room.price })
+        }
+
+        return []
     }
 
     func loadSavedStatus(completion: @escaping () -> Void) {
@@ -66,11 +77,15 @@ final class HotelCellVM {
             }
         } else {
             let nights = Calendar.current.dateComponents([.day], from: checkInDate, to: checkOutDate).day ?? 1
-            guard let cheapest = cheapestAvailableRoom else {
+            let roomCombination = findValidRoomCombination(from: hotel)
+
+            guard !roomCombination.isEmpty else {
                 completion(false)
                 return
             }
-            let totalPrice = nights * Int(cheapest.room.price)
+
+            let totalPrice = roomCombination.reduce(0) { $0 + (Int($1.room.price) * nights) }
+            let selectedRoomNumber = roomCombination.first?.room.roomNumber // Or nil if you don’t want to store it
 
             let saved = SavedHotel(
                 hotelId: hotelId,
@@ -78,11 +93,11 @@ final class HotelCellVM {
                 city: hotel.city,
                 location: hotel.location,
                 savedAt: Date(),
-                checkInDate: searchParams.checkInDate,
-                checkOutDate: searchParams.checkOutDate,
-                guestCount: searchParams.guestCount,
-                roomCount: searchParams.roomCount,
-                selectedRoomNumber: cheapestAvailableRoom?.room.roomNumber,
+                checkInDate: checkInDate,
+                checkOutDate: checkOutDate,
+                guestCount: guestCount,
+                roomCount: roomCombination.count,
+                selectedRoomNumber: selectedRoomNumber,
                 totalPrice: totalPrice,
                 numberOfNights: nights
             )
@@ -95,5 +110,4 @@ final class HotelCellVM {
             }
         }
     }
-
 }

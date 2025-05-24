@@ -53,6 +53,11 @@ final class RoomSelectionVM: RoomSelectionVMProtocol {
         return max(nights, 1)
     }
     
+    var isSelectionComplete: Bool {
+        selectedRooms.count == roomCount &&
+        selectedRooms.map(\.bedCapacity).reduce(0, +) >= guestCount
+    }
+    
     init(hotel: Hotel, searchParams: HotelSearchParameters) {
         self.hotel = hotel
         self._searchParams = searchParams
@@ -62,7 +67,6 @@ final class RoomSelectionVM: RoomSelectionVMProtocol {
     func filterAvailableRooms() {
         availableRooms = hotel.roomTypes.compactMap { type in
             let filtered = type.rooms.filter {
-                $0.bedCapacity >= searchParams.guestCount &&
                 $0.isAvailable(for: searchParams.checkInDate, checkOut: searchParams.checkOutDate)
             }
             return filtered.isEmpty ? nil : RoomType(typeName: type.typeName, rooms: filtered)
@@ -80,9 +84,5 @@ final class RoomSelectionVM: RoomSelectionVMProtocol {
 
     func isRoomSelected(_ room: HotelRoom) -> Bool {
         selectedRooms.contains(where: { $0.roomNumber == room.roomNumber })
-    }
-
-    var isSelectionComplete: Bool {
-        selectedRooms.count == roomCount
     }
 }

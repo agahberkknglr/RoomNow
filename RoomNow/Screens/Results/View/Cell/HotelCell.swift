@@ -137,35 +137,38 @@ final class HotelCell: UICollectionViewCell {
 
         hotelNameLabel.text = viewModel.hotelName
         ratingLabel.text = viewModel.hotelRatingText
-        locationLabel.text = "\(viewModel.hotelLocation)"
+        locationLabel.text = viewModel.hotelLocation
 
-        if let cheapest = viewModel.cheapestAvailableRoom {
-            let baseText = "Hotel room: "
-            let typeNameText = cheapest.typeName.capitalized
-            let fullText = baseText + typeNameText
-            let attributed = NSMutableAttributedString(string: fullText)
+        if let firstRoom = viewModel.roomCombination.first {
+            let baseText = "Room type: "
+            let typeName = firstRoom.typeName.capitalized
+            let attributed = NSMutableAttributedString(string: baseText + typeName)
 
-            attributed.addAttribute(NSAttributedString.Key.font, value: UIFont.boldSystemFont(ofSize: 14), range: NSRange(location: 0, length: baseText.count))
-            attributed.addAttribute(NSAttributedString.Key.font, value: UIFont.systemFont(ofSize: 14), range: NSRange(location: baseText.count, length: typeNameText.count))
+            attributed.addAttribute(.font, value: UIFont.boldSystemFont(ofSize: 14), range: NSRange(location: 0, length: baseText.count))
+            attributed.addAttribute(.font, value: UIFont.systemFont(ofSize: 14), range: NSRange(location: baseText.count, length: typeName.count))
             roomTypeLabel.attributedText = attributed
 
             let nights = Calendar.current.dateComponents([.day], from: viewModel.checkInDate, to: viewModel.checkOutDate).day ?? 1
-            let totalPrice = nights * Int(cheapest.room.price)
+            let totalPrice = viewModel.roomCombination.reduce(0) { $0 + (Int($1.room.price) * nights) }
 
-            if nights > 1 {
-                priceLabel.setMixedStyleText(
-                    prefix: "\(nights) nights: ",
-                    suffix: "₺\(totalPrice)",
-                    prefixFont: .systemFont(ofSize: 12),
-                    suffixFont: .boldSystemFont(ofSize: 16),
-                    prefixColor: .appSecondaryText,
-                    suffixColor: .appPrimaryText
-                )
-            } else {
-                priceLabel.text = "₺\(Int(cheapest.room.price))"
-            }
+            priceLabel.setMixedStyleText(
+                prefix: "\(nights) night\(nights > 1 ? "s" : ""): ",
+                suffix: "₺\(totalPrice)",
+                prefixFont: .systemFont(ofSize: 12),
+                suffixFont: .boldSystemFont(ofSize: 16),
+                prefixColor: .appSecondaryText,
+                suffixColor: .appPrimaryText
+            )
 
+            let bedTotal = viewModel.roomCombination.reduce(0) { $0 + $1.room.bedCapacity }
+            roomBedLabel.text = "\(viewModel.roomCombination.count) rooms, \(bedTotal) beds"
+            
             infoLabel.text = "No prepayment needed\nFree cancellation"
+        } else {
+            priceLabel.text = ""
+            roomTypeLabel.text = ""
+            roomBedLabel.text = ""
+            infoLabel.text = ""
         }
 
         viewModel.loadSavedStatus { [weak self] in
@@ -174,6 +177,7 @@ final class HotelCell: UICollectionViewCell {
             }
         }
     }
+
 
     @objc private func saveButtonTapped() {
         guard let viewModel = viewModel else { return }
