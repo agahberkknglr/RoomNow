@@ -180,8 +180,6 @@ extension PersonalInfoVC: UITableViewDataSource {
 
         return cell
     }
-
-
 }
 
 extension PersonalInfoVC: UITextFieldDelegate {
