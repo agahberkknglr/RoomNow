@@ -29,4 +29,20 @@ extension UILabel {
         attributedText.append(suffixText)
         self.attributedText = attributedText
     }
+    
+    func applyTitleStyle() {
+        self.font = UIFont.systemFont(ofSize: 24, weight: .bold)
+        self.textColor = .appPrimaryText
+        self.numberOfLines = 0
+        self.textAlignment = .left
+        self.adjustsFontForContentSizeCategory = true
+    }
+    
+    func applySubtitleStyle() {
+        self.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
+        self.textColor = .appSecondaryText
+        self.numberOfLines = 0
+        self.textAlignment = .left
+        self.adjustsFontForContentSizeCategory = true
+    }
 }
