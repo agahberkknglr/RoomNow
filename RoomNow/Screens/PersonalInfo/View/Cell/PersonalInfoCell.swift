@@ -13,13 +13,23 @@ final class PersonalInfoCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupUI()
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    private func setupUI() {
         textField.borderStyle = .roundedRect
         textField.backgroundColor = .appSecondaryBackground
         textField.translatesAutoresizingMaskIntoConstraints = false
+        
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.textColor = .appPrimaryText
+        
         contentView.backgroundColor = .appBackground
         contentView.addSubview(textField)
         contentView.addSubview(titleLabel)
+        
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
@@ -30,10 +40,9 @@ final class PersonalInfoCell: UITableViewCell {
             textField.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
             textField.heightAnchor.constraint(equalToConstant: 44)
         ])
+        
     }
-
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-
+    
     func configure(placeholder: String, text: String?, keyboard: UIKeyboardType = .default) {
         titleLabel.text = placeholder
         textField.placeholder = placeholder
