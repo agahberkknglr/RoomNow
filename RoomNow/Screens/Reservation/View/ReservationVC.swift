@@ -46,7 +46,7 @@ final class ReservationVC: UIViewController {
     }
 
     private func setupConfirmButton() {
-        confirmButton.applyPrimaryStyle(with: "Confirm Reservation")
+        confirmButton.applyPrimaryStyle(with: "Book Now")
         confirmButton.addTarget(self, action: #selector(confirmTapped), for: .touchUpInside)
 
         view.addSubview(confirmButton)
