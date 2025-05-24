@@ -126,7 +126,9 @@ extension RoomSelectionVC: UITableViewDelegate {
 extension RoomSelectionVC: RoomTypeCellDelegate {
     func didSelectRoom(_ room: HotelRoom) {
         viewModel.toggleSelection(for: room)
-        tableView.reloadData()
+        if let index = viewModel.indexForRoom(room) {
+            tableView.reloadRows(at: [IndexPath(row: 0, section: index)], with: .none)
+        }
         updateContinueButtonVisibility()
     }
 }

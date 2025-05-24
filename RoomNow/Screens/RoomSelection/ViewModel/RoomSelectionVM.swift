@@ -24,6 +24,7 @@ protocol RoomSelectionVMProtocol {
     func filterAvailableRooms()
     func toggleSelection(for room: HotelRoom)
     func isRoomSelected(_ room: HotelRoom) -> Bool
+    func indexForRoom(_ room: HotelRoom) -> Int?
 }
 
 final class RoomSelectionVM: RoomSelectionVMProtocol {
@@ -84,5 +85,14 @@ final class RoomSelectionVM: RoomSelectionVMProtocol {
 
     func isRoomSelected(_ room: HotelRoom) -> Bool {
         selectedRooms.contains(where: { $0.roomNumber == room.roomNumber })
+    }
+    
+    func indexForRoom(_ room: HotelRoom) -> Int? {
+        for (index, roomType) in availableRooms.enumerated() {
+            if roomType.rooms.contains(where: { $0.roomNumber == room.roomNumber }) {
+                return index
+            }
+        }
+        return nil
     }
 }

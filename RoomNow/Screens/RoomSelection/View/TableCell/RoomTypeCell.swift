@@ -87,10 +87,13 @@ extension RoomTypeCell: UICollectionViewDataSource {
 
         cell.configure(with: rooms[indexPath.item], forNights: nights, startDate: start, endDate: end, isSelected: isSelected)
         cell.onSelectTapped = { [weak self] in
-            let room = self?.rooms[indexPath.item]
-            if let room = room {
-                self?.delegate?.didSelectRoom(room)
-            }
+            guard let self = self else { return }
+            let index = indexPath.item
+            let room = self.rooms[index]
+
+            self.collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+
+            self.delegate?.didSelectRoom(room)
         }
         return cell
     }
