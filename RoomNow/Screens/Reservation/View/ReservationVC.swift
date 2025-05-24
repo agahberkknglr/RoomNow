@@ -16,7 +16,7 @@ final class ReservationVC: UIViewController {
     init(viewModel: ReservationVM) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        title = "Reservation Summary"
+        title = "Booking Summary"
     }
 
     required init?(coder: NSCoder) {
