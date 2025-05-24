@@ -28,4 +28,8 @@ extension UIView {
         }
         return nil
     }
+    
+    func superview<T: UIView>(of type: T.Type) -> T? {
+        return superview as? T ?? superview?.superview(of: T.self)
+    }
 }

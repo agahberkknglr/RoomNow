@@ -11,9 +11,10 @@ protocol RoomTypeCellDelegate: AnyObject {
     func didSelectRoom(_ room: HotelRoom)
 }
 
-final class RoomTypeCell: UITableViewCell {
+final class RoomTypeCell: UITableViewCell, UICollectionViewDelegate {
 
     weak var delegate: RoomTypeCellDelegate?
+    private var lastContentOffset: CGPoint = .zero
 
     private let titleLabel = UILabel()
     private var collectionView: UICollectionView
@@ -41,6 +42,7 @@ final class RoomTypeCell: UITableViewCell {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.register(RoomCardCell.self)
         collectionView.dataSource = self
+        collectionView.delegate = self
 
         contentView.addSubview(titleLabel)
         contentView.addSubview(collectionView)
@@ -69,6 +71,16 @@ final class RoomTypeCell: UITableViewCell {
         self.startDate = startDate
         self.endDate = endDate
         collectionView.reloadData()
+        collectionView.setContentOffset(lastContentOffset, animated: false)
+
+    }
+    
+    func setHorizontalOffset(_ offset: CGFloat) {
+        collectionView.setContentOffset(CGPoint(x: offset, y: 0), animated: false)
+    }
+
+    func currentHorizontalOffset() -> CGFloat {
+        return collectionView.contentOffset.x
     }
 }
 
@@ -96,6 +108,12 @@ extension RoomTypeCell: UICollectionViewDataSource {
             self.delegate?.didSelectRoom(room)
         }
         return cell
+    }
+}
+
+extension RoomTypeCell: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        lastContentOffset = scrollView.contentOffset
     }
 }
 

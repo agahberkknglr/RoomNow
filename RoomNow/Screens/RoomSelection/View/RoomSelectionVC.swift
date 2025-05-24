@@ -29,6 +29,9 @@ final class RoomSelectionVC: UIViewController {
         return view
     }()
     
+    private var horizontalOffsets: [Int: CGFloat] = [:]
+
+    
     init(hotel: Hotel, searchParams: HotelSearchParameters) {
         self.viewModel = RoomSelectionVM(hotel: hotel, searchParams: searchParams)
         super.init(nibName: nil, bundle: nil)
@@ -120,7 +123,12 @@ extension RoomSelectionVC: UITableViewDataSource {
 }
 
 extension RoomSelectionVC: UITableViewDelegate {
-    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if let cell = cell as? RoomTypeCell {
+            let offset = horizontalOffsets[indexPath.section] ?? 0
+            cell.setHorizontalOffset(offset)
+        }
+    }
 }
 
 extension RoomSelectionVC: RoomTypeCellDelegate {
@@ -130,5 +138,13 @@ extension RoomSelectionVC: RoomTypeCellDelegate {
             tableView.reloadRows(at: [IndexPath(row: 0, section: index)], with: .none)
         }
         updateContinueButtonVisibility()
+    }
+}
+
+extension RoomSelectionVC: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard let cell = scrollView.superview(of: RoomTypeCell.self),
+              let indexPath = tableView.indexPath(for: cell) else { return }
+        horizontalOffsets[indexPath.section] = scrollView.contentOffset.x
     }
 }
