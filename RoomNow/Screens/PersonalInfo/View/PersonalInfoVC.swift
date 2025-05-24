@@ -62,6 +62,42 @@ final class PersonalInfoVC: UIViewController {
         ])
     }
     
+    private func createToolbar(tag: Int, title: String, isLast: Bool) -> UIToolbar {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+
+        let titleLabel = UILabel()
+        titleLabel.text = title
+        titleLabel.textAlignment = .center
+        titleLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        titleLabel.textColor = .secondaryLabel
+        titleLabel.sizeToFit()
+
+        let titleItem = UIBarButtonItem(customView: titleLabel)
+        let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+
+        let buttonTitle = isLast ? "Done" : "Next"
+        let action = isLast ? #selector(doneButtonTapped) : #selector(nextButtonTapped)
+        let actionButton = UIBarButtonItem(title: buttonTitle, style: .done, target: self, action: action)
+        actionButton.tag = tag
+
+        toolbar.setItems([spacer, titleItem, spacer, actionButton], animated: false)
+        return toolbar
+    }
+    
+    @objc private func nextButtonTapped(_ sender: UIBarButtonItem) {
+        let nextTag = sender.tag + 1
+        if let nextField = tableView.viewWithTag(nextTag) as? UITextField {
+            nextField.becomeFirstResponder()
+        } else {
+            view.endEditing(true)
+        }
+    }
+    
+    @objc private func doneButtonTapped() {
+        view.endEditing(true)
+    }
+    
     private func setupContinueButton() {
         continueButton.translatesAutoresizingMaskIntoConstraints = false
         continueButton.applyPrimaryStyle(with: "Review Reservation")
@@ -116,24 +152,36 @@ extension PersonalInfoVC: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeue(PersonalInfoCell.self, for: indexPath)
+        let tag = indexPath.row
         cell.textField.delegate = self
-        cell.textField.tag = indexPath.row
-        cell.textField.returnKeyType = (indexPath.row == 3) ? .done : .next
+        cell.textField.tag = tag
+
+        let toolbarTitle: String
+        let isLast = indexPath.row == 3
 
         switch indexPath.row {
         case 0:
             cell.configure(placeholder: "Full Name", text: viewModel.fullName)
+            toolbarTitle = "Full Name"
         case 1:
             cell.configure(placeholder: "Email", text: viewModel.email, keyboard: .emailAddress)
+            toolbarTitle = "Email"
         case 2:
             cell.configure(placeholder: "Phone", text: viewModel.phone, keyboard: .phonePad)
+            toolbarTitle = "Phone"
         case 3:
             cell.configure(placeholder: "Note (Optional)", text: viewModel.note)
-        default: break
+            toolbarTitle = "Note"
+        default:
+            toolbarTitle = ""
         }
+
+        cell.textField.inputAccessoryView = createToolbar(tag: tag, title: toolbarTitle, isLast: isLast)
 
         return cell
     }
+
+
 }
 
 extension PersonalInfoVC: UITextFieldDelegate {
