@@ -54,6 +54,8 @@ final class PersonalInfoVC: UIViewController {
         tableView.dataSource = self
         tableView.registerCell(type: PersonalInfoCell.self)
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 150
         view.addSubview(tableView)
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
@@ -170,7 +172,8 @@ extension PersonalInfoVC: UITableViewDataSource {
             cell.configure(placeholder: "Phone", text: viewModel.phone, keyboard: .phonePad)
             toolbarTitle = "Phone"
         case 3:
-            cell.configure(placeholder: "Note (Optional)", text: viewModel.note)
+            cell.textView.delegate = self
+            cell.configure(placeholder: "Note (Optional)", text: viewModel.note, isNote: true)
             toolbarTitle = "Note"
         default:
             toolbarTitle = ""
@@ -189,7 +192,6 @@ extension PersonalInfoVC: UITextFieldDelegate {
         case 0: viewModel.fullName = textField.text ?? ""
         case 1: viewModel.email = textField.text ?? ""
         case 2: viewModel.phone = textField.text ?? ""
-        case 3: viewModel.note = textField.text
         default: break
         }
     }
@@ -202,5 +204,11 @@ extension PersonalInfoVC: UITextFieldDelegate {
             textField.resignFirstResponder()
         }
         return true
+    }
+}
+
+extension PersonalInfoVC: UITextViewDelegate {
+    func textViewDidEndEditing(_ textView: UITextView) {
+        viewModel.note = textView.text
     }
 }
