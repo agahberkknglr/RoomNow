@@ -17,8 +17,16 @@ final class RoomSelectionVC: UIViewController {
     private let continueButton: UIButton = {
         let button = UIButton(type: .system)
         button.applyPrimaryStyle(with: "Continue Reservation")
-        button.isHidden = true
+        button.translatesAutoresizingMaskIntoConstraints = false
         return button
+    }()
+    
+    private let buttonView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .appSecondaryBackground
+        view.isHidden = true
+        return view
     }()
     
     init(hotel: Hotel, searchParams: HotelSearchParameters) {
@@ -48,17 +56,27 @@ final class RoomSelectionVC: UIViewController {
         tableView.registerCell(type: RoomTypeCell.self)
 
         view.addSubview(tableView)
-        tableView.pinToEdges(of: view, withInsets: UIEdgeInsets(top: 16, left: 8, bottom: 16, right: 8))
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 16),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
+        ])
     }
     
     private func setupButton() {
         continueButton.addTarget(self, action: #selector(continueTapped), for: .touchUpInside)
-        view.addSubview(continueButton)
-        continueButton.translatesAutoresizingMaskIntoConstraints = false
+        buttonView.addSubview(continueButton)
+        view.addSubview(buttonView)
         NSLayoutConstraint.activate([
-            continueButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            continueButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            continueButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
+            buttonView.topAnchor.constraint(equalTo: tableView.bottomAnchor),
+            buttonView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            buttonView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            buttonView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            continueButton.topAnchor.constraint(equalTo: buttonView.topAnchor, constant: 12),
+            continueButton.leadingAnchor.constraint(equalTo: buttonView.leadingAnchor, constant: 16),
+            continueButton.trailingAnchor.constraint(equalTo: buttonView.trailingAnchor, constant: -16),
+            continueButton.bottomAnchor.constraint(equalTo: buttonView.safeAreaLayoutGuide.bottomAnchor, constant: -12),
             continueButton.heightAnchor.constraint(equalToConstant: 48)
         ])
     }
@@ -74,7 +92,7 @@ final class RoomSelectionVC: UIViewController {
     }
     
     private func updateContinueButtonVisibility() {
-        continueButton.isHidden = !viewModel.isSelectionComplete
+        buttonView.isHidden = !viewModel.isSelectionComplete
     }
 }
 
