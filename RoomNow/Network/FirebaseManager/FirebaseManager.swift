@@ -80,24 +80,39 @@ extension FirebaseManager: FirebaseManagerProtocol {
                             }
                         }
                     } catch {
-                        print("❌ Hotel decode FAILED for document \(doc.documentID): \(error)")
+                        print("Hotel decode FAILED for document \(doc.documentID): \(error)")
                     }
                 }
                 
                 let filteredHotels = fetchedHotels.filter { hotel in
-                    for roomType in hotel.roomTypes {
-                        for room in roomType.rooms {
-                            if room.bedCapacity >= searchParameters.guestCount &&
-                                room.isAvailable(for: searchParameters.checkInDate, checkOut: searchParameters.checkOutDate) {
-                                return true
-                            }
-                        }
+                    let allRooms = hotel.roomTypes.flatMap { $0.rooms }
+                    let availableRooms = allRooms.filter {
+                        $0.isAvailable(for: searchParameters.checkInDate, checkOut: searchParameters.checkOutDate)
                     }
-                    return false
+
+                    return self.hasValidCombination(of: availableRooms, requiredRoomCount: searchParameters.roomCount, requiredBedCount: searchParameters.guestCount)
                 }
                 
                 completion(.success(filteredHotels))
             }
+    }
+    
+    private func hasValidCombination(of rooms: [HotelRoom], requiredRoomCount: Int, requiredBedCount: Int) -> Bool {
+        func backtrack(_ index: Int, _ path: [HotelRoom], _ bedSum: Int) -> Bool {
+            if path.count > requiredRoomCount { return false }
+            if path.count == requiredRoomCount {
+                return bedSum >= requiredBedCount
+            }
+            guard index < rooms.count else { return false }
+
+            if backtrack(index + 1, path + [rooms[index]], bedSum + rooms[index].bedCapacity) {
+                return true
+            }
+
+            return backtrack(index + 1, path, bedSum)
+        }
+
+        return backtrack(0, [], 0)
     }
     
     func fetchHotelsAsJSON() {
