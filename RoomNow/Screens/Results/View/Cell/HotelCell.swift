@@ -35,7 +35,8 @@ final class HotelCell: UICollectionViewCell {
     private func setupUI() {
         contentView.layer.cornerRadius = 12
         contentView.layer.borderWidth = 1
-        contentView.layer.borderColor = UIColor.clear.cgColor
+        contentView.layer.borderColor = UIColor.appDivider.cgColor
+        contentView.backgroundColor = .appSecondaryBackground
         contentView.clipsToBounds = true
         
         hotelImageView.contentMode = .scaleAspectFill
