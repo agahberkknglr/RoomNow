@@ -10,7 +10,7 @@ import Foundation
 final class ReservationVM {
     let hotel: Hotel
     let searchParams: HotelSearchParameters
-    let selectedRooms: [HotelRoom]
+    let selectedRooms: [Room]
 
     let fullName: String
     let email: String
@@ -20,7 +20,7 @@ final class ReservationVM {
     init(
         hotel: Hotel,
         searchParams: HotelSearchParameters,
-        selectedRooms: [HotelRoom],
+        selectedRooms: [Room],
         fullName: String,
         email: String,
         phone: String,

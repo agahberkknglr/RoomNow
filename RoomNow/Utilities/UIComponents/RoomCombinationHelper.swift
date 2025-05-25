@@ -9,10 +9,10 @@ import Foundation
 
 struct RoomCombinationHelper {
     static func findCombination(
-        rooms: [(typeName: String, room: HotelRoom)],
+        rooms: [(typeName: String, room: Room)],
         requiredRooms: Int,
         requiredBeds: Int
-    ) -> [(typeName: String, room: HotelRoom)] {
+    ) -> [(typeName: String, room: Room)] {
         let allCombinations = combinations(of: rooms, choosing: requiredRooms)
 
         for combo in allCombinations {

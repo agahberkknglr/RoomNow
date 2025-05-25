@@ -29,8 +29,10 @@ final class RoomSelectionVC: UIViewController {
         return view
     }()
     
-    init(hotel: Hotel, searchParams: HotelSearchParameters) {
-        self.viewModel = RoomSelectionVM(hotel: hotel, searchParams: searchParams)
+    private var groupedRooms: [(type: String, rooms: [Room])] = []
+    
+    init(hotel: Hotel, rooms: [Room], searchParams: HotelSearchParameters) {
+        self.viewModel = RoomSelectionVM(hotel: hotel, rooms: rooms, searchParams: searchParams)
         super.init(nibName: nil, bundle: nil)
         self.title = "Select Room"
     }
@@ -42,6 +44,9 @@ final class RoomSelectionVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .appBackground
+        groupedRooms = Dictionary(grouping: viewModel.availableRooms, by: { $0.roomType })
+            .sorted { $0.key < $1.key }
+            .map { (type: $0.key, rooms: $0.value) }
         setupTableView()
         setupButton()
     }
@@ -99,7 +104,7 @@ final class RoomSelectionVC: UIViewController {
 extension RoomSelectionVC: UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        viewModel.availableRooms.count
+        groupedRooms.count
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -111,9 +116,16 @@ extension RoomSelectionVC: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let roomType = viewModel.availableRooms[indexPath.section]
+        let section = groupedRooms[indexPath.section]
         let cell = tableView.dequeue(RoomTypeCell.self, for: indexPath)
-        cell.configure(typeName: roomType.typeName, rooms: roomType.rooms, selectedRooms: viewModel.selectedRooms, forNights: viewModel.numberOfNights, startDate: viewModel.checkInDate, endDate: viewModel.checkOutDate)
+        cell.configure(
+            typeName: section.type,
+            rooms: section.rooms,
+            selectedRooms: viewModel.selectedRooms,
+            forNights: viewModel.numberOfNights,
+            startDate: viewModel.checkInDate,
+            endDate: viewModel.checkOutDate
+        )
         cell.delegate = self
         return cell
     }
@@ -124,7 +136,7 @@ extension RoomSelectionVC: UITableViewDelegate {
 }
 
 extension RoomSelectionVC: RoomTypeCellDelegate {
-    func didSelectRoom(_ room: HotelRoom) {
+    func didSelectRoom(_ room: Room) {
         viewModel.toggleSelection(for: room)
         tableView.reloadData()
         updateContinueButtonVisibility()

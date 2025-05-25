@@ -141,7 +141,7 @@ final class HotelCell: UICollectionViewCell {
 
         if let firstRoom = viewModel.roomCombination.first {
             let baseText = "Room type: "
-            let typeName = firstRoom.typeName.capitalized
+            let typeName = firstRoom.roomType.capitalized
             let attributed = NSMutableAttributedString(string: baseText + typeName)
 
             attributed.addAttribute(.font, value: UIFont.boldSystemFont(ofSize: 14), range: NSRange(location: 0, length: baseText.count))
@@ -149,7 +149,7 @@ final class HotelCell: UICollectionViewCell {
             roomTypeLabel.attributedText = attributed
 
             let nights = Calendar.current.dateComponents([.day], from: viewModel.checkInDate, to: viewModel.checkOutDate).day ?? 1
-            let totalPrice = viewModel.roomCombination.reduce(0) { $0 + (Int($1.room.price) * nights) }
+            let totalPrice = viewModel.roomCombination.reduce(0) { $0 + (Int($1.price) * nights) }
 
             priceLabel.setMixedStyleText(
                 prefix: "\(nights) night\(nights > 1 ? "s" : ""): ",
@@ -160,9 +160,9 @@ final class HotelCell: UICollectionViewCell {
                 suffixColor: .appPrimaryText
             )
 
-            let bedTotal = viewModel.roomCombination.reduce(0) { $0 + $1.room.bedCapacity }
+            let bedTotal = viewModel.roomCombination.reduce(0) { $0 + $1.bedCapacity }
             roomBedLabel.text = "\(viewModel.roomCombination.count) rooms, \(bedTotal) beds"
-            
+
             infoLabel.text = "No prepayment needed\nFree cancellation"
         } else {
             priceLabel.text = ""
@@ -177,6 +177,7 @@ final class HotelCell: UICollectionViewCell {
             }
         }
     }
+
 
 
     @objc private func saveButtonTapped() {

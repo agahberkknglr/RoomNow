@@ -8,7 +8,7 @@
 import UIKit
 
 protocol RoomTypeCellDelegate: AnyObject {
-    func didSelectRoom(_ room: HotelRoom)
+    func didSelectRoom(_ room: Room)
 }
 
 final class RoomTypeCell: UITableViewCell {
@@ -17,8 +17,8 @@ final class RoomTypeCell: UITableViewCell {
 
     private let titleLabel = UILabel()
     private var collectionView: UICollectionView
-    private var rooms: [HotelRoom] = []
-    private var selectedRooms: [HotelRoom] = []
+    private var rooms: [Room] = []
+    private var selectedRooms: [Room] = []
     private var nights: Int = 1
     private var startDate: Date?
     private var endDate: Date?
@@ -61,7 +61,7 @@ final class RoomTypeCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(typeName: String, rooms: [HotelRoom], selectedRooms: [HotelRoom], forNights: Int, startDate: Date, endDate: Date) {
+    func configure(typeName: String, rooms: [Room], selectedRooms: [Room], forNights: Int, startDate: Date, endDate: Date) {
         self.titleLabel.text = typeName.capitalized
         self.rooms = rooms
         self.selectedRooms = selectedRooms

@@ -15,7 +15,7 @@ protocol FirebaseManagerProtocol {
     func uploadHotelsToFirestore()
     
     func fetchCities(completion: @escaping (Result<[City], Error>) -> Void)
-    func fetchHotels(searchParameters: HotelSearchParameters, completion: @escaping (Result<[Hotel], Error>) -> Void)
+    func fetchHotels(searchParameters: HotelSearchParameters, completion: @escaping (Result<[(hotel: Hotel, rooms: [Room])], Error>) -> Void)
 }
 
 final class FirebaseManager {
@@ -46,9 +46,9 @@ extension FirebaseManager: FirebaseManagerProtocol {
         }
     }
     
-    func fetchHotels(searchParameters: HotelSearchParameters, completion: @escaping (Result<[Hotel], Error>) -> Void) {
+    func fetchHotels(searchParameters: HotelSearchParameters, completion: @escaping (Result<[(hotel: Hotel, rooms: [Room])], Error>) -> Void) {
         let db = Firestore.firestore()
-        
+
         db.collection("hotels")
             .whereField("city", isEqualTo: searchParameters.destination.lowercased())
             .getDocuments { snapshot, error in
@@ -56,49 +56,39 @@ extension FirebaseManager: FirebaseManagerProtocol {
                     completion(.failure(error))
                     return
                 }
-                
-                guard let documents = snapshot?.documents else {
-                    completion(.success([]))
-                    return
-                }
-                
-                var fetchedHotels: [Hotel] = []
-                
-                for doc in documents {
-                    do {
-                        let hotel = try doc.data(as: Hotel.self)
-                        fetchedHotels.append(hotel)
-                        
-                        print("Hotel fetched: \(hotel.name)")
-                        print("RoomTypes count: \(hotel.roomTypes.count)")
-                        
-                        for roomType in hotel.roomTypes {
-                            print("- RoomType: \(roomType.typeName)")
-                            print("- Rooms count: \(roomType.rooms.count)")
-                            for room in roomType.rooms {
-                                print("-- RoomNumber: \(room.roomNumber), BedCapacity: \(room.bedCapacity)")
-                            }
-                        }
-                    } catch {
-                        print("Hotel decode FAILED for document \(doc.documentID): \(error)")
-                    }
-                }
-                
-                let filteredHotels = fetchedHotels.filter { hotel in
-                    let allRooms = hotel.roomTypes.flatMap { $0.rooms }
-                    let availableRooms = allRooms.filter {
-                        $0.isAvailable(for: searchParameters.checkInDate, checkOut: searchParameters.checkOutDate)
-                    }
 
-                    return self.hasValidCombination(of: availableRooms, requiredRoomCount: searchParameters.roomCount, requiredBedCount: searchParameters.guestCount)
+                let documents = snapshot?.documents ?? []
+                let hotels: [Hotel] = documents.compactMap { try? $0.data(as: Hotel.self) }
+
+                let hotelIds = hotels.compactMap { $0.id }
+
+                self.fetchRooms(for: hotelIds) { result in
+                    switch result {
+                    case .failure(let error):
+                        completion(.failure(error))
+
+                    case .success(let allRooms):
+                        let hotelTuples: [(Hotel, [Room])] = hotels.map { hotel in
+                            let rooms = allRooms.filter { $0.hotelId == hotel.id }
+                            return (hotel, rooms)
+                        }
+
+                        let validHotels = hotelTuples.filter { (hotel, rooms) in
+                            let available = rooms.filter {
+                                $0.isAvailable(for: searchParameters.checkInDate, checkOut: searchParameters.checkOutDate)
+                            }
+                            return self.hasValidCombination(of: available, requiredRoomCount: searchParameters.roomCount, requiredBedCount: searchParameters.guestCount)
+                        }
+
+                        completion(.success(validHotels))
+                    }
                 }
-                
-                completion(.success(filteredHotels))
             }
     }
+
     
-    private func hasValidCombination(of rooms: [HotelRoom], requiredRoomCount: Int, requiredBedCount: Int) -> Bool {
-        func backtrack(_ index: Int, _ path: [HotelRoom], _ bedSum: Int) -> Bool {
+    private func hasValidCombination(of rooms: [Room], requiredRoomCount: Int, requiredBedCount: Int) -> Bool {
+        func backtrack(_ index: Int, _ path: [Room], _ bedSum: Int) -> Bool {
             if path.count > requiredRoomCount { return false }
             if path.count == requiredRoomCount {
                 return bedSum >= requiredBedCount
@@ -114,6 +104,27 @@ extension FirebaseManager: FirebaseManagerProtocol {
 
         return backtrack(0, [], 0)
     }
+    
+    func fetchRooms(for hotelIds: [String], completion: @escaping (Result<[Room], Error>) -> Void) {
+        let db = Firestore.firestore()
+        db.collection("rooms")
+            .whereField("hotelId", in: hotelIds)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                guard let documents = snapshot?.documents else {
+                    completion(.success([]))
+                    return
+                }
+                let rooms = documents.compactMap { try? $0.data(as: Room.self) }
+                completion(.success(rooms))
+            }
+    }
+
+
+
     
     func fetchHotelsAsJSON() {
         let db = Firestore.firestore()

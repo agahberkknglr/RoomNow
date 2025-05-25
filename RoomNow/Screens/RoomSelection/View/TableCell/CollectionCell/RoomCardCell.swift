@@ -10,7 +10,7 @@ import UIKit
 final class RoomCardCell: UICollectionViewCell {
     
     var onSelectTapped: (() -> Void)?
-    private var currentRoom: HotelRoom?
+    private var currentRoom: Room?
 
     private let titleLabel = UILabel()
     private let bedsLabel = UILabel()
@@ -87,7 +87,7 @@ final class RoomCardCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(with room: HotelRoom, forNights nights: Int, startDate: Date, endDate: Date, isSelected: Bool) {
+    func configure(with room: Room, forNights nights: Int, startDate: Date, endDate: Date, isSelected: Bool) {
         currentRoom = room
         
         let formatter = DateFormatter()

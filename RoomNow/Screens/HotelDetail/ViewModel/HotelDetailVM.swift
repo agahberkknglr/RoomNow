@@ -46,6 +46,7 @@ protocol HotelDetailVMProtocol: AnyObject {
     var hotelForNavigation: Hotel { get }
     var searchParamsForNavigation: HotelSearchParameters { get }
     var isSaved: Bool { get set }
+    var rooms: [Room] { get }
 
     func loadSavedStatus(completion: @escaping () -> Void)
     func toggleSavedStatus(completion: @escaping () -> Void)
@@ -62,13 +63,15 @@ final class HotelDetailVM: HotelDetailVMProtocol {
     }
 
     private let hotel: Hotel
+    private let _rooms: [Room]
     private let searchParams: HotelSearchParameters
     
     var hotelForNavigation: Hotel { hotel }
     var searchParamsForNavigation: HotelSearchParameters { searchParams }
     
-    init(hotel: Hotel, searchParams: HotelSearchParameters) {
+    init(hotel: Hotel, rooms: [Room], searchParams: HotelSearchParameters) {
         self.hotel = hotel
+        self._rooms = rooms
         self.searchParams = searchParams
     }
 
@@ -114,18 +117,18 @@ final class HotelDetailVM: HotelDetailVMProtocol {
     }
 
     var cheapestRoom: RoomDisplayData? {
-        hotel.roomTypes.flatMap { type in
-            type.rooms.filter {
-                $0.isAvailable(for: searchParams.checkInDate, checkOut: searchParams.checkOutDate)
-            }.map { room in
-                RoomDisplayData(
-                    typeName: type.typeName,
-                    roomNumber: room.roomNumber,
-                    bedCapacity: room.bedCapacity,
-                    price: room.price,
-                    description: room.description
-                )
-            }
+        let availableRooms = rooms.filter {
+            $0.isAvailable(for: searchParams.checkInDate, checkOut: searchParams.checkOutDate)
+        }
+        
+        return availableRooms.map {
+            RoomDisplayData(
+                typeName: $0.roomType,
+                roomNumber: $0.roomNumber,
+                bedCapacity: $0.bedCapacity,
+                price: $0.price,
+                description: $0.description
+            )
         }.min(by: { $0.price < $1.price })
     }
 
@@ -139,6 +142,10 @@ final class HotelDetailVM: HotelDetailVMProtocol {
 
     var description: String {
         hotel.description
+    }
+    
+    var rooms: [Room] {
+        return self._rooms
     }
 
     private func format(date: Date) -> String {

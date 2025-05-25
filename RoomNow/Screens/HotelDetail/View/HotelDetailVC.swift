@@ -160,7 +160,9 @@ extension HotelDetailVC: HotelDetailVCProtocol {
     private func navigateToRoomTypeSelection() {
         let hotel = viewModel.hotelForNavigation
         let params = viewModel.searchParamsForNavigation
-        let vc = RoomSelectionVC(hotel: hotel, searchParams: params)
+        let rooms = viewModel.rooms
+
+        let vc = RoomSelectionVC(hotel: hotel, rooms: rooms, searchParams: params)
         navigationController?.pushViewController(vc, animated: true)
     }
 }

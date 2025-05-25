@@ -72,7 +72,7 @@ extension ResultVC: ResultVMDelegate {
     func didFetchHotels() {
         DispatchQueue.main.async {
             self.collectionView.reloadData()
-            self.emptyLabel.isHidden = self.viewModel.hotels.count > 0
+            self.emptyLabel.isHidden = self.viewModel.hotelRooms.count > 0
         }
     }
 }
@@ -121,24 +121,22 @@ extension ResultVC: ResultVCProtocol {
 
 extension ResultVC: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        viewModel.hotels.count
+        return viewModel.hotelRooms.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeue(HotelCell.self, for: indexPath)
-        let hotel = viewModel.hotels[indexPath.item]
-        let viewModel = HotelCellVM(hotel: hotel, searchParams: viewModel.searchParameters)
-        cell.configure(with: viewModel)
-
-        //cell.configure(with: hotel, searchParams: viewModel.searchParameters)
+        let item = viewModel.hotelRooms[indexPath.item]
+        let cellVM = HotelCellVM(hotel: item.hotel, rooms: item.rooms, searchParams: viewModel.searchParameters)
+        cell.configure(with: cellVM)
         return cell
     }
 }
 
 extension ResultVC: UICollectionViewDelegate{
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let selectedHotel = viewModel.hotels[indexPath.item]
-        let detailVM = HotelDetailVM(hotel: selectedHotel, searchParams: viewModel.searchParameters)
+        let item = viewModel.hotelRooms[indexPath.item]
+        let detailVM = HotelDetailVM(hotel: item.hotel, rooms: item.rooms, searchParams: viewModel.searchParameters)
         let detailVC = HotelDetailVC(viewModel: detailVM)
         navigationController?.pushViewController(detailVC, animated: true)
     }

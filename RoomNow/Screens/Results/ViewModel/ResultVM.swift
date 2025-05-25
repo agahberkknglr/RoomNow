@@ -8,7 +8,7 @@
 import Foundation
 
 protocol ResultVMProtocol {
-    var hotels: [Hotel] { get }
+    var hotelRooms: [(hotel: Hotel, rooms: [Room])] { get }
     var searchParameters: HotelSearchParameters { get }
     var delegate: ResultVMDelegate? { get set }
 
@@ -22,7 +22,7 @@ protocol ResultVMDelegate: AnyObject {
 final class ResultVM: ResultVMProtocol {
     
     weak var delegate: ResultVMDelegate?
-    private(set) var hotels: [Hotel] = []
+    private(set) var hotelRooms: [(hotel: Hotel, rooms: [Room])] = []
     let searchParameters: HotelSearchParameters
 
     init(searchParameters: HotelSearchParameters) {
@@ -33,8 +33,8 @@ final class ResultVM: ResultVMProtocol {
         FirebaseManager.shared.fetchHotels(searchParameters: searchParameters) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let hotels):
-                self.hotels = hotels
+            case .success(let hotelRooms):
+                self.hotelRooms = hotelRooms
                 self.delegate?.didFetchHotels()
             case .failure(let error):
                 print("Failed to fetch hotels: \(error.localizedDescription)")

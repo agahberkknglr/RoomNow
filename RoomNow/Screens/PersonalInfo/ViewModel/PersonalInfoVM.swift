@@ -19,9 +19,9 @@ final class PersonalInfoVM {
     // MARK: - Data required for reservation
     let hotel: Hotel
     let searchParams: HotelSearchParameters
-    let selectedRooms: [HotelRoom]
+    let selectedRooms: [Room]
 
-    init(hotel: Hotel, searchParams: HotelSearchParameters, selectedRooms: [HotelRoom]) {
+    init(hotel: Hotel, searchParams: HotelSearchParameters, selectedRooms: [Room]) {
         self.hotel = hotel
         self.searchParams = searchParams
         self.selectedRooms = selectedRooms

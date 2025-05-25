@@ -143,26 +143,34 @@ extension SavedHotelsVC: UICollectionViewDataSource, UICollectionViewDelegateFlo
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let saved = viewModel.hotel(at: indexPath.item)
-        print(saved.hotelId)
+        
         FirebaseManager.shared.fetchHotel(by: saved.hotelId) { [weak self] result in
             switch result {
             case .success(let fullHotel):
-                let params = HotelSearchParameters(
-                    destination: saved.city,
-                    checkInDate: saved.checkInDate,
-                    checkOutDate: saved.checkOutDate,
-                    guestCount: saved.guestCount,
-                    roomCount: saved.roomCount
-                )
-                let detailVM = HotelDetailVM(hotel: fullHotel, searchParams: params)
-                let detailVC = HotelDetailVC(viewModel: detailVM)
-                DispatchQueue.main.async {
-                    self?.navigationController?.pushViewController(detailVC, animated: true)
+                FirebaseManager.shared.fetchRooms(for: [saved.hotelId]) { roomResult in
+                    switch roomResult {
+                    case .success(let rooms):
+                        let params = HotelSearchParameters(
+                            destination: saved.city,
+                            checkInDate: saved.checkInDate,
+                            checkOutDate: saved.checkOutDate,
+                            guestCount: saved.guestCount,
+                            roomCount: saved.roomCount
+                        )
+                        let detailVM = HotelDetailVM(hotel: fullHotel, rooms: rooms, searchParams: params)
+                        let detailVC = HotelDetailVC(viewModel: detailVM)
+                        DispatchQueue.main.async {
+                            self?.navigationController?.pushViewController(detailVC, animated: true)
+                        }
+                    case .failure(let error):
+                        print("❌ Failed to fetch rooms:", error.localizedDescription)
+                    }
                 }
             case .failure(let error):
-                print(" Failed to fetch hotel:", error.localizedDescription)
+                print("❌ Failed to fetch hotel:", error.localizedDescription)
             }
         }
     }
+
 }
 
