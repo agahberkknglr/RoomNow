@@ -40,6 +40,7 @@ protocol HotelDetailVMProtocol: AnyObject {
     var checkOutDate: Date { get }
     var guestInfoText: String { get }
     var cheapestRoom: HotelDetailVM.RoomDisplayData? { get }
+    var totalPriceForCombination: Double { get }
     var mockCoordinate: CLLocationCoordinate2D { get }
     var amenities: [Amenity] { get }
     var description: String { get }
@@ -65,7 +66,8 @@ final class HotelDetailVM: HotelDetailVMProtocol {
     private let hotel: Hotel
     private let _rooms: [Room]
     private let searchParams: HotelSearchParameters
-    
+    private(set) var validRoomCombination: [Room] = []
+
     var hotelForNavigation: Hotel { hotel }
     var searchParamsForNavigation: HotelSearchParameters { searchParams }
     
@@ -73,6 +75,7 @@ final class HotelDetailVM: HotelDetailVMProtocol {
         self.hotel = hotel
         self._rooms = rooms
         self.searchParams = searchParams
+        self.validRoomCombination = findValidRoomCombination()
     }
 
     var sections: [HotelDetailSection] {
@@ -117,23 +120,26 @@ final class HotelDetailVM: HotelDetailVMProtocol {
     }
 
     var cheapestRoom: RoomDisplayData? {
-        let availableRooms = rooms.filter {
-            $0.isAvailable(for: searchParams.checkInDate, checkOut: searchParams.checkOutDate)
+        guard let cheapest = validRoomCombination.min(by: { $0.price < $1.price }) else {
+            return nil
         }
-        
-        return availableRooms.map {
-            RoomDisplayData(
-                typeName: $0.roomType,
-                roomNumber: $0.roomNumber,
-                bedCapacity: $0.bedCapacity,
-                price: $0.price,
-                description: $0.description
-            )
-        }.min(by: { $0.price < $1.price })
+
+        return RoomDisplayData(
+            typeName: cheapest.roomType,
+            roomNumber: cheapest.roomNumber,
+            bedCapacity: cheapest.bedCapacity,
+            price: cheapest.price,
+            description: cheapest.description
+        )
+    }
+    
+    var totalPriceForCombination: Double {
+        let nights = Calendar.current.dateComponents([.day], from: checkInDate, to: checkOutDate).day ?? 1
+        return Double(validRoomCombination.reduce(0) { $0 + Int($1.price) }) * Double(nights)
     }
 
     var mockCoordinate: CLLocationCoordinate2D {
-        CLLocationCoordinate2D(latitude: 41.0082, longitude: 28.9784) // Istanbul
+        CLLocationCoordinate2D(latitude: hotel.latitude, longitude: hotel.longitude)
     }
     
     var amenities: [Amenity] {
@@ -219,6 +225,23 @@ final class HotelDetailVM: HotelDetailVMProtocol {
             }
             
         }
+    }
+    
+    private func findValidRoomCombination() -> [Room] {
+        let filteredRooms = rooms.filter {
+            $0.isAvailable(for: searchParams.checkInDate, checkOut: searchParams.checkOutDate)
+        }
+
+        let combinations = filteredRooms.combinations(ofCount: searchParams.roomCount)
+        
+        for combo in combinations {
+            let totalBeds = combo.reduce(0) { $0 + $1.bedCapacity }
+            if totalBeds >= searchParams.guestCount {
+                return combo
+            }
+        }
+        
+        return []
     }
 }
 
