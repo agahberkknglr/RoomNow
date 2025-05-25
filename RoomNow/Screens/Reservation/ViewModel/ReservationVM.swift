@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseAuth
 
 final class ReservationVM {
     let hotel: Hotel
@@ -43,4 +44,71 @@ final class ReservationVM {
     var totalPrice: Int {
         selectedRooms.reduce(0) { $0 + (Int($1.price) * numberOfNights) }
     }
+    
+    func confirmReservation(completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let hotelId = hotel.id else {
+            completion(.failure(NSError(domain: "Missing hotel ID", code: 0)))
+            return
+        }
+
+        let reservation = Reservation(
+            hotelId: hotelId,
+            hotelName: hotel.name,
+            checkInDate: searchParams.checkInDate,
+            checkOutDate: searchParams.checkOutDate,
+            guestCount: searchParams.guestCount,
+            roomCount: selectedRooms.count,
+            selectedRoomNumbers: selectedRooms.map { $0.roomNumber },
+            totalPrice: totalPrice,
+            fullName: fullName,
+            email: email,
+            phone: phone,
+            note: note,
+            reservedAt: Date()
+        )
+
+        FirebaseManager.shared.saveReservation(reservation) { [weak self] result in
+            switch result {
+            case .success:
+                self?.updateRoomDates(completion: completion)
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    func updateRoomDates(completion: @escaping (Result<Void, Error>) -> Void) {
+        let group = DispatchGroup()
+        var firstError: Error?
+        
+        
+
+        for room in selectedRooms {
+            group.enter()
+            guard let roomId = room.id else {
+                print("❌ Room ID is nil for room number: \(room.roomNumber)")
+                continue
+            }
+            FirebaseManager.shared.updateBookedDates(
+                for: roomId,
+                startDate: searchParams.checkInDate,
+                endDate: searchParams.checkOutDate
+            ) { result in
+                if case .failure(let error) = result, firstError == nil {
+                    firstError = error
+                }
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            if let error = firstError {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+
 }
