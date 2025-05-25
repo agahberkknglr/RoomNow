@@ -24,7 +24,7 @@ struct Reservation: Codable {
     let phone: String
     let note: String?
     let reservedAt: Date
-    let status: ReservationStatus
-    let completedAt: Date?
-    let cancelledAt: Date?
+    var status: ReservationStatus
+    var completedAt: Date?
+    var cancelledAt: Date?
 }
