@@ -54,6 +54,7 @@ final class ReservationVM {
         let reservation = Reservation(
             hotelId: hotelId,
             hotelName: hotel.name,
+            city: hotel.city,
             checkInDate: searchParams.checkInDate,
             checkOutDate: searchParams.checkOutDate,
             guestCount: searchParams.guestCount,
