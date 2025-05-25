@@ -14,6 +14,8 @@ struct Hotel: Codable {
     let rating: Double
     let location: String
     let description: String
+    let latitude: Double
+    let longitude: Double
     let imageUrls: [String]
     let amenities: [String]
 }
@@ -27,6 +29,8 @@ extension Hotel {
             rating: 4.5,
             location: "",
             description: "",
+            latitude: 0.0,
+            longitude: 0.0,
             imageUrls: [],
             amenities: []
         )
