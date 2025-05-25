@@ -320,6 +320,53 @@ extension FirebaseManager: FirebaseManagerProtocol {
         }
     }
     
+    func saveReservation(_ reservation: Reservation, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "User not logged in", code: 401)))
+            return
+        }
+
+        do {
+            let data = try Firestore.Encoder().encode(reservation)
+            Firestore.firestore()
+                .collection("users")
+                .document(uid)
+                .collection("reservations")
+                .addDocument(data: data) { error in
+                    if let error = error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(()))
+                    }
+                }
+        } catch {
+            completion(.failure(error))
+        }
+    }
+    
+    func updateBookedDates(for roomId: String, startDate: Date, endDate: Date, completion: @escaping (Result<Void, Error>) -> Void) {
+        let db = Firestore.firestore()
+        let roomRef = db.collection("rooms").document(roomId)
+
+        roomRef.updateData([
+            "bookedDates": FieldValue.arrayUnion([
+                [
+                    "start": Timestamp(date: startDate),
+                    "end": Timestamp(date: endDate)
+                ]
+            ])
+        ]) { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+
+
+    
     
     
     
