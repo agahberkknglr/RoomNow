@@ -6,8 +6,10 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct Reservation: Codable {
+    @DocumentID var id: String?
     let hotelId: String
     let hotelName: String
     let city: String
@@ -22,4 +24,7 @@ struct Reservation: Codable {
     let phone: String
     let note: String?
     let reservedAt: Date
+    let status: ReservationStatus
+    let completedAt: Date?
+    let cancelledAt: Date?
 }
