@@ -31,6 +31,9 @@ final class BookingCell: UITableViewCell {
 
         titleLabel.applyCellTitleStyle()
         dateLabel.applyCellSubtitleStyle()
+        dateLabel.adjustsFontSizeToFitWidth = true
+        dateLabel.minimumScaleFactor = 0.8
+        dateLabel.numberOfLines = 1
         priceLabel.applyCellSubtitleStyle()
         statusLabel.applyCellSecondSubtitleStyle()
         
