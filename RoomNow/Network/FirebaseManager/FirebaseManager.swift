@@ -363,6 +363,28 @@ extension FirebaseManager: FirebaseManagerProtocol {
             }
         }
     }
+    
+    func fetchReservations(completion: @escaping (Result<[Reservation], Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "Not logged in", code: 401)))
+            return
+        }
+
+        Firestore.firestore()
+            .collection("users")
+            .document(uid)
+            .collection("reservations")
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                } else if let docs = snapshot?.documents {
+                    let reservations = docs.compactMap { try? $0.data(as: Reservation.self) }
+                    completion(.success(reservations))
+                } else {
+                    completion(.success([]))
+                }
+            }
+    }
 
 
 
