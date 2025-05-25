@@ -13,6 +13,7 @@ final class HotelMapCell: UITableViewCell {
     private let view = UIView()
     private let mapView = MKMapView()
     private let addressLabel = UILabel()
+    private var coordinate: CLLocationCoordinate2D?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -59,6 +60,7 @@ final class HotelMapCell: UITableViewCell {
     }
     
     func configure(locationText: String, mockCoordinate: CLLocationCoordinate2D) {
+        coordinate = mockCoordinate
         addressLabel.text = locationText
 
         let region = MKCoordinateRegion(center: mockCoordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
@@ -76,8 +78,8 @@ final class HotelMapCell: UITableViewCell {
     }
 
     @objc private func openInMaps() {
-        // Example: open in Apple Maps with fake coordinate
-        let coordinate = CLLocationCoordinate2D(latitude: 41.0082, longitude: 28.9784) // Istanbul by default
+        guard let coordinate = coordinate else { return }
+
         let placemark = MKPlacemark(coordinate: coordinate)
         let mapItem = MKMapItem(placemark: placemark)
         mapItem.name = addressLabel.text
