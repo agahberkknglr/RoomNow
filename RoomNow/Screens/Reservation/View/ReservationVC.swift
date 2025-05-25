@@ -77,8 +77,16 @@ final class ReservationVC: UIViewController {
     }
 
     @objc private func confirmTapped() {
-        print("🛎 Reservation Confirmed")
-        // Later: call FirebaseManager.shared.saveReservation(...)
+        viewModel.confirmReservation { [weak self] result in
+            switch result {
+            case .success:
+                print("✅ Reservation and room updates complete")
+                // maybe show confirmation screen or alert
+            case .failure(let error):
+                print("❌ Error: \(error.localizedDescription)")
+                // show error alert
+            }
+        }
     }
 }
 
@@ -128,8 +136,4 @@ extension ReservationVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         100
     }
-
-    
-    
 }
-
