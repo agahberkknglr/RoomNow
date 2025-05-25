@@ -65,7 +65,10 @@ final class ReservationVM {
             email: email,
             phone: phone,
             note: note,
-            reservedAt: Date()
+            reservedAt: Date(),
+            status: .active,
+            completedAt: nil,
+            cancelledAt: nil
         )
 
         FirebaseManager.shared.saveReservation(reservation) { [weak self] result in
