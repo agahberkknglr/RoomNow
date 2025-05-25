@@ -32,21 +32,24 @@ final class HotelCellVM {
     var hotelRatingText: String { "\(hotel.rating)" }
     
     private func findValidRoomCombination() -> [Room] {
-        let filteredRooms = allRooms.filter {
+        let availableRooms = allRooms.filter {
             $0.isAvailable(for: searchParams.checkInDate, checkOut: searchParams.checkOutDate)
         }
 
-        let combinations = filteredRooms.combinations(ofCount: searchParams.roomCount)
-
-        for combo in combinations {
-            let totalBeds = combo.reduce(0) { $0 + $1.bedCapacity }
-            if totalBeds >= guestCount {
-                return combo
+        if searchParams.roomCount == 1 {
+            return availableRooms.first(where: { $0.bedCapacity >= searchParams.guestCount }).map { [$0] } ?? []
+        } else {
+            let combinations = availableRooms.combinations(ofCount: searchParams.roomCount)
+            for combo in combinations {
+                let totalBeds = combo.reduce(0) { $0 + $1.bedCapacity }
+                if totalBeds >= searchParams.guestCount {
+                    return combo
+                }
             }
+            return []
         }
-
-        return []
     }
+
 
     func loadSavedStatus(completion: @escaping () -> Void) {
         guard let id = hotel.id else {

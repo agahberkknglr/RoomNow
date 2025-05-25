@@ -210,7 +210,7 @@ extension HotelDetailVC: UITableViewDataSource {
             
         case .cheapestRoom:
             let cell = tableView.dequeue(HotelCheapestRoomCell.self, for: indexPath)
-            cell.configure(price: viewModel.cheapestRoom?.price ?? 0, startDate: viewModel.checkInDate, endDate: viewModel.checkOutDate)
+            cell.configure(price: viewModel.totalPriceForCombination, startDate: viewModel.checkInDate, endDate: viewModel.checkOutDate)
             return cell
             
         case .map:
