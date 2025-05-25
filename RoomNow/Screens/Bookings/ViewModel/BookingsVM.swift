@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseAuth
 
 final class BookingsVM {
     private(set) var groupedReservations: [(city: String, reservations: [Reservation])] = []
