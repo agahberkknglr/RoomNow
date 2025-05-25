@@ -411,6 +411,71 @@ extension FirebaseManager: FirebaseManagerProtocol {
                 }
             }
     }
+    
+    func cancelReservation(for reservationId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "auth", code: -1)))
+            return
+        }
+
+        let docRef = Firestore.firestore()
+            .collection("users")
+            .document(uid)
+            .collection("reservations")
+            .document(reservationId)
+
+        docRef.updateData([
+            "status": "cancelled",
+            "cancelledAt": Timestamp(date: Date())
+        ]) { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+    
+    func removeBookedDate(hotelId: String, roomNumber: String, startDate: Date, endDate: Date, completion: @escaping (Result<Void, Error>) -> Void) {
+        let roomRef = Firestore.firestore()
+            .collection("hotels")
+            .document(hotelId)
+            .collection("rooms")
+            .document(roomNumber)
+        
+        let bookedRange = [
+            "start": Timestamp(date: startDate),
+            "end": Timestamp(date: endDate)
+        ]
+        
+        roomRef.updateData([
+            "bookedDates": FieldValue.arrayRemove([bookedRange])
+        ]) { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+    func markReservationCompleted(userId: String, reservationId: String, date: Date, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        let db = Firestore.firestore()
+        let ref = db.collection("users").document(userId).collection("reservations").document(reservationId)
+        
+        ref.updateData([
+            "status": "completed",
+            "completedAt": Timestamp(date: date)
+        ]) { error in
+            if let error = error {
+                print("❌ Failed to mark completed:", error.localizedDescription)
+                completion?(.failure(error))
+            } else {
+                completion?(.success(()))
+            }
+        }
+    }
 
 
     
