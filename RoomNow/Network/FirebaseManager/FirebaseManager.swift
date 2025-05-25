@@ -365,27 +365,52 @@ extension FirebaseManager: FirebaseManagerProtocol {
     }
     
     func fetchReservations(completion: @escaping (Result<[Reservation], Error>) -> Void) {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            completion(.failure(NSError(domain: "Not logged in", code: 401)))
+        guard let userId = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "NoUserID", code: -1)))
             return
         }
 
-        Firestore.firestore()
-            .collection("users")
-            .document(uid)
+        let db = Firestore.firestore()
+        db.collection("users")
+            .document(userId)
             .collection("reservations")
+            .order(by: "reservedAt", descending: true)
             .getDocuments { snapshot, error in
                 if let error = error {
                     completion(.failure(error))
-                } else if let docs = snapshot?.documents {
-                    let reservations = docs.compactMap { try? $0.data(as: Reservation.self) }
-                    completion(.success(reservations))
                 } else {
-                    completion(.success([]))
+                    let reservations = snapshot?.documents.compactMap {
+                        try? $0.data(as: Reservation.self)
+                    } ?? []
+                    completion(.success(reservations))
                 }
             }
     }
 
+
+    func updateReservationStatus(userId: String, reservationId: String, newStatus: ReservationStatus, completion: @escaping (Result<Void, Error>) -> Void) {
+        let db = Firestore.firestore()
+        var updates: [String: Any] = [
+            "status": newStatus.rawValue
+        ]
+
+        if newStatus == .completed {
+            updates["completedAt"] = Timestamp(date: Date())
+        } else if newStatus == .cancelled {
+            updates["cancelledAt"] = Timestamp(date: Date())
+        }
+
+        db.collection("users").document(userId)
+            .collection("reservations")
+            .document(reservationId)
+            .updateData(updates) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
+            }
+    }
 
 
     
