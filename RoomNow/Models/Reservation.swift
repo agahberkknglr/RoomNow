@@ -10,6 +10,7 @@ import Foundation
 struct Reservation: Codable {
     let hotelId: String
     let hotelName: String
+    let city: String
     let checkInDate: Date
     let checkOutDate: Date
     let guestCount: Int
