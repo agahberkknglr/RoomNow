@@ -10,7 +10,7 @@ import FirebaseAuth
 
 final class BookingDetailVM {
     
-    var reservation: Reservation  // must be var to allow mutation
+    var reservation: Reservation
     private(set) var reservationId: String
     
     init(reservation: Reservation, reservationId: String) {
@@ -28,10 +28,6 @@ final class BookingDetailVM {
     }
 
     func cancelReservation(completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            completion(.failure(NSError(domain: "auth", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user logged in."])))
-            return
-        }
 
         FirebaseManager.shared.cancelReservation(for: reservationId) { [weak self] result in
             switch result {
@@ -51,9 +47,9 @@ final class BookingDetailVM {
 
         for roomNumber in reservation.selectedRoomNumbers {
             group.enter()
+            let roomId = "\(reservation.hotelId)_\(roomNumber)"
             FirebaseManager.shared.removeBookedDate(
-                hotelId: reservation.hotelId,
-                roomNumber: roomNumber,
+                roomId: roomId,
                 startDate: reservation.checkInDate,
                 endDate: reservation.checkOutDate
             ) { result in
