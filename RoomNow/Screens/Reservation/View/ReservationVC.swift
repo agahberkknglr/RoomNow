@@ -81,12 +81,41 @@ final class ReservationVC: UIViewController {
             switch result {
             case .success:
                 print("✅ Reservation and room updates complete")
-                // maybe show confirmation screen or alert
+                self?.showBookingSuccessAlert()
             case .failure(let error):
                 print("❌ Error: \(error.localizedDescription)")
-                // show error alert
+                self?.showBookingErrorAlert(message: error.localizedDescription)
             }
         }
+    }
+    
+    private func showBookingSuccessAlert() {
+        let alert = UIAlertController(
+            title: "Booking Confirmed",
+            message: "Your reservation was successfully completed.",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            self.navigateAfterBooking()
+        })
+
+        present(alert, animated: true)
+    }
+    
+    private func showBookingErrorAlert(message: String) {
+        let alert = UIAlertController(
+            title: "Booking Failed",
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
+    private func navigateAfterBooking() {
+        navigationController?.popToRootViewController(animated: true)
+        tabBarController?.selectedIndex = 2
     }
 }
 
