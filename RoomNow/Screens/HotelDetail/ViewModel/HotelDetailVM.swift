@@ -94,10 +94,7 @@ final class HotelDetailVM: HotelDetailVMProtocol {
     var hotelName: String { hotel.name }
     var location: String { hotel.location }
     var ratingText: String { "\(hotel.rating)" }
-    //var imageUrls: [String] { hotel.imageUrls }
-    var imageUrls: [String] {
-        return ["hotelph", "hotelph", "hotelph", "hotelph"]
-    }
+    var imageUrls: [String] { hotel.imageUrls }
 
     var checkInDateText: String {
         format(date: searchParams.checkInDate)

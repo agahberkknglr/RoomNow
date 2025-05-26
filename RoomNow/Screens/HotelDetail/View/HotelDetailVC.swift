@@ -190,13 +190,6 @@ extension HotelDetailVC: UITableViewDataSource {
             let cell = tableView.dequeue(HotelImageCell.self, for: indexPath)
             cell.configure(with: viewModel.imageUrls)
             return cell
-        //case .imageGallery:
-        //    guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: HotelImageCell.self), for: indexPath) as? HotelImageCell,
-        //          let imageUrls = section.data as? [String] else {
-        //        return UITableViewCell()
-        //    }
-        //    cell.configure(with: imageUrls)
-        //    return cell
         
         case .checkInOut:
             let cell = tableView.dequeue(HotelCheckInOutCell.self, for: indexPath)

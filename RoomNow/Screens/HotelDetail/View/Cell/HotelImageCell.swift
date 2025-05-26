@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SDWebImage
 
 final class HotelImageCell: UITableViewCell {
 
@@ -37,38 +38,44 @@ final class HotelImageCell: UITableViewCell {
         ])
     }
     
-    func configure(with imageNames: [String]) {
-        scrollView.subviews.forEach { $0.removeFromSuperview() }
-
-        let width = UIScreen.main.bounds.width
-        let height: CGFloat = 200
-
-        for (index, name) in imageNames.enumerated() {
-            let imageView = UIImageView()
-            imageView.image = UIImage(named: name)
-            imageView.contentMode = .scaleAspectFill
-            imageView.clipsToBounds = true
-            imageView.frame = CGRect(x: CGFloat(index) * width, y: 0, width: width, height: height)
-            scrollView.addSubview(imageView)
-        }
-
-        scrollView.contentSize = CGSize(width: width * CGFloat(imageNames.count), height: height)
-    }
-    //MARK: update this when firebase has images 
-    //func configure(with imageUrls: [String]) {
+    //func configure(with imageNames: [String]) {
     //    scrollView.subviews.forEach { $0.removeFromSuperview() }
-
+//
     //    let width = UIScreen.main.bounds.width
     //    let height: CGFloat = 200
-    //
-    //    for (index, _) in imageUrls.enumerated() {
+//
+    //    for (index, name) in imageNames.enumerated() {
     //        let imageView = UIImageView()
-    //        imageView.backgroundColor = .appSecondaryAccent // Placeholder
+    //        imageView.image = UIImage(named: name)
     //        imageView.contentMode = .scaleAspectFill
     //        imageView.clipsToBounds = true
     //        imageView.frame = CGRect(x: CGFloat(index) * width, y: 0, width: width, height: height)
     //        scrollView.addSubview(imageView)
     //    }
-    //    scrollView.contentSize = CGSize(width: width * CGFloat(imageUrls.count), height: height)
+//
+    //    scrollView.contentSize = CGSize(width: width * CGFloat(imageNames.count), height: height)
     //}
+
+    func configure(with imageUrls: [String]) {
+        scrollView.subviews.forEach { $0.removeFromSuperview() }
+
+        let width = UIScreen.main.bounds.width
+        let height: CGFloat = 200
+
+        for (index, urlString) in imageUrls.enumerated() {
+            let imageView = UIImageView()
+            imageView.backgroundColor = .appSecondaryAccent // placeholder background
+            imageView.contentMode = .scaleAspectFill
+            imageView.clipsToBounds = true
+            imageView.frame = CGRect(x: CGFloat(index) * width, y: 0, width: width, height: height)
+
+            if let url = URL(string: urlString) {
+                imageView.sd_setImage(with: url, placeholderImage: UIImage(named: "hotelph"))
+            }
+
+            scrollView.addSubview(imageView)
+        }
+
+        scrollView.contentSize = CGSize(width: width * CGFloat(imageUrls.count), height: height)
+    }
 }
