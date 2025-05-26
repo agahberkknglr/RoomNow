@@ -112,6 +112,20 @@ extension BookingsVC: UITableViewDataSource {
 
 extension BookingsVC: UITableViewDelegate {
     
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let reservation = viewModel.reservation(at: indexPath)
+        
+        guard let id = reservation.id else {
+            print("Reservation missing ID")
+            return
+        }
+
+        let detailVM = BookingDetailVM(reservation: reservation, reservationId: id)
+        let detailVC = BookingDetailVC(viewModel: detailVM)
+        detailVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(detailVC, animated: true)
+    }
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         110
     }
