@@ -21,6 +21,11 @@ final class BookingDetailVM {
     var isCancelable: Bool {
         reservation.status == .active && Date() < reservation.checkInDate
     }
+    
+    var numberOfNights: Int {
+        let nights = Calendar.current.dateComponents([.day], from: reservation.checkInDate, to: reservation.checkOutDate).day ?? 1
+        return max(nights, 1)
+    }
 
     func cancelReservation(completion: @escaping (Result<Void, Error>) -> Void) {
         guard let uid = Auth.auth().currentUser?.uid else {
