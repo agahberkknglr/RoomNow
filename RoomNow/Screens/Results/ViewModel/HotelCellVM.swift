@@ -30,6 +30,7 @@ final class HotelCellVM {
     var hotelName: String { hotel.name }
     var hotelLocation: String { hotel.location }
     var hotelRatingText: String { "\(hotel.rating)" }
+    var hotelImageUrl: String? { return hotel.imageUrls.first }
     
     private func findValidRoomCombination() -> [Room] {
         let availableRooms = allRooms.filter {

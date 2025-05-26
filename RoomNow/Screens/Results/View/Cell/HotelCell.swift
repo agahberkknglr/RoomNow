@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SDWebImage
 
 final class HotelCell: UICollectionViewCell {
     
@@ -167,6 +168,13 @@ final class HotelCell: UICollectionViewCell {
             roomTypeLabel.text = ""
             roomBedLabel.text = ""
             infoLabel.text = ""
+        }
+        
+        if let imageUrlString = viewModel.hotelImageUrl,
+           let url = URL(string: imageUrlString) {
+            hotelImageView.sd_setImage(with: url)
+        } else {
+            hotelImageView.image = UIImage(named: "hotelph")
         }
 
         viewModel.loadSavedStatus { [weak self] in
