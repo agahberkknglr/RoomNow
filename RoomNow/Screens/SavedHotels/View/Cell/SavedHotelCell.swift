@@ -36,11 +36,9 @@ final class SavedHotelCell: UICollectionViewCell {
     }
 
     private func setupUI() {
-        //contentView.layer.cornerRadius = 12
-        //contentView.layer.borderWidth = 1
-        //contentView.layer.borderColor = UIColor.appDivider.cgColor
-        //contentView.clipsToBounds = true
-        contentView.backgroundColor = .appBackground
+        contentView.layer.cornerRadius = 12
+        contentView.clipsToBounds = true
+        contentView.backgroundColor = .appSecondaryBackground
 
         nameLabel.font = .boldSystemFont(ofSize: 18)
         nameLabel.textColor = .appPrimaryText
