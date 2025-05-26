@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseAuth
 
 protocol SearchVMProtocol: AnyObject {
     var delegate: SearchVMDelegate? { get set }
@@ -23,6 +24,12 @@ protocol SearchVMProtocol: AnyObject {
     func getDestinationTitle() -> String
     func isSearchEnabled() -> Bool
     func getSearchParameters() -> HotelSearchParameters?
+    func saveRecentSearch()
+    func numberOfRecentSearches() -> Int
+    func recentSearch(at index: Int) -> HotelSearchParameters?
+    func recentSearchTitle(at index: Int) -> String
+    func loadRecentSearches()
+    func historyCellViewModel(at index: Int) -> HistoryCellViewModel 
 }
 
 protocol SearchVMDelegate: AnyObject {
@@ -45,9 +52,12 @@ final class SearchVM {
     private var selectedRooms: Int = 1
     private var selectedAdults: Int = 2
     private var selectedChildren: Int = 0
+    private(set) var recentSearches: [RecentSearch] = []
+
 }
 
 extension SearchVM: SearchVMProtocol {
+    
     func viewDidLoad() {
         delegate?.updateUI()
     }
@@ -104,6 +114,67 @@ extension SearchVM: SearchVMProtocol {
             checkOutDate: end,
             guestCount: selectedAdults + selectedChildren,
             roomCount: selectedRooms
+        )
+    }
+    
+    func saveRecentSearch() {
+        guard let userId = Auth.auth().currentUser?.uid,
+              let parameters = getSearchParameters() else { return }
+        CoreDataManager.shared.saveRecentSearch(parameters, for: userId)
+    }
+
+    func loadRecentSearches() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        recentSearches = CoreDataManager.shared.fetchRecentSearches(for: userId)
+        delegate?.updateUI()
+    }
+
+    func numberOfRecentSearches() -> Int {
+        return recentSearches.count
+    }
+
+    func recentSearch(at index: Int) -> HotelSearchParameters? {
+        let s = recentSearches[index]
+        guard let destination = s.destination,
+              let checkIn = s.checkInDate,
+              let checkOut = s.checkOutDate else {
+            return nil
+        }
+        
+        return HotelSearchParameters(
+            destination: destination,
+            checkInDate: checkIn,
+            checkOutDate: checkOut,
+            guestCount: Int(s.guestCount),
+            roomCount: Int(s.roomCount)
+        )
+    }
+
+    func recentSearchTitle(at index: Int) -> String {
+        let s = recentSearches[index]
+        let destination = s.destination ?? ""
+        let guestCount = Int(s.guestCount)
+        let roomCount = Int(s.roomCount)
+        return "\(destination.capitalized), \(roomCount) room, \(guestCount) guests"
+    }
+    
+    func historyCellViewModel(at index: Int) -> HistoryCellViewModel {
+        let search = recentSearches[index]
+        
+        let destination = search.destination ?? "Unknown"
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMM d"
+        let checkIn = search.checkInDate.map { dateFormatter.string(from: $0) } ?? "-"
+        let checkOut = search.checkOutDate.map { dateFormatter.string(from: $0) } ?? "-"
+        let dateRange = "\(checkIn) - \(checkOut)"
+        
+        let guestSummary = "\(search.roomCount) room • \(search.guestCount) guests"
+
+        return HistoryCellViewModel(
+            destination: destination.capitalized,
+            dateRange: dateRange,
+            guestSummary: guestSummary
         )
     }
 }
