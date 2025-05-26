@@ -67,4 +67,27 @@ final class HistoryCell: UITableViewCell {
         dateLabel.text = viewModel.dateRange
         guestlabel.text = viewModel.guestSummary
     }
+    
+    func animateForSwipe() {
+        UIView.animate(withDuration: 0.2) {
+            self.view.backgroundColor = .systemRed.withAlphaComponent(0.2)
+            self.view.transform = CGAffineTransform(scaleX: 0.97, y: 0.97)
+        }
+    }
+
+    func resetSwipeState() {
+        UIView.animate(withDuration: 0.2) {
+            self.view.backgroundColor = .appSecondaryBackground
+            self.view.transform = .identity
+        }
+    }
+    
+    func animateDelete(completion: @escaping () -> Void) {
+        UIView.animate(withDuration: 0.3, animations: {
+            self.view.alpha = 0
+            self.view.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+        }, completion: { _ in
+            completion()
+        })
+    }
 }
