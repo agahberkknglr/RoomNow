@@ -97,7 +97,7 @@ final class BookingHotelInfoCell: UITableViewCell {
     
     func configure(hotelName: String, location: String, checkIn: Date, checkOut: Date, guestCount: Int) {
         titleLabel.text = hotelName
-        locationLabel.text = location
+        locationLabel.text = location.capitalized
 
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d, yyyy"
