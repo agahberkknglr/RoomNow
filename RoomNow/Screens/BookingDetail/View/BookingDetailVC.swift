@@ -37,6 +37,7 @@ final class BookingDetailVC: UIViewController {
         tableView.backgroundColor = .appBackground
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
+        tableView.separatorStyle = .none
         tableView.registerCell(type: BookingHotelInfoCell.self)
         tableView.registerCell(type: BookingPriceInfoCell.self)
         tableView.registerCell(type: BookingRoomInfoCell.self)
@@ -49,11 +50,11 @@ final class BookingDetailVC: UIViewController {
     }
 
     private func setupCancelButtonIfNeeded() {
-        guard viewModel.isCancelable else { return }
+        guard viewModel.isCancelable else { return tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true }
 
         cancelButton.setTitle("Cancel Reservation", for: .normal)
-        cancelButton.backgroundColor = .systemRed
-        cancelButton.setTitleColor(.white, for: .normal)
+        cancelButton.backgroundColor = .appButtonBackground
+        cancelButton.setTitleColor(.appError, for: .normal)
         cancelButton.layer.cornerRadius = 8
         cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
 
@@ -128,7 +129,6 @@ extension BookingDetailVC: UITableViewDataSource {
             let typeName = "Room Type Name in here..."
             let nights = viewModel.numberOfNights
             let guest = viewModel.reservation.fullName
-
             let cell = tableView.dequeue(BookingRoomInfoCell.self, for: indexPath)
             cell.configure(roomNumber: roomNumber, typeName: typeName, nights: nights, guestName: guest)
             return cell
