@@ -475,6 +475,19 @@ extension FirebaseManager: FirebaseManagerProtocol {
             }
         }
     }
+    
+    func deleteReservation(userId: String, reservationId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        let db = Firestore.firestore()
+        db.collection("users").document(userId).collection("reservations")
+            .document(reservationId)
+            .delete { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
+            }
+    }
 
 
     
