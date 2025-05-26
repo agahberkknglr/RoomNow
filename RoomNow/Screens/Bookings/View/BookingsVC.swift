@@ -29,6 +29,11 @@ final class BookingsVC: UIViewController {
         setupTableView()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        fetchLatestReservations()
+    }
+    
     private func setupUI(){
         view.backgroundColor = .appBackground
         title = "Bookings"
@@ -55,7 +60,10 @@ final class BookingsVC: UIViewController {
             emptyView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
-        
+        fetchLatestReservations()
+    }
+    
+    private func fetchLatestReservations() {
         viewModel.fetchReservations { [weak self] in
             DispatchQueue.main.async {
                 guard let self = self else { return }
