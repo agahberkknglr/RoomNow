@@ -40,6 +40,7 @@ final class SearchVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        configureUI()
         viewModel.viewDidLoad()
         viewModel.loadRecentSearches()
     }
@@ -164,7 +165,6 @@ final class SearchVC: UIViewController {
 
 extension SearchVC: SearchVMDelegate {
     func updateUI() {
-        configureUI()
         updateButtonStates()
 
         let isEmpty = viewModel.numberOfRecentSearches() == 0
@@ -236,5 +236,9 @@ extension SearchVC: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         80
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return viewModel.numberOfRecentSearches() == 0 ? 0 : 44
     }
 }
