@@ -34,9 +34,12 @@ final class BookingDetailVC: UIViewController {
     }
 
     private func setupTableView() {
+        tableView.backgroundColor = .appBackground
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        tableView.registerCell(type: BookingHotelInfoCell.self)
+        tableView.registerCell(type: BookingPriceInfoCell.self)
+        tableView.registerCell(type: BookingRoomInfoCell.self)
         view.addSubview(tableView)
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -67,18 +70,80 @@ final class BookingDetailVC: UIViewController {
     }
 
     @objc private func cancelTapped() {
-        // Confirmation and Firebase update
+        let alert = UIAlertController(
+            title: "Cancel Reservation",
+            message: "Are you sure you want to cancel this reservation?",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Yes", style: .destructive) { [weak self] _ in
+            self?.viewModel.cancelReservation { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success:
+                        self?.navigationController?.popViewController(animated: true)
+                    case .failure(let error):
+                        self?.showErrorAlert(message: error.localizedDescription)
+                    }
+                }
+            }
+        })
+
+        present(alert, animated: true)
     }
+
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+
 }
 
 extension BookingDetailVC: UITableViewDataSource {
+    func numberOfSections(in tableView: UITableView) -> Int { 3 }
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        1
+        section == 2 ? viewModel.reservation.selectedRoomNumbers.count : 1
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        UITableViewCell()
+        let reservation = viewModel.reservation
+
+        switch indexPath.section {
+        case 0:
+            let cell = tableView.dequeue(BookingHotelInfoCell.self, for: indexPath)
+            cell.configure(
+                hotelName: viewModel.reservation.hotelName,
+                location: viewModel.reservation.city,
+                checkIn: viewModel.reservation.checkInDate,
+                checkOut: viewModel.reservation.checkOutDate,
+                guestCount: viewModel.reservation.guestCount
+            )
+            return cell
+
+        case 1:
+            let roomNumber = viewModel.reservation.selectedRoomNumbers[indexPath.row]
+            let typeName = "Room Type Name in here..."
+            let nights = viewModel.numberOfNights
+            let guest = viewModel.reservation.fullName
+
+            let cell = tableView.dequeue(BookingRoomInfoCell.self, for: indexPath)
+            cell.configure(roomNumber: roomNumber, typeName: typeName, nights: nights, guestName: guest)
+            return cell
+
+        case 2:
+            let cell = tableView.dequeue(BookingPriceInfoCell.self, for: indexPath)
+            cell.configure(
+                totalPrice: viewModel.reservation.totalPrice,
+                nights: viewModel.numberOfNights
+            )
+            return cell
+
+        default:
+            return UITableViewCell()
+        }
     }
-    
-    
 }
+
