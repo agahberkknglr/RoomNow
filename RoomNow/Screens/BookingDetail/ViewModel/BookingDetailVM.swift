@@ -22,9 +22,24 @@ final class BookingDetailVM {
         reservation.status == .active && Date() < reservation.checkInDate
     }
     
+    var canBeDeleted: Bool {
+        return reservation.status == .cancelled || reservation.status == .completed
+    }
+    
     var numberOfNights: Int {
         let nights = Calendar.current.dateComponents([.day], from: reservation.checkInDate, to: reservation.checkOutDate).day ?? 1
         return max(nights, 1)
+    }
+    
+    func deleteReservation(completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "auth", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user logged in."])))
+            return
+        }
+
+        FirebaseManager.shared.deleteReservation(userId: uid, reservationId: reservationId) { result in
+            completion(result)
+        }
     }
 
     func cancelReservation(completion: @escaping (Result<Void, Error>) -> Void) {
