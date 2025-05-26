@@ -9,12 +9,15 @@ import UIKit
 
 final class SearchVC: UIViewController {
     
+    private let scrollView = UIScrollView()
+    private let contentStack = UIStackView()
+    
     private let destinationButton = SearchOptionButton()
     private let dateButton = SearchOptionButton()
     private let roomButton = SearchOptionButton()
     private let searchButton = UIButton()
+    private let titleLabel = UILabel()
     private let recentSearchesTableView = UITableView()
-    
     private let emptyStateLabel: UILabel = {
         let label = UILabel()
         label.text = "No recent searches yet."
@@ -25,6 +28,8 @@ final class SearchVC: UIViewController {
         label.isHidden = true
         return label
     }()
+    
+    private var recentSearchesTableHeightConstraint: NSLayoutConstraint?
 
     private let viewModel: SearchVMProtocol
     
@@ -53,47 +58,63 @@ final class SearchVC: UIViewController {
     private func configureUI() {
         view.backgroundColor = .appBackground
         
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(scrollView)
+        
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        contentStack.axis = .vertical
+        contentStack.spacing = 16
+        contentStack.translatesAutoresizingMaskIntoConstraints = false
+
+        scrollView.addSubview(contentStack)
+
+        NSLayoutConstraint.activate([
+            contentStack.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 20),
+            contentStack.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20),
+            contentStack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -20),
+            contentStack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentStack.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -40)
+        ])
+        
         destinationButton.addTarget(self, action: #selector(openDestinationSheet), for: .touchUpInside)
         dateButton.addTarget(self, action: #selector(openDateSheet), for: .touchUpInside)
         roomButton.addTarget(self, action: #selector(openRoomSheet), for: .touchUpInside)
         searchButton.addTarget(self, action: #selector(searchButtonTapped), for: .touchUpInside)
         searchButton.applyPrimaryStyle(with: "Search Now")
         
-        let stackView = UIStackView(arrangedSubviews: [destinationButton, dateButton, roomButton, searchButton])
-        stackView.axis = .vertical
-        stackView.spacing = 12
-        stackView.distribution = .fillEqually
-
-        view.addSubview(stackView)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            destinationButton.heightAnchor.constraint(equalToConstant: 50),
-            searchButton.heightAnchor.constraint(equalToConstant: 50)
-        ])
+        [destinationButton, dateButton, roomButton, searchButton].forEach {
+            $0.heightAnchor.constraint(equalToConstant: 50).isActive = true
+            contentStack.addArrangedSubview($0)
+        }
         
-        view.addSubview(recentSearchesTableView)
+        contentStack.setCustomSpacing(32, after: searchButton)
+        
+        titleLabel.text = "Continue your search"
+        titleLabel.applyTitleStyle()
+        contentStack.addArrangedSubview(titleLabel)
+
         recentSearchesTableView.backgroundColor = .clear
         recentSearchesTableView.separatorStyle = .none
+        recentSearchesTableView.isScrollEnabled = false
         recentSearchesTableView.translatesAutoresizingMaskIntoConstraints = false
         recentSearchesTableView.dataSource = self
         recentSearchesTableView.delegate = self
         recentSearchesTableView.registerCell(type: HistoryCell.self)
         
-        NSLayoutConstraint.activate([
-            recentSearchesTableView.topAnchor.constraint(equalTo: searchButton.bottomAnchor, constant: 20),
-            recentSearchesTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            recentSearchesTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            recentSearchesTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+        contentStack.addArrangedSubview(recentSearchesTableView)
+
+        let initialHeight = CGFloat(0)
+        let constraint = recentSearchesTableView.heightAnchor.constraint(equalToConstant: initialHeight)
+        constraint.isActive = true
+        self.recentSearchesTableHeightConstraint = constraint
         
-        view.addSubview(emptyStateLabel)
-        NSLayoutConstraint.activate([
-            emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            emptyStateLabel.topAnchor.constraint(equalTo: searchButton.bottomAnchor, constant: 40)
-        ])
+        contentStack.addArrangedSubview(emptyStateLabel)
     }
 
     private func updateButtonStates() {
@@ -167,12 +188,17 @@ extension SearchVC: SearchVMDelegate {
     func updateUI() {
         updateButtonStates()
 
-        let isEmpty = viewModel.numberOfRecentSearches() == 0
+        let count = viewModel.numberOfRecentSearches()
+        let isEmpty = count == 0
         recentSearchesTableView.isHidden = isEmpty
         emptyStateLabel.isHidden = !isEmpty
+        titleLabel.isHidden = isEmpty
+
+        recentSearchesTableHeightConstraint?.constant = CGFloat(min(count, 5) * 80)
 
         recentSearchesTableView.reloadData()
     }
+
 }
 
 extension SearchVC: DestinationVCDelegate {
@@ -204,26 +230,6 @@ extension SearchVC: UITableViewDataSource {
         cell.configure(with: vm)
         return cell
     }
-    
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let headerView = UIView()
-        headerView.backgroundColor = .appBackground
-
-        let titleLabel = UILabel()
-        titleLabel.applyTitleStyle()
-        titleLabel.text = "Continue your search"
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        headerView.addSubview(titleLabel)
-
-        NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
-            titleLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
-            titleLabel.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
-            titleLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -8)
-        ])
-
-        return headerView
-    }
 }
 
 extension SearchVC: UITableViewDelegate {
@@ -238,7 +244,39 @@ extension SearchVC: UITableViewDelegate {
         80
     }
     
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return viewModel.numberOfRecentSearches() == 0 ? 0 : 44
+    func tableView(_ tableView: UITableView, willBeginEditingRowAt indexPath: IndexPath) {
+        if let cell = tableView.cellForRow(at: indexPath) as? HistoryCell {
+            cell.animateForSwipe()
+        }
     }
+    
+    func tableView(_ tableView: UITableView, didEndEditingRowAt indexPath: IndexPath?) {
+        if let indexPath = indexPath,
+           let cell = tableView.cellForRow(at: indexPath) as? HistoryCell {
+            cell.resetSwipeState()
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completion in
+            guard let self = self else { return }
+
+            if let cell = tableView.cellForRow(at: indexPath) as? HistoryCell {
+                cell.animateDelete {
+                    self.viewModel.deleteRecentSearch(at: indexPath.row)
+                    completion(true)
+                }
+            } else {
+                self.viewModel.deleteRecentSearch(at: indexPath.row)
+                completion(true)
+            }
+        }
+        
+        deleteAction.backgroundColor = .appBackground
+        deleteAction.image = UIImage(systemName: "trash.fill")
+        
+        
+        return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
+
 }
