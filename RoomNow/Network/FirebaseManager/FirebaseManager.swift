@@ -437,20 +437,17 @@ extension FirebaseManager: FirebaseManagerProtocol {
     }
 
     
-    func removeBookedDate(hotelId: String, roomNumber: String, startDate: Date, endDate: Date, completion: @escaping (Result<Void, Error>) -> Void) {
-        let roomRef = Firestore.firestore()
-            .collection("hotels")
-            .document(hotelId)
-            .collection("rooms")
-            .document(roomNumber)
-        
-        let bookedRange = [
+    func removeBookedDate( roomId: String, startDate: Date, endDate: Date, completion: @escaping (Result<Void, Error>) -> Void ) {
+        let db = Firestore.firestore()
+        let roomRef = db.collection("rooms").document(roomId)
+
+        let rangeToRemove: [String: Timestamp] = [
             "start": Timestamp(date: startDate),
             "end": Timestamp(date: endDate)
         ]
-        
+
         roomRef.updateData([
-            "bookedDates": FieldValue.arrayRemove([bookedRange])
+            "bookedDates": FieldValue.arrayRemove([rangeToRemove])
         ]) { error in
             if let error = error {
                 completion(.failure(error))
@@ -459,6 +456,8 @@ extension FirebaseManager: FirebaseManagerProtocol {
             }
         }
     }
+
+
 
     func markReservationCompleted(userId: String, reservationId: String, date: Date, completion: ((Result<Void, Error>) -> Void)? = nil) {
         let db = Firestore.firestore()
