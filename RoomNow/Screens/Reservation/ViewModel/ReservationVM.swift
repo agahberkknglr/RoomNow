@@ -85,12 +85,10 @@ final class ReservationVM {
         let group = DispatchGroup()
         var firstError: Error?
         
-        
-
         for room in selectedRooms {
             group.enter()
             guard let roomId = room.id else {
-                print("❌ Room ID is nil for room number: \(room.roomNumber)")
+                print("Room ID is nil for room number: \(room.roomNumber)")
                 continue
             }
             FirebaseManager.shared.updateBookedDates(
