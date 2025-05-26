@@ -13,7 +13,19 @@ final class SearchVC: UIViewController {
     private let dateButton = SearchOptionButton()
     private let roomButton = SearchOptionButton()
     private let searchButton = UIButton()
+    private let recentSearchesTableView = UITableView()
     
+    private let emptyStateLabel: UILabel = {
+        let label = UILabel()
+        label.text = "No recent searches yet."
+        label.textColor = .appSecondaryText
+        label.font = UIFont.preferredFont(forTextStyle: .body)
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
+        return label
+    }()
+
     private let viewModel: SearchVMProtocol
     
     init(viewModel: SearchVMProtocol = SearchVM()) {
@@ -29,6 +41,12 @@ final class SearchVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         viewModel.viewDidLoad()
+        viewModel.loadRecentSearches()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        viewModel.loadRecentSearches()
     }
 
     private func configureUI() {
@@ -54,6 +72,27 @@ final class SearchVC: UIViewController {
             destinationButton.heightAnchor.constraint(equalToConstant: 50),
             searchButton.heightAnchor.constraint(equalToConstant: 50)
         ])
+        
+        view.addSubview(recentSearchesTableView)
+        recentSearchesTableView.backgroundColor = .clear
+        recentSearchesTableView.separatorStyle = .none
+        recentSearchesTableView.translatesAutoresizingMaskIntoConstraints = false
+        recentSearchesTableView.dataSource = self
+        recentSearchesTableView.delegate = self
+        recentSearchesTableView.registerCell(type: HistoryCell.self)
+        
+        NSLayoutConstraint.activate([
+            recentSearchesTableView.topAnchor.constraint(equalTo: searchButton.bottomAnchor, constant: 20),
+            recentSearchesTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            recentSearchesTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            recentSearchesTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        view.addSubview(emptyStateLabel)
+        NSLayoutConstraint.activate([
+            emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyStateLabel.topAnchor.constraint(equalTo: searchButton.bottomAnchor, constant: 40)
+        ])
     }
 
     private func updateButtonStates() {
@@ -68,14 +107,18 @@ final class SearchVC: UIViewController {
     }
 
     @objc private func searchButtonTapped() {
+        viewModel.saveRecentSearch()
+
         guard let parameters = viewModel.getSearchParameters() else {
             print("Missing search data")
             return
         }
+
         let resultVC = ResultVC(searchParameters: parameters)
-        resultVC.hidesBottomBarWhenPushed = true 
+        resultVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(resultVC, animated: true)
     }
+
 
     @objc private func openDestinationSheet() {
         let destinationVC = DestinationVC()
@@ -123,6 +166,12 @@ extension SearchVC: SearchVMDelegate {
     func updateUI() {
         configureUI()
         updateButtonStates()
+
+        let isEmpty = viewModel.numberOfRecentSearches() == 0
+        recentSearchesTableView.isHidden = isEmpty
+        emptyStateLabel.isHidden = !isEmpty
+
+        recentSearchesTableView.reloadData()
     }
 }
 
@@ -141,5 +190,51 @@ extension SearchVC: DateVCDelegate {
 extension SearchVC: RoomVCDelegate {
     func didSelectRoomDetails(roomCount: Int, adults: Int, children: Int) {
         viewModel.updateSelectedRoomInfo(rooms: roomCount, adults: adults, children: children)
+    }
+}
+
+extension SearchVC: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return viewModel.numberOfRecentSearches()
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeue(HistoryCell.self, for: indexPath)
+        let vm = viewModel.historyCellViewModel(at: indexPath.row)
+        cell.configure(with: vm)
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let headerView = UIView()
+        headerView.backgroundColor = .appBackground
+
+        let titleLabel = UILabel()
+        titleLabel.applyTitleStyle()
+        titleLabel.text = "Continue your search"
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        headerView.addSubview(titleLabel)
+
+        NSLayoutConstraint.activate([
+            titleLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
+            titleLabel.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 8),
+            titleLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -8)
+        ])
+
+        return headerView
+    }
+}
+
+extension SearchVC: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let parameters = viewModel.recentSearch(at: indexPath.row) else { return }
+        let resultVC = ResultVC(searchParameters: parameters)
+        resultVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(resultVC, animated: true)
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        80
     }
 }
