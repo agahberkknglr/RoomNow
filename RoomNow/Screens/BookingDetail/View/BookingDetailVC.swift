@@ -24,6 +24,14 @@ final class BookingDetailVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        
+        if viewModel.canBeDeleted {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(
+                barButtonSystemItem: .trash,
+                target: self,
+                action: #selector(deleteTapped)
+            )
+        }
     }
 
     private func setupUI() {
@@ -99,6 +107,35 @@ final class BookingDetailVC: UIViewController {
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
+    
+    @objc private func deleteTapped() {
+        let alert = UIAlertController(
+            title: "Delete Reservation",
+            message: "Are you sure you want to permanently delete this reservation?",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+            self?.deleteReservation()
+        })
+
+        present(alert, animated: true)
+    }
+    
+    private func deleteReservation() {
+        viewModel.deleteReservation { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self?.navigationController?.popViewController(animated: true)
+                case .failure(let error):
+                    print("Failed to delete:", error.localizedDescription)
+                }
+            }
+        }
+    }
+
 
 }
 
