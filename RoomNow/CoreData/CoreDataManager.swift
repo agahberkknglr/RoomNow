@@ -58,9 +58,7 @@ extension CoreDataManager {
 
         saveContext()
     }
-}
 
-extension CoreDataManager {
     func fetchRecentSearches(for userId: String) -> [RecentSearch] {
         let request: NSFetchRequest<RecentSearch> = RecentSearch.fetchRequest()
         request.predicate = NSPredicate(format: "userId == %@", userId)
@@ -72,5 +70,10 @@ extension CoreDataManager {
             print("Fetch failed: \(error)")
             return []
         }
+    }
+    
+    func deleteRecentSearch(_ search: RecentSearch) {
+        context.delete(search)
+        saveContext()
     }
 }
