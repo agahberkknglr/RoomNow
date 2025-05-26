@@ -29,7 +29,8 @@ protocol SearchVMProtocol: AnyObject {
     func recentSearch(at index: Int) -> HotelSearchParameters?
     func recentSearchTitle(at index: Int) -> String
     func loadRecentSearches()
-    func historyCellViewModel(at index: Int) -> HistoryCellViewModel 
+    func historyCellViewModel(at index: Int) -> HistoryCellViewModel
+    func deleteRecentSearch(at index: Int)
 }
 
 protocol SearchVMDelegate: AnyObject {
@@ -176,6 +177,16 @@ extension SearchVM: SearchVMProtocol {
             dateRange: dateRange,
             guestSummary: guestSummary
         )
+    }
+    
+    func deleteRecentSearch(at index: Int) {
+        guard index < recentSearches.count else { return }
+
+        let searchToDelete = recentSearches[index]
+        CoreDataManager.shared.deleteRecentSearch(searchToDelete)
+
+        recentSearches.remove(at: index)
+        delegate?.updateUI()
     }
 }
 
