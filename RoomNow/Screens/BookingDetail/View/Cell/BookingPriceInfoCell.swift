@@ -58,7 +58,8 @@ final class BookingPriceInfoCell: UITableViewCell {
         ])
     }
     
-    func configure() {
-        
+    func configure(totalPrice: Int, nights: Int) {
+        nightLabel.text = "\(nights) night\(nights > 1 ? "s" : "")"
+        priceLabel.text = "₺\(totalPrice)"
     }
 }

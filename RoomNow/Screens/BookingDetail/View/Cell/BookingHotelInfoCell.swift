@@ -95,8 +95,22 @@ final class BookingHotelInfoCell: UITableViewCell {
         ])
     }
     
-    func configure() {
-        
+    func configure(hotelName: String, location: String, checkIn: Date, checkOut: Date, guestCount: Int) {
+        titleLabel.text = hotelName
+        locationLabel.text = location
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy"
+        formatter.timeZone = TimeZone(identifier: "Europe/Istanbul")
+
+        checkInLabel.text = "Check-in"
+        checkInDateLabel.text = formatter.string(from: checkIn)
+
+        checkOutLabel.text = "Check-out"
+        checkOutDateLabel.text = formatter.string(from: checkOut)
+
+        guestNumberLabel.text = "Guests: \(guestCount)"
     }
+
 
 }

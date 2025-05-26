@@ -66,7 +66,9 @@ final class BookingRoomInfoCell: UITableViewCell {
         ])
     }
     
-    func configure(){
-        
+    func configure(roomNumber: String, typeName: String, nights: Int, guestName: String) {
+        roomTypeLabel.text = typeName.capitalized
+        roomInfoLabel.text = "Room No: \(roomNumber) • \(nights) night\(nights > 1 ? "s" : "")"
+        roomUserNameLabel.text = "Guest: \(guestName)"
     }
 }
