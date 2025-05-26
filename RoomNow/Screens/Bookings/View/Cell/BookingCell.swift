@@ -89,9 +89,18 @@ final class BookingCell: UITableViewCell {
         
         priceLabel.text = "₺\(reservation.totalPrice)"
         
-        let endDate = reservation.checkOutDate
-        let isPast = endDate < Date()
-        statusLabel.text = isPast ? "Completed" : "Upcoming"
-        statusLabel.textColor = isPast ? .appSecondaryText : .appSuccess
+        switch reservation.status {
+        case .active:
+            statusLabel.text = "Upcoming"
+            statusLabel.textColor = .appSuccess
+
+        case .completed:
+            statusLabel.text = "Completed"
+            statusLabel.textColor = .appSecondaryText
+
+        case .cancelled:
+            statusLabel.text = "Cancelled"
+            statusLabel.textColor = .systemRed
+        }
     }
 }
