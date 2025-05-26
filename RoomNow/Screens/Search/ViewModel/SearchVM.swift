@@ -182,11 +182,9 @@ extension SearchVM: SearchVMProtocol {
     func deleteRecentSearch(at index: Int) {
         guard index < recentSearches.count else { return }
 
-        let searchToDelete = recentSearches[index]
-        CoreDataManager.shared.deleteRecentSearch(searchToDelete)
-
+        let search = recentSearches[index]
+        CoreDataManager.shared.deleteRecentSearch(search)
         recentSearches.remove(at: index)
-        delegate?.updateUI()
     }
 }
 
