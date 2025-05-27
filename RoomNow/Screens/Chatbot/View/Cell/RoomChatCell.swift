@@ -33,7 +33,6 @@ final class RoomChatCell: UITableViewCell {
         bedLabel.text = "👥 Sleeps \(room.bedCapacity)"
         priceLabel.text = "💸 ₺\(Int(room.price)) per night"
         avatarLabel.isHidden = !showAvatar
-        print("room \(typeLabel.text ?? ""): \(showAvatar)")
     }
 
     private func setupUI() {
@@ -83,9 +82,5 @@ final class RoomChatCell: UITableViewCell {
 
     @objc private func selectTapped() {
         onSelectTapped?()
-    }
-
-    static var reuseIdentifier: String {
-        return "RoomChatCell"
     }
 }
