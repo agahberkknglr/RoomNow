@@ -48,6 +48,10 @@ final class ChatbotVC: UIViewController {
         inputField.translatesAutoresizingMaskIntoConstraints = false
         sendButton.translatesAutoresizingMaskIntoConstraints = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        tableView.registerCell(type: HotelChatCell.self)
+        tableView.registerCell(type: SummaryChatCell.self)
+        tableView.registerCell(type: RoomChatCell.self)
 
         view.addSubview(tableView)
         view.addSubview(inputContainer)
@@ -90,38 +94,82 @@ extension ChatbotVC: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = messages[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
 
-        var config = UIListContentConfiguration.valueCell()
-        config.text = message.text
-        config.textProperties.alignment = .natural
-        config.textProperties.color = (message.sender == .user) ? .label : .systemGray
+        switch message.type {
+        
+        case .summary:
+            guard let data = message.payload as? ParsedSearchData else {
+                return UITableViewCell()
+            }
 
-        cell.contentConfiguration = config
-        return cell
+            let cell = tableView.dequeue(SummaryChatCell.self, for: indexPath)
+            cell.configure(with: data)
+
+            cell.onSearchTapped = { [weak self] in
+                self?.viewModel.fetchHotels(for: data)
+            }
+
+            return cell
+        
+        case .hotelCard:
+            guard let hotelData = message.payload as? HotelWithRooms else {
+                return UITableViewCell()
+            }
+
+            let cell = tableView.dequeue(HotelChatCell.self, for: indexPath)
+            cell.configure(with: hotelData.hotel, rooms: hotelData.rooms)
+
+            cell.onViewDetails = { [weak self] in
+                guard let self = self, let parsed = self.lastParsedSearchData else { return }
+                let params = parsed.toHotelSearchParameters()
+                let vc = HotelDetailVC(viewModel: HotelDetailVM(hotel: hotelData.hotel, rooms: hotelData.rooms, searchParams: params))
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+
+            cell.onSelectRoom = { [weak self] in
+                guard let self = self else { return }
+
+                self.appendMessage("🛏️ Please select your room type for \(hotelData.hotel.name):", sender: .bot)
+
+                hotelData.rooms.forEach { room in
+                    let message = ChatMessage(sender: .bot, text: "", type: .roomOption, payload: room)
+                    self.appendMessage(message.text, sender: message.sender, type: message.type, payload: message.payload)
+                }
+            }
+
+            return cell
+            
+        case .roomOption:
+            guard let room = message.payload as? Room else {
+                return UITableViewCell()
+            }
+
+            let cell = tableView.dequeue(RoomChatCell.self, for: indexPath)
+            cell.configure(with: room)
+
+            cell.onSelectTapped = { [weak self] in
+                self?.appendMessage("✅ Room \(room.roomNumber) selected. Ready to book?", sender: .bot)
+                // TODO: store selected room + show booking confirmation
+            }
+
+            return cell
+
+        default:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+            var config = UIListContentConfiguration.valueCell()
+            config.text = message.text
+            config.textProperties.alignment = .natural
+            config.textProperties.color = (message.sender == .user) ? .label : .systemGray
+            cell.contentConfiguration = config
+            return cell
+        }
     }
+
 }
 
 extension ChatbotVC: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let message = messages[indexPath.row]
-        
-        switch message.type {
-        case .summary:
-            if let data = message.payload as? ParsedSearchData {
-                viewModel.fetchHotels(for: data)
-            }
-        case .hotel:
-            if let hotelData = message.payload as? HotelWithRooms,
-               let parsedSearch = lastParsedSearchData {
-                let parameters = parsedSearch.toHotelSearchParameters()
-                let detailVC = HotelDetailVC(viewModel: HotelDetailVM(hotel: hotelData.hotel, rooms: hotelData.rooms, searchParams: parameters))
-                navigationController?.pushViewController(detailVC, animated: true)
-            }
-        default:
-            break
-        }
-    }
+
+
 
 }
 
