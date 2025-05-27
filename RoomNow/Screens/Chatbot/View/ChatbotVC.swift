@@ -29,7 +29,6 @@ final class ChatbotVC: UIViewController {
         navigationItem.title = "Assistant"
 
         tableView.dataSource = self
-        tableView.delegate = self
         tableView.separatorStyle = .none
         tableView.keyboardDismissMode = .interactive
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
@@ -52,6 +51,8 @@ final class ChatbotVC: UIViewController {
         
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 60
+        tableView.allowsSelection = true
+        tableView.isUserInteractionEnabled = true
         
         tableView.registerCell(type: ChatBubbleCell.self)
         tableView.registerCell(type: HotelChatCell.self)
@@ -118,7 +119,6 @@ final class ChatbotVC: UIViewController {
     }
     
     func appendMessage(_ message: ChatMessage) {
-        print("👤 \(message.type) avatar: \(message.showAvatar)")
         messages.append(message)
         tableView.reloadData()
         tableView.scrollToRow(at: IndexPath(row: messages.count - 1, section: 0), at: .bottom, animated: true)
@@ -129,24 +129,24 @@ extension ChatbotVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return messages.count
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = messages[indexPath.row]
         switch message.type {
-        
+            
         case .text:
             let cell = tableView.dequeue(ChatBubbleCell.self, for: indexPath)
             cell.configure(with: message)
             return cell
-        
+            
         case .summary:
             guard let data = message.payload as? ParsedSearchData else {
                 return UITableViewCell()
             }
-
+            
             let cell = tableView.dequeue(SummaryChatCell.self, for: indexPath)
             cell.configure(with: data, showAvatar: message.showAvatar)
-
+            
             cell.onSearchTapped = { [weak self] in
                 guard let self = self else { return }
                 if var last = self.messages.last, last.type == .summary {
@@ -156,36 +156,36 @@ extension ChatbotVC: UITableViewDataSource {
                 }
                 self.viewModel.fetchHotels(for: data)
             }
-
+            
             return cell
-        
+            
         case .hotelCard:
             guard let hotelData = message.payload as? HotelWithRooms else {
                 return UITableViewCell()
             }
-
+            
             let cell = tableView.dequeue(HotelChatCell.self, for: indexPath)
             cell.configure(with: hotelData.hotel, rooms: hotelData.rooms, showAvatar: message.showAvatar)
-
+            
             cell.onViewDetails = { [weak self] in
                 guard let self = self, let parsed = self.lastParsedSearchData else { return }
                 let params = parsed.toHotelSearchParameters()
                 let vc = HotelDetailVC(viewModel: HotelDetailVM(hotel: hotelData.hotel, rooms: hotelData.rooms, searchParams: params))
                 self.navigationController?.pushViewController(vc, animated: true)
             }
-
+            
             cell.onSelectRoom = { [weak self] in
                 guard let self = self else { return }
                 self.viewModel.selectedHotel = hotelData.hotel
                 self.appendMessage("🛏️ Please select your room type for \(hotelData.hotel.name):", sender: .bot)
-
+                
                 for (index, room) in hotelData.rooms.enumerated() {
                     let isLast = index == hotelData.rooms.count - 1
                     let message = ChatMessage(sender: .bot, text: "", type: .roomOption, payload: room, showAvatar: isLast)
                     self.appendMessage(message)
                 }
             }
-
+            
             return cell
             
         case .roomOption:
@@ -194,7 +194,7 @@ extension ChatbotVC: UITableViewDataSource {
             }
             let cell = tableView.dequeue(RoomChatCell.self, for: indexPath)
             cell.configure(with: room, showAvatar: message.showAvatar)
-
+            
             cell.onSelectTapped = { [weak self] in
                 self?.appendMessage("✅ Room \(room.roomNumber) selected. Let's complete your reservation.", sender: .bot)
                 self?.viewModel.selectedRoom = room
@@ -202,30 +202,27 @@ extension ChatbotVC: UITableViewDataSource {
             }
             
             return cell
-
-        default:
-            print("⚠️ Unknown message type: \(message.type)")
-            let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-            var config = UIListContentConfiguration.valueCell()
-            config.text = message.text
-            config.textProperties.alignment = .natural
-            config.textProperties.color = (message.sender == .user) ? .label : .systemGray
-            cell.contentConfiguration = config
+            
+        case .bookingConfirm:
+            let cell = tableView.dequeue(ChatBubbleCell.self, for: indexPath)
+            cell.configure(with: message)
+            cell.addConfirmationButton(title: "✅ Confirm Booking") { [weak self] in
+                self?.viewModel.confirmReservationFromChat()
+            }
             return cell
         }
     }
-
-}
-
-extension ChatbotVC: UITableViewDelegate {
-
-
-
 }
 
 extension ChatbotVC: ChatbotVMDelegate {
     func didReceiveSearchData(_ data: ParsedSearchData) {
-        lastParsedSearchData = data
+        print("📩 Received parsed search data:", data)
+
+        guard !data.destination.isEmpty else {
+            appendMessage("❌ I couldn't understand the destination. Could you try again?", sender: .bot)
+            return
+        }
+
         viewModel.lastSearchData = data
 
         let summary = """
@@ -235,17 +232,16 @@ extension ChatbotVC: ChatbotVMDelegate {
         Guests: \(data.guestCount)
         Rooms: \(data.roomCount)
         """
+
         appendMessage(summary, sender: .bot, type: .summary, payload: data)
     }
     
     func didReceiveHotelMessages(_ hotelMessages: [ChatMessage]) {
-        for message in hotelMessages {
-            messages.append(message)
-        }
+        for message in hotelMessages { messages.append(message) }
         tableView.reloadData()
         tableView.scrollToRow(at: IndexPath(row: messages.count - 1, section: 0), at: .bottom, animated: true)
     }
-
+    
     func didFailWithError(_ error: Error) {
         appendMessage("⚠️ Error: \(error.localizedDescription)", sender: .bot)
     }
