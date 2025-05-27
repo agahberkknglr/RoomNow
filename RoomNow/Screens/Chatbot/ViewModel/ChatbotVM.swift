@@ -7,6 +7,14 @@
 
 import Foundation
 
+enum ChatInputStep {
+    case idle
+    case askingName
+    case askingEmail
+    case askingPhone
+    case askingNote
+}
+
 protocol ChatbotVMDelegate: AnyObject {
     func didReceiveSearchData(_ data: ParsedSearchData)
     func didReceiveHotelMessages(_ messages: [ChatMessage])
@@ -18,6 +26,10 @@ final class ChatbotVM {
     weak var delegate: ChatbotVMDelegate?
     private(set) var messages: [(String, String)] = []
     private var messageHistory: [String] = []
+    var inputStep: ChatInputStep = .idle
+    
+    var userInfo = UserReservationInfo()
+
     
     func sendMessage(_ userMessage: String) {
         messages.append((userMessage, "⏳"))
@@ -56,21 +68,29 @@ final class ChatbotVM {
                             ChatMessage(sender: .bot, text: "❌ No hotels found.", type: .text, payload: nil)
                         ])
                     } else {
-                        let messages: [ChatMessage] = hotelResults.map { tuple in
+                        let messages: [ChatMessage] = hotelResults.enumerated().map { (index, tuple) in
                             let hotel = tuple.hotel
                             let rooms = tuple.rooms
                             let price = Int(rooms.first?.price ?? 0)
-                            
+
                             let text = """
                             🏨 \(hotel.name.capitalized)
                             📍 \(hotel.city), \(hotel.location)
                             ₺\(price) / night
-                            Tap to view
                             """
-                            
+
                             let wrapped = HotelWithRooms(hotel: hotel, rooms: rooms)
-                            return ChatMessage(sender: .bot, text: text, type: .hotelCard, payload: wrapped)
+                            let isLast = index == hotelResults.count - 1
+
+                            return ChatMessage(
+                                sender: .bot,
+                                text: text,
+                                type: .hotelCard,
+                                payload: wrapped,
+                                showAvatar: isLast
+                            )
                         }
+
                         self?.delegate?.didReceiveHotelMessages(messages)
                     }
                 case .failure(let error):
