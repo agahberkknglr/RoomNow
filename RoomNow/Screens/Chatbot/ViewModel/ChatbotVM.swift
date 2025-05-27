@@ -69,7 +69,7 @@ final class ChatbotVM {
                             """
                             
                             let wrapped = HotelWithRooms(hotel: hotel, rooms: rooms)
-                            return ChatMessage(sender: .bot, text: text, type: .hotel, payload: wrapped)
+                            return ChatMessage(sender: .bot, text: text, type: .hotelCard, payload: wrapped)
                         }
                         self?.delegate?.didReceiveHotelMessages(messages)
                     }
