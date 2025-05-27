@@ -12,7 +12,9 @@ final class ChatBubbleCell: UITableViewCell {
     private let avatarLabel = UILabel()
     private let bubbleView = UIView()
     private let messageLabel = UILabel()
-    
+    private let messageStack = UIStackView()
+    private var confirmButton = UIButton()
+
     private var leftConstraints: [NSLayoutConstraint] = []
     private var rightConstraints: [NSLayoutConstraint] = []
 
@@ -29,6 +31,7 @@ final class ChatBubbleCell: UITableViewCell {
         messageLabel.text = message.text
         avatarLabel.text = message.sender == .user ? "🧍" : "🤖"
         avatarLabel.isHidden = !message.showAvatar 
+        confirmButton.isHidden = true
         
         if message.sender == .user {
             NSLayoutConstraint.deactivate(leftConstraints)
@@ -41,6 +44,13 @@ final class ChatBubbleCell: UITableViewCell {
             bubbleView.backgroundColor = .systemGray5
             messageLabel.textColor = .label
         }
+    }
+    
+    func addConfirmationButton(title: String, action: @escaping () -> Void) {
+        confirmButton.setTitle(title, for: .normal)
+        confirmButton.isHidden = false
+        confirmButton.removeTarget(nil, action: nil, for: .allEvents)
+        confirmButton.addAction(UIAction { _ in action() }, for: .touchUpInside)
     }
 
     private func setupUI() {
@@ -56,17 +66,29 @@ final class ChatBubbleCell: UITableViewCell {
         messageLabel.translatesAutoresizingMaskIntoConstraints = false
         messageLabel.font = .systemFont(ofSize: 15)
         messageLabel.numberOfLines = 0
+        
+        confirmButton.backgroundColor = .systemGreen
+        confirmButton.setTitleColor(.white, for: .normal)
+        confirmButton.layer.cornerRadius = 8
+        confirmButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
+        confirmButton.isHidden = true
+
+        messageStack.axis = .vertical
+        messageStack.spacing = 8
+        messageStack.translatesAutoresizingMaskIntoConstraints = false
+        messageStack.addArrangedSubview(messageLabel)
+        messageStack.addArrangedSubview(confirmButton)
 
         contentView.addSubview(avatarLabel)
         contentView.addSubview(bubbleView)
-        bubbleView.addSubview(messageLabel)
+        bubbleView.addSubview(messageStack)
         
         // Common constraints
         NSLayoutConstraint.activate([
-            messageLabel.topAnchor.constraint(equalTo: bubbleView.topAnchor, constant: 10),
-            messageLabel.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -10),
-            messageLabel.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: 12),
-            messageLabel.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -12),
+            messageStack.topAnchor.constraint(equalTo: bubbleView.topAnchor, constant: 10),
+            messageStack.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -10),
+            messageStack.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: 12),
+            messageStack.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -12),
             
             bubbleView.widthAnchor.constraint(lessThanOrEqualToConstant: 260),
             bubbleView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
