@@ -10,6 +10,8 @@ import Foundation
 protocol ChatbotVMDelegate: AnyObject {
     func didReceiveSearchData(_ data: ParsedSearchData)
     func didFailWithError(_ error: Error)
+    
+    func performHotelSearch(using data: ParsedSearchData)
 }
 
 final class ChatbotVM {

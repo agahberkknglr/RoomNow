@@ -14,3 +14,15 @@ struct ParsedSearchData: Codable {
     let guestCount: Int
     let roomCount: Int
 }
+
+extension ParsedSearchData {
+    func toHotelSearchParameters() -> HotelSearchParameters {
+        return HotelSearchParameters(
+            destination: destination.lowercased(),
+            checkInDate: DateFormatter.yyyyMMdd.date(from: checkIn) ?? Date(),
+            checkOutDate: DateFormatter.yyyyMMdd.date(from: checkOut) ?? Date().addingTimeInterval(86400),
+            guestCount: guestCount,
+            roomCount: roomCount
+        )
+    }
+}

@@ -110,7 +110,14 @@ extension ChatbotVC: ChatbotVMDelegate {
         """
         appendMessage(summary, sender: .bot)
 
-        // Optional: navigate to hotel results
+        // ✅ Now trigger hotel search!
+        performHotelSearch(using: data)
+    }
+    
+    func performHotelSearch(using data: ParsedSearchData) {
+        let parameters = data.toHotelSearchParameters()
+        let resultVC = ResultVC(searchParameters: parameters)
+        navigationController?.pushViewController(resultVC, animated: true)
     }
 
     func didFailWithError(_ error: Error) {
