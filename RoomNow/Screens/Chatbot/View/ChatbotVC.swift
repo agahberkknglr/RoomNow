@@ -49,6 +49,10 @@ final class ChatbotVC: UIViewController {
         sendButton.translatesAutoresizingMaskIntoConstraints = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
         
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 60
+        
+        tableView.registerCell(type: ChatBubbleCell.self)
         tableView.registerCell(type: HotelChatCell.self)
         tableView.registerCell(type: SummaryChatCell.self)
         tableView.registerCell(type: RoomChatCell.self)
@@ -79,9 +83,22 @@ final class ChatbotVC: UIViewController {
     }
 
     func appendMessage(_ text: String, sender: ChatSender, type: ChatMessageType = .text, payload: Any? = nil) {
-        let message = ChatMessage(sender: sender, text: text, type: type, payload: payload)
+        let shouldShowAvatar: Bool = {
+            if let last = messages.last {
+                return last.sender != sender
+            }
+            return true
+        }()
+
+        let message = ChatMessage(sender: sender, text: text, type: type, payload: payload, showAvatar: shouldShowAvatar)
         messages.append(message)
 
+        tableView.reloadData()
+        tableView.scrollToRow(at: IndexPath(row: messages.count - 1, section: 0), at: .bottom, animated: true)
+    }
+    
+    func appendMessage(_ message: ChatMessage) {
+        messages.append(message)
         tableView.reloadData()
         tableView.scrollToRow(at: IndexPath(row: messages.count - 1, section: 0), at: .bottom, animated: true)
     }
@@ -97,16 +114,27 @@ extension ChatbotVC: UITableViewDataSource {
 
         switch message.type {
         
+        case .text:
+            let cell = tableView.dequeue(ChatBubbleCell.self, for: indexPath)
+            cell.configure(with: message)
+            return cell
+        
         case .summary:
             guard let data = message.payload as? ParsedSearchData else {
                 return UITableViewCell()
             }
 
             let cell = tableView.dequeue(SummaryChatCell.self, for: indexPath)
-            cell.configure(with: data)
+            cell.configure(with: data, showAvatar: message.showAvatar)
 
             cell.onSearchTapped = { [weak self] in
-                self?.viewModel.fetchHotels(for: data)
+                guard let self = self else { return }
+                if var last = self.messages.last, last.type == .summary {
+                    last.showAvatar = false
+                    self.messages[self.messages.count - 1] = last
+                    self.tableView.reloadRows(at: [IndexPath(row: self.messages.count - 1, section: 0)], with: .none)
+                }
+                self.viewModel.fetchHotels(for: data)
             }
 
             return cell
@@ -117,7 +145,7 @@ extension ChatbotVC: UITableViewDataSource {
             }
 
             let cell = tableView.dequeue(HotelChatCell.self, for: indexPath)
-            cell.configure(with: hotelData.hotel, rooms: hotelData.rooms)
+            cell.configure(with: hotelData.hotel, rooms: hotelData.rooms, showAvatar: message.showAvatar)
 
             cell.onViewDetails = { [weak self] in
                 guard let self = self, let parsed = self.lastParsedSearchData else { return }
@@ -131,9 +159,16 @@ extension ChatbotVC: UITableViewDataSource {
 
                 self.appendMessage("🛏️ Please select your room type for \(hotelData.hotel.name):", sender: .bot)
 
-                hotelData.rooms.forEach { room in
-                    let message = ChatMessage(sender: .bot, text: "", type: .roomOption, payload: room)
-                    self.appendMessage(message.text, sender: message.sender, type: message.type, payload: message.payload)
+                for (index, room) in hotelData.rooms.enumerated() {
+                    let isLast = index == hotelData.rooms.count - 1
+                    let message = ChatMessage(
+                        sender: .bot,
+                        text: "",
+                        type: .roomOption,
+                        payload: room,
+                        showAvatar: isLast
+                    )
+                    self.appendMessage(message)
                 }
             }
 
@@ -145,7 +180,7 @@ extension ChatbotVC: UITableViewDataSource {
             }
 
             let cell = tableView.dequeue(RoomChatCell.self, for: indexPath)
-            cell.configure(with: room)
+            cell.configure(with: room, showAvatar: message.showAvatar)
 
             cell.onSelectTapped = { [weak self] in
                 self?.appendMessage("✅ Room \(room.roomNumber) selected. Ready to book?", sender: .bot)
