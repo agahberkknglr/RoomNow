@@ -20,6 +20,7 @@ final class ChatbotVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupNavBar()
         viewModel.delegate = self
     }
 
@@ -73,13 +74,32 @@ final class ChatbotVC: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: inputContainer.topAnchor, constant: -8)
         ])
     }
+    
+    private func setupNavBar() {
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            title: "Cancel",
+            style: .plain,
+            target: self,
+            action: #selector(cancelTapped))
+    }
 
+    @objc private func cancelTapped() {
+        let alert = UIAlertController(title: "Cancel Reservation", message: "This will reset the current chat flow. Are you sure?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Yes", style: .destructive, handler: { _ in
+            self.viewModel.resetConversation()
+            self.messages.removeAll()
+            self.tableView.reloadData()
+            self.appendMessage("🔄 Reservation flow reset. You can start again.", sender: .bot)
+        }))
+        alert.addAction(UIAlertAction(title: "No", style: .cancel))
+        present(alert, animated: true)
+    }
+    
     @objc private func sendTapped() {
         guard let text = inputField.text, !text.isEmpty else { return }
-        
         appendMessage(text, sender: .user)
         inputField.text = ""
-        viewModel.sendMessage(text)
+        viewModel.handleUserInput(text)
     }
 
     func appendMessage(_ text: String, sender: ChatSender, type: ChatMessageType = .text, payload: Any? = nil) {
@@ -98,6 +118,7 @@ final class ChatbotVC: UIViewController {
     }
     
     func appendMessage(_ message: ChatMessage) {
+        print("👤 \(message.type) avatar: \(message.showAvatar)")
         messages.append(message)
         tableView.reloadData()
         tableView.scrollToRow(at: IndexPath(row: messages.count - 1, section: 0), at: .bottom, animated: true)
@@ -111,7 +132,6 @@ extension ChatbotVC: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = messages[indexPath.row]
-
         switch message.type {
         
         case .text:
@@ -156,18 +176,12 @@ extension ChatbotVC: UITableViewDataSource {
 
             cell.onSelectRoom = { [weak self] in
                 guard let self = self else { return }
-
+                self.viewModel.selectedHotel = hotelData.hotel
                 self.appendMessage("🛏️ Please select your room type for \(hotelData.hotel.name):", sender: .bot)
 
                 for (index, room) in hotelData.rooms.enumerated() {
                     let isLast = index == hotelData.rooms.count - 1
-                    let message = ChatMessage(
-                        sender: .bot,
-                        text: "",
-                        type: .roomOption,
-                        payload: room,
-                        showAvatar: isLast
-                    )
+                    let message = ChatMessage(sender: .bot, text: "", type: .roomOption, payload: room, showAvatar: isLast)
                     self.appendMessage(message)
                 }
             }
@@ -178,18 +192,19 @@ extension ChatbotVC: UITableViewDataSource {
             guard let room = message.payload as? Room else {
                 return UITableViewCell()
             }
-
             let cell = tableView.dequeue(RoomChatCell.self, for: indexPath)
             cell.configure(with: room, showAvatar: message.showAvatar)
 
             cell.onSelectTapped = { [weak self] in
-                self?.appendMessage("✅ Room \(room.roomNumber) selected. Ready to book?", sender: .bot)
-                // TODO: store selected room + show booking confirmation
+                self?.appendMessage("✅ Room \(room.roomNumber) selected. Let's complete your reservation.", sender: .bot)
+                self?.viewModel.selectedRoom = room
+                self?.viewModel.startCollectingUserInfo()
             }
-
+            
             return cell
 
         default:
+            print("⚠️ Unknown message type: \(message.type)")
             let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
             var config = UIListContentConfiguration.valueCell()
             config.text = message.text
@@ -211,6 +226,7 @@ extension ChatbotVC: UITableViewDelegate {
 extension ChatbotVC: ChatbotVMDelegate {
     func didReceiveSearchData(_ data: ParsedSearchData) {
         lastParsedSearchData = data
+        viewModel.lastSearchData = data
 
         let summary = """
         Destination: \(data.destination)
