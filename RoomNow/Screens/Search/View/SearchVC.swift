@@ -40,6 +40,7 @@ final class SearchVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+        configureNavBar()
         viewModel.viewDidLoad()
         viewModel.loadRecentSearches()
     }
@@ -93,6 +94,18 @@ final class SearchVC: UIViewController {
             emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyStateLabel.topAnchor.constraint(equalTo: searchButton.bottomAnchor, constant: 40)
         ])
+    }
+    
+    private func configureNavBar() {
+        let chatButton = makeBarButton(systemName: "message", action: #selector(chatbotTapped))
+        setNavigation(title: "", rightButtons: [chatButton])
+    }
+    
+    @objc private func chatbotTapped() {
+        print("Chatbot Tapped")
+        let chatVC = ChatbotVC()
+        chatVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(chatVC, animated: true)
     }
 
     private func updateButtonStates() {

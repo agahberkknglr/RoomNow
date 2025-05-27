@@ -86,6 +86,7 @@ extension ChatbotVC: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = messages[indexPath.row]
+        print(message)
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
         var config = UIListContentConfiguration.valueCell()
