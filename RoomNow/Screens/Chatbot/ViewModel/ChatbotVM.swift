@@ -225,6 +225,90 @@ final class ChatbotVM {
         delegate?.didReceiveHotelMessages([message])
     }
     
+    func confirmReservationFromChat() {
+        guard
+            let hotel = selectedHotel,
+            let room = selectedRoom,
+            let parsed = lastSearchData
+        else {
+            delegate?.didReceiveHotelMessages([
+                ChatMessage(sender: .bot, text: "❌ Missing reservation data.", type: .text, payload: nil)
+            ])
+            return
+        }
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+
+        guard
+            let checkIn = formatter.date(from: parsed.checkIn),
+            let checkOut = formatter.date(from: parsed.checkOut)
+        else {
+            delegate?.didReceiveHotelMessages([
+                ChatMessage(sender: .bot, text: "❌ Invalid dates.", type: .text, payload: nil)
+            ])
+            return
+        }
+
+        let reservation = Reservation(
+            hotelId: hotel.id ?? "",
+            hotelName: hotel.name,
+            city: hotel.city,
+            checkInDate: checkIn,
+            checkOutDate: checkOut,
+            guestCount: parsed.guestCount,
+            roomCount: 1,
+            selectedRoomNumbers: [room.roomNumber],
+            totalPrice: Int(room.price),
+            fullName: userInfo.name ?? "",
+            email: userInfo.email ?? "",
+            phone: userInfo.phone ?? "",
+            note: userInfo.note,
+            reservedAt: Date(),
+            status: .active,
+            completedAt: nil,
+            cancelledAt: nil
+        )
+
+        FirebaseManager.shared.saveReservation(reservation) { [weak self] result in
+            switch result {
+            case .success:
+                self?.updateRoomDatesForChat(
+                    roomId: room.id,
+                    checkIn: checkIn,
+                    checkOut: checkOut
+                )
+            case .failure(let error):
+                self?.delegate?.didReceiveHotelMessages([
+                    ChatMessage(sender: .bot, text: "❌ Booking failed: \(error.localizedDescription)", type: .text, payload: nil)
+                ])
+            }
+        }
+    }
+
+    private func updateRoomDatesForChat(roomId: String?, checkIn: Date, checkOut: Date) {
+        guard let roomId = roomId else {
+            delegate?.didReceiveHotelMessages([
+                ChatMessage(sender: .bot, text: "⚠️ Room ID is missing.", type: .text, payload: nil)
+            ])
+            return
+        }
+
+        FirebaseManager.shared.updateBookedDates(for: roomId, startDate: checkIn, endDate: checkOut) { [weak self] result in
+            switch result {
+            case .success:
+                self?.delegate?.didReceiveHotelMessages([
+                    ChatMessage(sender: .bot, text: "🎉 Booking confirmed! Thank you.", type: .text, payload: nil)
+                ])
+                self?.resetConversation()
+            case .failure(let error):
+                self?.delegate?.didReceiveHotelMessages([
+                    ChatMessage(sender: .bot, text: "⚠️ Booked but failed to update dates: \(error.localizedDescription)", type: .text, payload: nil)
+                ])
+            }
+        }
+    }
+    
     func resetConversation() {
         inputStep = .idle
         userInfo = UserReservationInfo()
