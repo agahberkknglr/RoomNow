@@ -23,6 +23,7 @@ struct ChatMessage {
     let text: String
     let type: ChatMessageType
     let payload: Any?
+    var showAvatar: Bool = true
     
     var isActionable: Bool {
         switch type {
