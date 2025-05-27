@@ -9,6 +9,9 @@ import UIKit
 
 final class RoomChatCell: UITableViewCell {
 
+    private let avatarLabel = UILabel()
+    private let bubbleView = UIView()
+    private let stackView = UIStackView()
     private let typeLabel = UILabel()
     private let bedLabel = UILabel()
     private let priceLabel = UILabel()
@@ -25,30 +28,56 @@ final class RoomChatCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(with room: Room) {
-        typeLabel.text = "🛏 \(room.roomNumber)"
+    func configure(with room: Room, showAvatar: Bool) {
+        typeLabel.text = "🛏 Room \(room.roomNumber)"
         bedLabel.text = "👥 Sleeps \(room.bedCapacity)"
         priceLabel.text = "💸 ₺\(Int(room.price)) per night"
+        avatarLabel.isHidden = !showAvatar
+        print("room \(typeLabel.text ?? ""): \(showAvatar)")
     }
 
     private func setupUI() {
-        let stack = UIStackView(arrangedSubviews: [typeLabel, bedLabel, priceLabel, selectButton])
-        stack.axis = .vertical
-        stack.spacing = 4
-        stack.translatesAutoresizingMaskIntoConstraints = false
+        selectionStyle = .none
 
-        contentView.addSubview(stack)
-        contentView.layer.cornerRadius = 10
-        contentView.backgroundColor = UIColor.systemGray6
+        avatarLabel.text = "🤖"
+        avatarLabel.font = .systemFont(ofSize: 24)
+        avatarLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        bubbleView.backgroundColor = .systemGray5
+        bubbleView.layer.cornerRadius = 16
+        bubbleView.translatesAutoresizingMaskIntoConstraints = false
+
+        stackView.axis = .vertical
+        stackView.spacing = 4
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+
+        [typeLabel, bedLabel, priceLabel, selectButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            stackView.addArrangedSubview($0)
+        }
 
         selectButton.setTitle("✅ Select Room", for: .normal)
         selectButton.addTarget(self, action: #selector(selectTapped), for: .touchUpInside)
 
+        bubbleView.addSubview(stackView)
+        contentView.addSubview(avatarLabel)
+        contentView.addSubview(bubbleView)
+
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            stack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            stack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            stack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
+            avatarLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
+            avatarLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            avatarLabel.widthAnchor.constraint(equalToConstant: 30),
+            avatarLabel.heightAnchor.constraint(equalToConstant: 30),
+
+            bubbleView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            bubbleView.leadingAnchor.constraint(equalTo: avatarLabel.trailingAnchor, constant: 8),
+            bubbleView.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -16),
+            bubbleView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+
+            stackView.topAnchor.constraint(equalTo: bubbleView.topAnchor, constant: 12),
+            stackView.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: 12),
+            stackView.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -12),
+            stackView.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -12)
         ])
     }
 
