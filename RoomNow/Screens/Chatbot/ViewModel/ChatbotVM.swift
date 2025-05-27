@@ -9,9 +9,8 @@ import Foundation
 
 protocol ChatbotVMDelegate: AnyObject {
     func didReceiveSearchData(_ data: ParsedSearchData)
+    func didReceiveHotelMessages(_ messages: [ChatMessage])
     func didFailWithError(_ error: Error)
-    
-    func performHotelSearch(using data: ParsedSearchData)
 }
 
 final class ChatbotVM {
@@ -44,5 +43,45 @@ final class ChatbotVM {
             }
         }
     }
+    
+    func fetchHotels(for data: ParsedSearchData) {
+        let parameters = data.toHotelSearchParameters()
+        
+        FirebaseManager.shared.fetchHotels(searchParameters: parameters) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let hotelResults):
+                    if hotelResults.isEmpty {
+                        self?.delegate?.didReceiveHotelMessages([
+                            ChatMessage(sender: .bot, text: "❌ No hotels found.", type: .text, payload: nil)
+                        ])
+                    } else {
+                        let messages: [ChatMessage] = hotelResults.map { tuple in
+                            let hotel = tuple.hotel
+                            let rooms = tuple.rooms
+                            let price = Int(rooms.first?.price ?? 0)
+                            
+                            let text = """
+                            🏨 \(hotel.name.capitalized)
+                            📍 \(hotel.city), \(hotel.location)
+                            ₺\(price) / night
+                            Tap to view
+                            """
+                            
+                            let wrapped = HotelWithRooms(hotel: hotel, rooms: rooms)
+                            return ChatMessage(sender: .bot, text: text, type: .hotel, payload: wrapped)
+                        }
+                        self?.delegate?.didReceiveHotelMessages(messages)
+                    }
+                case .failure(let error):
+                    self?.delegate?.didReceiveHotelMessages([
+                        ChatMessage(sender: .bot, text: "❌ Failed to fetch hotels: \(error.localizedDescription)", type: .text, payload: nil)
+                    ])
+                }
+            }
+        }
+    }
+
+
 }
 

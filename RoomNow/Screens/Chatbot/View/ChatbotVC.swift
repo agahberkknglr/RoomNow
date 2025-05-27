@@ -14,6 +14,7 @@ final class ChatbotVC: UIViewController {
     private let sendButton = UIButton(type: .system)
     
     private var messages: [ChatMessage] = []
+    private var lastParsedSearchData: ParsedSearchData?
     private let viewModel = ChatbotVM()
     
     override func viewDidLoad() {
@@ -27,6 +28,7 @@ final class ChatbotVC: UIViewController {
         navigationItem.title = "Assistant"
 
         tableView.dataSource = self
+        tableView.delegate = self
         tableView.separatorStyle = .none
         tableView.keyboardDismissMode = .interactive
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
@@ -72,8 +74,10 @@ final class ChatbotVC: UIViewController {
         viewModel.sendMessage(text)
     }
 
-    private func appendMessage(_ text: String, sender: ChatSender) {
-        messages.append(ChatMessage(sender: sender, text: text))
+    func appendMessage(_ text: String, sender: ChatSender, type: ChatMessageType = .text, payload: Any? = nil) {
+        let message = ChatMessage(sender: sender, text: text, type: type, payload: payload)
+        messages.append(message)
+
         tableView.reloadData()
         tableView.scrollToRow(at: IndexPath(row: messages.count - 1, section: 0), at: .bottom, animated: true)
     }
@@ -86,21 +90,45 @@ extension ChatbotVC: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = messages[indexPath.row]
-        print(message)
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        
+
         var config = UIListContentConfiguration.valueCell()
         config.text = message.text
-        config.textProperties.alignment = (message.sender == .user) ? .natural : .natural
+        config.textProperties.alignment = .natural
         config.textProperties.color = (message.sender == .user) ? .label : .systemGray
+
         cell.contentConfiguration = config
-        cell.selectionStyle = .none
         return cell
     }
 }
 
+extension ChatbotVC: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let message = messages[indexPath.row]
+        
+        switch message.type {
+        case .summary:
+            if let data = message.payload as? ParsedSearchData {
+                viewModel.fetchHotels(for: data)
+            }
+        case .hotel:
+            if let hotelData = message.payload as? HotelWithRooms,
+               let parsedSearch = lastParsedSearchData {
+                let parameters = parsedSearch.toHotelSearchParameters()
+                let detailVC = HotelDetailVC(viewModel: HotelDetailVM(hotel: hotelData.hotel, rooms: hotelData.rooms, searchParams: parameters))
+                navigationController?.pushViewController(detailVC, animated: true)
+            }
+        default:
+            break
+        }
+    }
+
+}
+
 extension ChatbotVC: ChatbotVMDelegate {
     func didReceiveSearchData(_ data: ParsedSearchData) {
+        lastParsedSearchData = data
+
         let summary = """
         Destination: \(data.destination)
         Check-in: \(data.checkIn)
@@ -108,16 +136,15 @@ extension ChatbotVC: ChatbotVMDelegate {
         Guests: \(data.guestCount)
         Rooms: \(data.roomCount)
         """
-        appendMessage(summary, sender: .bot)
-
-        // ✅ Now trigger hotel search!
-        performHotelSearch(using: data)
+        appendMessage(summary, sender: .bot, type: .summary, payload: data)
     }
     
-    func performHotelSearch(using data: ParsedSearchData) {
-        let parameters = data.toHotelSearchParameters()
-        let resultVC = ResultVC(searchParameters: parameters)
-        navigationController?.pushViewController(resultVC, animated: true)
+    func didReceiveHotelMessages(_ hotelMessages: [ChatMessage]) {
+        for message in hotelMessages {
+            messages.append(message)
+        }
+        tableView.reloadData()
+        tableView.scrollToRow(at: IndexPath(row: messages.count - 1, section: 0), at: .bottom, animated: true)
     }
 
     func didFailWithError(_ error: Error) {
