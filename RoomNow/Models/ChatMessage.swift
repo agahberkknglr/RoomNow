@@ -12,8 +12,10 @@ enum ChatSender {
 
 enum ChatMessageType {
     case text
-    case hotel
     case summary
+    case hotelCard
+    case roomOption
+    case bookingConfirm
 }
 
 struct ChatMessage {
@@ -23,6 +25,11 @@ struct ChatMessage {
     let payload: Any?
     
     var isActionable: Bool {
-        return type == .summary || type == .hotel
+        switch type {
+        case .summary, .hotelCard, .roomOption, .bookingConfirm:
+            return true
+        case .text:
+            return false
+        }
     }
 }
