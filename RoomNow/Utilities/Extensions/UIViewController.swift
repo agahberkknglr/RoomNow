@@ -89,3 +89,48 @@ extension UIViewController {
         loadingIndicator.stopAnimating()
     }
 }
+
+
+extension UIViewController {
+    
+    func observeKeyboardChanges(scrollView: UIScrollView) {
+        NotificationCenter.default.addObserver(
+            forName: UIResponder.keyboardWillShowNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            self?.adjustForKeyboard(notification: notification, scrollView: scrollView, showing: true)
+        }
+        
+        NotificationCenter.default.addObserver(
+            forName: UIResponder.keyboardWillHideNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            self?.adjustForKeyboard(notification: notification, scrollView: scrollView, showing: false)
+        }
+    }
+    
+    func stopObservingKeyboardChanges() {
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    private func adjustForKeyboard(notification: Notification, scrollView: UIScrollView, showing: Bool) {
+        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        
+        let keyboardHeight = showing ? keyboardFrame.height : 0
+        
+        scrollView.contentInset.bottom = keyboardHeight
+        scrollView.scrollIndicatorInsets.bottom = keyboardHeight
+        
+        // Optional: Scroll to bottom if it's a UITableView or UICollectionView
+        if let tableView = scrollView as? UITableView {
+            let lastRow = tableView.numberOfRows(inSection: 0) - 1
+            if lastRow >= 0 {
+                let indexPath = IndexPath(row: lastRow, section: 0)
+                tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+            }
+        }
+    }
+}
