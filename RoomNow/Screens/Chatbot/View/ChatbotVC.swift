@@ -27,9 +27,7 @@ final class ChatbotVC: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.viewModel.sendInitialGreeting()
         }
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
-
+        keyboardObserver()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -189,6 +187,12 @@ final class ChatbotVC: UIViewController {
                 appendMessage("⚠️ The selected rooms can't accommodate all guests. Please adjust your selection.", sender: .bot)
             }
         }
+    }
+    
+    private func keyboardObserver() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+
     }
     
     @objc private func keyboardWillShow(_ notification: Notification) {
