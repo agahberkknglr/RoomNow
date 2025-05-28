@@ -91,7 +91,7 @@ final class BookingCell: UITableViewCell {
         
         switch reservation.status {
         case .active:
-            statusLabel.text = "Upcoming"
+            statusLabel.text = "Active"
             statusLabel.textColor = .appSuccess
         
         case .ongoing:
