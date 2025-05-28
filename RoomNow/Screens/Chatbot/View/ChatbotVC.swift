@@ -168,7 +168,11 @@ extension ChatbotVC: UITableViewDataSource {
             cell.configure(with: hotelData.hotel, rooms: hotelData.rooms, showAvatar: message.showAvatar)
             
             cell.onViewDetails = { [weak self] in
-                guard let self = self, let parsed = self.lastParsedSearchData else { return }
+                guard let self = self else {
+                    print("self is nil, can't navigate")
+                    return
+                }
+                guard let parsed = viewModel.lastSearchData else { return }
                 let params = parsed.toHotelSearchParameters()
                 let vc = HotelDetailVC(viewModel: HotelDetailVM(hotel: hotelData.hotel, rooms: hotelData.rooms, searchParams: params))
                 self.navigationController?.pushViewController(vc, animated: true)
@@ -224,7 +228,7 @@ extension ChatbotVC: ChatbotVMDelegate {
         }
 
         viewModel.lastSearchData = data
-
+        
         let summary = """
         Destination: \(data.destination)
         Check-in: \(data.checkIn)
