@@ -58,6 +58,17 @@ final class ChatbotVM {
         }
     }
     
+    func sendInitialGreeting() {
+        let greeting = ChatMessage(
+            sender: .bot,
+            text: "👋 Hi! I'm your travel assistant. You can tell me where and when you want to go, and I’ll help you find a hotel.",
+            type: .text,
+            payload: nil,
+            showAvatar: true
+        )
+        delegate?.didReceiveHotelMessages([greeting])
+    }
+    
     func loadAvailableCities() {
         FirebaseManager.shared.fetchCities { [weak self] result in
             if case .success(let cities) = result {
