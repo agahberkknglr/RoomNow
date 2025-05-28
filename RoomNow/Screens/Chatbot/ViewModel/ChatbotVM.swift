@@ -31,6 +31,7 @@ final class ChatbotVM {
     var lastSearchData: ParsedSearchData?
     var selectedHotel: Hotel?
     var selectedRoom: Room?
+    var availableCities: [String] = []
     
     func sendMessage(_ userMessage: String) {
         messages.append((userMessage, "⏳"))
@@ -45,7 +46,7 @@ final class ChatbotVM {
                     if let lastIndex = self?.messages.indices.last {
                         self?.messages[lastIndex].1 = "Parsed"
                     }
-                    self?.delegate?.didReceiveSearchData(data)
+                    self?.handleParsedSearchData(data)
 
                 case .failure(let error):
                     if let lastIndex = self?.messages.indices.last {
@@ -57,6 +58,33 @@ final class ChatbotVM {
         }
     }
     
+    func loadAvailableCities() {
+        FirebaseManager.shared.fetchCities { [weak self] result in
+            if case .success(let cities) = result {
+                self?.availableCities = cities.map { $0.name.lowercased() }
+            }
+        }
+    }
+    
+    func handleParsedSearchData(_ parsed: ParsedSearchData) {
+        let validCities = availableCities
+
+        let normalizedDestination = parsed.destination.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+
+        guard validCities.contains(normalizedDestination) else {
+            delegate?.didReceiveHotelMessages([
+                ChatMessage(
+                    sender: .bot,
+                    text: "❌ Sorry, we couldn't find any results for \"\(parsed.destination)\". Please check the spelling or try another city.",
+                    type: .text,
+                    payload: nil
+                )
+            ])
+            return
+        }
+        delegate?.didReceiveSearchData(parsed)
+    }
+    
     func fetchHotels(for data: ParsedSearchData) {
         let parameters = data.toHotelSearchParameters()
         
@@ -65,9 +93,16 @@ final class ChatbotVM {
                 switch result {
                 case .success(let hotelResults):
                     if hotelResults.isEmpty {
+                        print("Hotel results \(hotelResults)")
                         self?.delegate?.didReceiveHotelMessages([
-                            ChatMessage(sender: .bot, text: "❌ No hotels found.", type: .text, payload: nil)
+                            ChatMessage(
+                                sender: .bot,
+                                text: "❌ Sorry, there are no available hotels in **\(data.destination.capitalized)** for the selected dates. Please try a different city or change your search.",
+                                type: .text,
+                                payload: nil
+                            )
                         ])
+                        return
                     } else {
                         let messages: [ChatMessage] = hotelResults.enumerated().map { (index, tuple) in
                             let hotel = tuple.hotel
@@ -205,7 +240,7 @@ final class ChatbotVM {
         🏨 \(selectedHotel.name)
         🛏 Room \(selectedRoom.roomNumber) - ₺\(Int(selectedRoom.price)) / night
         📍 \(search.destination)
-        📅 \(search.checkIn) to \(search.checkOut)
+        📅 \(search.toShortReadableDate(from: search.checkIn)) to \(search.toShortReadableDate(from: search.checkOut))
         👤 \(userInfo.name ?? "-")
         📧 \(userInfo.email ?? "-")
         📱 \(userInfo.phone ?? "-")
