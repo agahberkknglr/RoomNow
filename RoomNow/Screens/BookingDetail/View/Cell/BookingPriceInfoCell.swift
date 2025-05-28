@@ -12,6 +12,7 @@ final class BookingPriceInfoCell: UITableViewCell {
     private let totalLabel = UILabel()
     private let priceLabel = UILabel()
     private let nightLabel = UILabel()
+    private let cancelInfoLabel = UILabel()
     private let view: UIView = {
         let view = UIView()
         view.backgroundColor = .appSecondaryBackground
@@ -43,14 +44,19 @@ final class BookingPriceInfoCell: UITableViewCell {
         nightLabel.textColor = .appSecondaryText
         nightLabel.textAlignment = .right
 
+        cancelInfoLabel.font = .systemFont(ofSize: 12)
+        cancelInfoLabel.textAlignment = .left
+        
         totalLabel.translatesAutoresizingMaskIntoConstraints = false
         priceLabel.translatesAutoresizingMaskIntoConstraints = false
         nightLabel.translatesAutoresizingMaskIntoConstraints = false
+        cancelInfoLabel.translatesAutoresizingMaskIntoConstraints = false
 
         contentView.addSubview(view)
         view.addSubview(totalLabel)
         view.addSubview(priceLabel)
         view.addSubview(nightLabel)
+        view.addSubview(cancelInfoLabel)
         view.pinToEdges(of: contentView, withInsets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
         
         NSLayoutConstraint.activate([
@@ -64,13 +70,20 @@ final class BookingPriceInfoCell: UITableViewCell {
             priceLabel.topAnchor.constraint(equalTo: nightLabel.bottomAnchor, constant: 4),
             priceLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             priceLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            priceLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -12)
+            
+            cancelInfoLabel.topAnchor.constraint(equalTo: priceLabel.bottomAnchor, constant: 12),
+            cancelInfoLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            cancelInfoLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            cancelInfoLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -12),
+            
         ])
     }
     
-    func configure(totalPrice: Int, nights: Int) {
+    func configure(totalPrice: Int, nights: Int, status: ReservationStatus) {
         totalLabel.text = "Total Price:"
         nightLabel.text = "\(nights) night\(nights > 1 ? "s" : "")"
         priceLabel.text = "₺\(totalPrice)"
+        cancelInfoLabel.text = status.description
+        cancelInfoLabel.textColor = status.color
     }
 }

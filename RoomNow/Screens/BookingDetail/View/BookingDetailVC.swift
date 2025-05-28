@@ -199,10 +199,7 @@ extension BookingDetailVC: UITableViewDataSource {
 
         case 2:
             let cell = tableView.dequeue(BookingPriceInfoCell.self, for: indexPath)
-            cell.configure(
-                totalPrice: viewModel.reservation.totalPrice,
-                nights: viewModel.numberOfNights
-            )
+            cell.configure( totalPrice: viewModel.reservation.totalPrice, nights: viewModel.numberOfNights, status: viewModel.reservation.status)
             return cell
             
         case 3:
