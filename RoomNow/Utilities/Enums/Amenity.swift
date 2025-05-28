@@ -28,7 +28,7 @@ enum Amenity: String, CaseIterable {
     case tub = "hot tub"
     case pet = "pet friendly"
     case desk = "24 hour front desk"
-    case roomDining = "in room dining"
+    case roomDining = "in-room dining"
     case valet = "valet service"
     case restaurant = "restaurant"
     case smoke = "smoke free"
