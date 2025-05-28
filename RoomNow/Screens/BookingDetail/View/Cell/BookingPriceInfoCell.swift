@@ -9,6 +9,7 @@ import UIKit
 
 final class BookingPriceInfoCell: UITableViewCell {
     
+    private let totalLabel = UILabel()
     private let priceLabel = UILabel()
     private let nightLabel = UILabel()
     private let view: UIView = {
@@ -30,26 +31,35 @@ final class BookingPriceInfoCell: UITableViewCell {
     private func setupUI() {
         contentView.backgroundColor = .appBackground
 
+        totalLabel.font = .boldSystemFont(ofSize: 18)
+        totalLabel.textColor = .appPrimaryText
+        totalLabel.textAlignment = .left
+        
         priceLabel.font = .boldSystemFont(ofSize: 18)
         priceLabel.textColor = .appPrimaryText
-        priceLabel.textAlignment = .left
+        priceLabel.textAlignment = .right
 
         nightLabel.font = .systemFont(ofSize: 14)
         nightLabel.textColor = .appSecondaryText
-        nightLabel.textAlignment = .left
+        nightLabel.textAlignment = .right
 
+        totalLabel.translatesAutoresizingMaskIntoConstraints = false
         priceLabel.translatesAutoresizingMaskIntoConstraints = false
         nightLabel.translatesAutoresizingMaskIntoConstraints = false
 
         contentView.addSubview(view)
+        view.addSubview(totalLabel)
         view.addSubview(priceLabel)
         view.addSubview(nightLabel)
         view.pinToEdges(of: contentView, withInsets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
         
         NSLayoutConstraint.activate([
+            totalLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 12),
+            totalLabel.trailingAnchor.constraint(equalTo: nightLabel.trailingAnchor, constant: -16),
+            totalLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            
             nightLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 12),
             nightLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            nightLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             
             priceLabel.topAnchor.constraint(equalTo: nightLabel.bottomAnchor, constant: 4),
             priceLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
@@ -59,6 +69,7 @@ final class BookingPriceInfoCell: UITableViewCell {
     }
     
     func configure(totalPrice: Int, nights: Int) {
+        totalLabel.text = "Total Price:"
         nightLabel.text = "\(nights) night\(nights > 1 ? "s" : "")"
         priceLabel.text = "₺\(totalPrice)"
     }
