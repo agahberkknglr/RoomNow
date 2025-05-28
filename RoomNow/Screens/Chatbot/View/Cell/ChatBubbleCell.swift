@@ -29,20 +29,21 @@ final class ChatBubbleCell: UITableViewCell {
 
     func configure(with message: ChatMessage) {
         messageLabel.text = message.text
-        avatarLabel.text = message.sender == .user ? "🧍" : "🤖"
-        avatarLabel.isHidden = !message.showAvatar 
         confirmButton.isHidden = true
         
         if message.sender == .user {
+            avatarLabel.isHidden = true
             NSLayoutConstraint.deactivate(leftConstraints)
             NSLayoutConstraint.activate(rightConstraints)
-            bubbleView.backgroundColor = .systemBlue
-            messageLabel.textColor = .white
+            bubbleView.backgroundColor = .appSecondaryAccent
+            messageLabel.textColor = .appPrimaryText
         } else {
+            avatarLabel.text = "🤖"
+            avatarLabel.isHidden = !message.showAvatar
             NSLayoutConstraint.deactivate(rightConstraints)
             NSLayoutConstraint.activate(leftConstraints)
-            bubbleView.backgroundColor = .systemGray5
-            messageLabel.textColor = .label
+            bubbleView.backgroundColor = .appSecondaryBackground
+            messageLabel.textColor = .appPrimaryText
         }
     }
     
@@ -55,6 +56,7 @@ final class ChatBubbleCell: UITableViewCell {
 
     private func setupUI() {
         selectionStyle = .none
+        contentView.backgroundColor = .appBackground
         
         avatarLabel.translatesAutoresizingMaskIntoConstraints = false
         avatarLabel.font = .systemFont(ofSize: 24)
@@ -107,8 +109,7 @@ final class ChatBubbleCell: UITableViewCell {
 
         // User (right) layout
         rightConstraints = [
-            avatarLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
-            bubbleView.trailingAnchor.constraint(equalTo: avatarLabel.leadingAnchor, constant: -8)
+            bubbleView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8)
         ]
     }
 }
