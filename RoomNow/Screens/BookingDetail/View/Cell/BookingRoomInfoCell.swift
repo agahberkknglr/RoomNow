@@ -78,6 +78,6 @@ final class BookingRoomInfoCell: UITableViewCell {
         roomTypeLabel.text = typeName.capitalized
         roomInfoLabel.text = "Room No: \(roomNumber) • \(nights) night\(nights > 1 ? "s" : "")"
         roomDescriptionLabel.text = roomDescription ?? ""
-        roomUserNameLabel.text = "Reservation for :\(guestName)"
+        roomUserNameLabel.text = "Reservation for: \(guestName)"
     }
 }
