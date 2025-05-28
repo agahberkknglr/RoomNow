@@ -71,7 +71,7 @@ final class ChatbotVC: UIViewController {
         inputTextView.translatesAutoresizingMaskIntoConstraints = false
 
         // Send Button
-        sendButton.setTitle("Send", for: .normal)
+        sendButton.applyPrimaryChatStyle(with: "Send")
         sendButton.addTarget(self, action: #selector(sendTapped), for: .touchUpInside)
         sendButton.translatesAutoresizingMaskIntoConstraints = false
 
