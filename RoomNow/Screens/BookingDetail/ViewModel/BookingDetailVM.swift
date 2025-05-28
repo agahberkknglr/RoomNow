@@ -16,7 +16,8 @@ final class BookingDetailVM {
     private(set) var reservationId: String
     
     var onHotelDataUpdated: (() -> Void)?
-    
+    var isDescriptionExpanded: Bool = false
+
     init(reservation: Reservation, reservationId: String) {
         self.reservation = reservation
         self.reservationId = reservationId
