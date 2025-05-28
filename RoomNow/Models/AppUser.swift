@@ -13,5 +13,5 @@ struct AppUser: Codable {
     var email: String
     var gender: String
     var dateOfBirth: String
-    var profileImageUrl: String?
+    var profileImageBase64: String?
 }
