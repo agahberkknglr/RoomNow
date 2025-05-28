@@ -45,6 +45,7 @@ final class BookingPriceInfoCell: UITableViewCell {
         nightLabel.textAlignment = .right
 
         cancelInfoLabel.font = .systemFont(ofSize: 12)
+        cancelInfoLabel.numberOfLines = 0
         cancelInfoLabel.textAlignment = .left
         
         totalLabel.translatesAutoresizingMaskIntoConstraints = false
