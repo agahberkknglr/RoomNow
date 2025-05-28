@@ -36,6 +36,8 @@ final class SummaryChatCell: UITableViewCell {
     }
 
     private func setupUI() {
+        contentView.backgroundColor = .appBackground
+        
         avatarLabel.text = "🤖"
         avatarLabel.translatesAutoresizingMaskIntoConstraints = false
         avatarLabel.font = .systemFont(ofSize: 24)

@@ -25,9 +25,10 @@ final class ChatbotVC: UIViewController {
     }
 
     private func setupUI() {
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .appBackground
         navigationItem.title = "Assistant"
 
+        tableView.backgroundColor = .clear
         tableView.dataSource = self
         tableView.separatorStyle = .none
         tableView.keyboardDismissMode = .interactive

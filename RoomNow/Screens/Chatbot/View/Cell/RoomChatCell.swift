@@ -37,6 +37,7 @@ final class RoomChatCell: UITableViewCell {
 
     private func setupUI() {
         selectionStyle = .none
+        contentView.backgroundColor = .appBackground
 
         avatarLabel.text = "🤖"
         avatarLabel.font = .systemFont(ofSize: 24)
