@@ -134,4 +134,30 @@ final class AuthManager {
             }
         }
     }
+    
+    func updateUserData(_ user: AppUser, completion: @escaping (Result<Void, Error>) -> Void) {
+        let db = Firestore.firestore()
+        let uid = user.uid
+
+        var userData: [String: Any] = [
+            "username": user.username,
+            "email": user.email,
+            "dateOfBirth": user.dateOfBirth,
+            "gender": user.gender
+        ]
+
+        if let base64 = user.profileImageBase64 {
+            userData["profileImageBase64"] = base64
+        }
+
+        db.collection("users").document(uid).updateData(userData) { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                self.currentAppUser = user
+                completion(.success(()))
+            }
+        }
+    }
+
 }
