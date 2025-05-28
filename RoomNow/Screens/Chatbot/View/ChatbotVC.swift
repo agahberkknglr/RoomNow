@@ -22,7 +22,10 @@ final class ChatbotVC: UIViewController {
         setupUI()
         setupNavBar()
         viewModel.delegate = self
-        viewModel.loadAvailableCities() 
+        viewModel.loadAvailableCities()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.viewModel.sendInitialGreeting()
+        }
     }
 
     private func setupUI() {
@@ -186,10 +189,19 @@ extension ChatbotVC: UITableViewDataSource {
                 self.viewModel.selectedHotel = hotelData.hotel
                 self.appendMessage("🛏️ Please select your room type for \(hotelData.hotel.name):", sender: .bot)
                 
-                for (index, room) in hotelData.rooms.enumerated() {
-                    let isLast = index == hotelData.rooms.count - 1
+                let availableRooms = hotelData.rooms.filter {
+                    $0.isAvailable(for: self.viewModel.lastSearchData!.toHotelSearchParameters().checkInDate,
+                                   checkOut: self.viewModel.lastSearchData!.toHotelSearchParameters().checkOutDate)
+                }
+
+                for (index, room) in availableRooms.enumerated() {
+                    let isLast = index == availableRooms.count - 1
                     let message = ChatMessage(sender: .bot, text: "", type: .roomOption, payload: room, showAvatar: isLast)
                     self.appendMessage(message)
+                }
+
+                if availableRooms.isEmpty {
+                    self.appendMessage("❌ No rooms available for the selected dates.", sender: .bot)
                 }
             }
             
