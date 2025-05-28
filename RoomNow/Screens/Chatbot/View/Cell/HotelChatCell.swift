@@ -32,7 +32,7 @@ final class HotelChatCell: UITableViewCell {
 
     func configure(with hotel: Hotel, rooms: [Room], showAvatar: Bool) {
         nameLabel.text = "🏨 \(hotel.name)"
-        locationLabel.text = "📍 \(hotel.city), \(hotel.location)"
+        locationLabel.text = "📍 \(hotel.city.capitalized), \(hotel.location)"
         priceLabel.text = "💸 ₺\(Int(rooms.first?.price ?? 0)) / night"
         avatarLabel.isHidden = !showAvatar
     }
@@ -45,7 +45,7 @@ final class HotelChatCell: UITableViewCell {
         avatarLabel.font = .systemFont(ofSize: 24)
         avatarLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        bubbleView.backgroundColor = .systemGray5
+        bubbleView.backgroundColor = .appSecondaryBackground
         bubbleView.layer.cornerRadius = 16
         bubbleView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -53,8 +53,8 @@ final class HotelChatCell: UITableViewCell {
         locationLabel.font = .systemFont(ofSize: 14)
         priceLabel.font = .systemFont(ofSize: 14)
 
-        detailsButton.setTitle("View Details", for: .normal)
-        selectRoomButton.setTitle("Select Room", for: .normal)
+        detailsButton.applyPrimaryChatStyle(with: "View Details")
+        selectRoomButton.applyPrimaryChatStyle(with: "Select Room")
 
         detailsButton.addTarget(self, action: #selector(viewTapped), for: .touchUpInside)
         selectRoomButton.addTarget(self, action: #selector(selectTapped), for: .touchUpInside)
