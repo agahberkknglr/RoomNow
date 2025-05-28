@@ -17,6 +17,15 @@ extension UIButton {
         self.clipsToBounds = true
     }
     
+    func applyPrimaryChatStyle(with title: String) {
+        self.backgroundColor = UIColor.appButtonBackground
+        self.setTitle(title, for: .normal)
+        self.setTitleColor(.appAccent, for: .normal)
+        self.titleLabel?.font = UIFont.boldSystemFont(ofSize: 14)
+        self.layer.cornerRadius = 8
+        self.clipsToBounds = true
+    }
+    
     func applyLogOutStyle() {
         self.backgroundColor = UIColor.appButtonBackground
         self.setTitleColor(.appError, for: .normal)
