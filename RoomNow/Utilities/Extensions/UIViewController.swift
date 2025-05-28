@@ -134,3 +134,37 @@ extension UIViewController {
         }
     }
 }
+
+extension UIViewController {
+    func showToast(message: String, duration: TimeInterval = 2.0) {
+        let toastLabel = UILabel()
+        toastLabel.backgroundColor = UIColor.black.withAlphaComponent(0.25)
+        toastLabel.textColor = .white
+        toastLabel.textAlignment = .center
+        toastLabel.font = .systemFont(ofSize: 14)
+        toastLabel.text = message
+        toastLabel.numberOfLines = 0
+        toastLabel.alpha = 0
+        toastLabel.layer.cornerRadius = 8
+        toastLabel.clipsToBounds = true
+        toastLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        view.addSubview(toastLabel)
+        NSLayoutConstraint.activate([
+            toastLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
+            toastLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
+            toastLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40)
+        ])
+
+        UIView.animate(withDuration: 0.3, animations: {
+            toastLabel.alpha = 1.0
+        }) { _ in
+            UIView.animate(withDuration: 0.3, delay: duration, options: .curveEaseOut, animations: {
+                toastLabel.alpha = 0.0
+            }) { _ in
+                toastLabel.removeFromSuperview()
+            }
+        }
+    }
+}
+
