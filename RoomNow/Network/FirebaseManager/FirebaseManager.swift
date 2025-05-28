@@ -463,7 +463,14 @@ extension FirebaseManager: FirebaseManagerProtocol {
         }
     }
 
-
+    func markReservationOngoing(userId: String, reservationId: String) {
+        let db = Firestore.firestore()
+        db.collection("users").document(userId)
+            .collection("reservations").document(reservationId)
+            .updateData([
+                "status": "ongoing"
+            ])
+    }
 
     func markReservationCompleted(userId: String, reservationId: String, date: Date, completion: ((Result<Void, Error>) -> Void)? = nil) {
         let db = Firestore.firestore()

@@ -8,6 +8,7 @@
 
 enum ReservationStatus: String, Codable {
     case active
+    case ongoing
     case cancelled
     case completed
 }

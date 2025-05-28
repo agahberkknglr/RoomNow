@@ -93,6 +93,10 @@ final class BookingCell: UITableViewCell {
         case .active:
             statusLabel.text = "Upcoming"
             statusLabel.textColor = .appSuccess
+        
+        case .ongoing:
+            statusLabel.text = "Ongoing"
+            statusLabel.textColor = .appWarning
 
         case .completed:
             statusLabel.text = "Completed"
@@ -100,7 +104,7 @@ final class BookingCell: UITableViewCell {
 
         case .cancelled:
             statusLabel.text = "Cancelled"
-            statusLabel.textColor = .systemRed
+            statusLabel.textColor = .appError
         }
     }
 }

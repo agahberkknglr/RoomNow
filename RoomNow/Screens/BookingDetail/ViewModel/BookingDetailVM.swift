@@ -19,8 +19,11 @@ final class BookingDetailVM {
     }
 
     var isCancelable: Bool {
-        reservation.status == .active && Date() < reservation.checkInDate
+        let today = Calendar.current.startOfDay(for: Date())
+        let checkInDay = Calendar.current.startOfDay(for: reservation.checkInDate)
+        return reservation.status == .active && today < checkInDay
     }
+
     
     var canBeDeleted: Bool {
         return reservation.status == .cancelled || reservation.status == .completed

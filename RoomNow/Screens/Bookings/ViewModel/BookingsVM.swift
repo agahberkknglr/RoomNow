@@ -18,24 +18,43 @@ final class BookingsVM {
 
                 let updatedReservations: [Reservation] = reservations.map { reservation in
                     var updatedReservation = reservation
-                    if Date() > reservation.checkOutDate &&
-                        reservation.status == .active {
+                    let now = Date()
+
+                    if now >= reservation.checkInDate &&
+                       now < reservation.checkOutDate &&
+                       reservation.status == .active {
                         
-                        updatedReservation.status = .completed
-                        updatedReservation.completedAt = Date()
-                        
-                        if let uid = Auth.auth().currentUser?.uid {
-                            if let id = updatedReservation.id {
-                                FirebaseManager.shared.markReservationCompleted(
-                                    userId: uid,
-                                    reservationId: id,
-                                    date: updatedReservation.completedAt!
-                                )
-                            }
+                        updatedReservation.status = .ongoing
+
+                        if let uid = Auth.auth().currentUser?.uid,
+                           let id = updatedReservation.id {
+                            FirebaseManager.shared.markReservationOngoing(
+                                userId: uid,
+                                reservationId: id
+                            )
                         }
                     }
+
+                    else if now >= reservation.checkOutDate &&
+                            reservation.status == .active {
+                        
+                        updatedReservation.status = .completed
+                        updatedReservation.completedAt = now
+                        
+                        if let uid = Auth.auth().currentUser?.uid,
+                           let id = updatedReservation.id {
+                            FirebaseManager.shared.markReservationCompleted(
+                                userId: uid,
+                                reservationId: id,
+                                date: now
+                            )
+                        }
+                    }
+
                     return updatedReservation
                 }
+
+
 
                 let groupedDict = Dictionary(grouping: updatedReservations) { $0.city }
                 self?.groupedReservations = groupedDict
