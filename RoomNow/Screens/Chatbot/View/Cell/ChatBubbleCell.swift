@@ -64,7 +64,8 @@ final class ChatBubbleCell: UITableViewCell {
         bubbleView.translatesAutoresizingMaskIntoConstraints = false
         bubbleView.layer.cornerRadius = 16
         bubbleView.layer.masksToBounds = true
-        
+        bubbleView.backgroundColor = .appSecondaryBackground
+
         messageLabel.translatesAutoresizingMaskIntoConstraints = false
         messageLabel.font = .systemFont(ofSize: 15)
         messageLabel.numberOfLines = 0
@@ -89,7 +90,7 @@ final class ChatBubbleCell: UITableViewCell {
             messageStack.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: 12),
             messageStack.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -12),
             
-            bubbleView.widthAnchor.constraint(lessThanOrEqualToConstant: 200),
+            bubbleView.widthAnchor.constraint(lessThanOrEqualToConstant: 300),
             bubbleView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             bubbleView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
             
