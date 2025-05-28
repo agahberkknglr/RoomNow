@@ -22,6 +22,7 @@ final class ChatbotVC: UIViewController {
         setupUI()
         setupNavBar()
         viewModel.delegate = self
+        viewModel.loadAvailableCities() 
     }
 
     private func setupUI() {
@@ -150,6 +151,7 @@ extension ChatbotVC: UITableViewDataSource {
             
             cell.onSearchTapped = { [weak self] in
                 guard let self = self else { return }
+
                 if var last = self.messages.last, last.type == .summary {
                     last.showAvatar = false
                     self.messages[self.messages.count - 1] = last
@@ -211,7 +213,7 @@ extension ChatbotVC: UITableViewDataSource {
         case .bookingConfirm:
             let cell = tableView.dequeue(ChatBubbleCell.self, for: indexPath)
             cell.configure(with: message)
-            cell.addConfirmationButton(title: "✅ Confirm Booking") { [weak self] in
+            cell.addConfirmationButton(title: "Confirm Booking") { [weak self] in
                 self?.viewModel.confirmReservationFromChat()
             }
             return cell
