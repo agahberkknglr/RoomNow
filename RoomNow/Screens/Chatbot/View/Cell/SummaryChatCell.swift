@@ -29,8 +29,8 @@ final class SummaryChatCell: UITableViewCell {
     }
 
     func configure(with data: ParsedSearchData, showAvatar: Bool) {
-        destinationLabel.text = "🧭 \(data.destination)"
-        dateLabel.text = "🗓️ \(data.checkIn) → \(data.checkOut)"
+        destinationLabel.text = "🧭 \(data.destination.capitalized)"
+        dateLabel.text = "🗓️ \(data.toShortReadableDate(from: data.checkIn)) → \(data.toShortReadableDate(from: data.checkOut))"
         guestRoomLabel.text = "🧍‍♂️ \(data.guestCount) guests, 🛏️ \(data.roomCount) room"
         avatarLabel.isHidden = !showAvatar
     }
@@ -42,7 +42,7 @@ final class SummaryChatCell: UITableViewCell {
         avatarLabel.translatesAutoresizingMaskIntoConstraints = false
         avatarLabel.font = .systemFont(ofSize: 24)
 
-        bubbleView.backgroundColor = .systemGray5
+        bubbleView.backgroundColor = .appSecondaryBackground
         bubbleView.layer.cornerRadius = 16
         bubbleView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -54,8 +54,12 @@ final class SummaryChatCell: UITableViewCell {
             $0.translatesAutoresizingMaskIntoConstraints = false
             stackView.addArrangedSubview($0)
         }
+        
+        destinationLabel.font = .boldSystemFont(ofSize: 15)
+        dateLabel.font = .systemFont(ofSize: 14)
+        guestRoomLabel.font = .systemFont(ofSize: 14)
 
-        searchButton.setTitle("🔍 See Hotels", for: .normal)
+        searchButton.applyPrimaryStyle(with: "🔍 See Hotels" )
         searchButton.addTarget(self, action: #selector(searchTapped), for: .touchUpInside)
 
         contentView.addSubview(avatarLabel)
