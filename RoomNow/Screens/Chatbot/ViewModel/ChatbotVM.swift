@@ -19,6 +19,7 @@ protocol ChatbotVMDelegate: AnyObject {
     func didReceiveSearchData(_ data: ParsedSearchData)
     func didReceiveHotelMessages(_ messages: [ChatMessage])
     func didFailWithError(_ error: Error)
+    func shouldNavigateToBookings()
 }
 
 final class ChatbotVM {
@@ -302,8 +303,22 @@ final class ChatbotVM {
     
     func showBookingSummary() {
         guard let search = lastSearchData,  let selectedHotel = selectedHotel, !selectedRooms.isEmpty else { return }
+        
+        let checkIn = search.toDate(from: search.checkIn)
+        let checkOut = search.toDate(from: search.checkOut)
 
-        let totalPrice = selectedRooms.reduce(0) { $0 + Int($1.price) }
+        let nights = Calendar.current.dateComponents([.day], from: checkIn, to: checkOut).day ?? 1
+
+        var priceDetails = ""
+        var totalPrice = 0
+
+        for room in selectedRooms {
+            let pricePerNight = Int(room.price)
+            let roomTotal = pricePerNight * nights
+            priceDetails += "🛏 Room \(room.roomNumber): ₺\(pricePerNight) x \(nights) night(s) = ₺\(roomTotal)\n"
+            totalPrice += roomTotal
+        }
+        
         let roomNumbers = selectedRooms.map { $0.roomNumber }.joined(separator: ", ")
 
         let summary = """
@@ -368,7 +383,12 @@ final class ChatbotVM {
         }
         
         let roomNumbers = selectedRooms.map { $0.roomNumber }
-        let totalPrice = selectedRooms.reduce(0) { $0 + Int($1.price) }
+        
+        let nights = Calendar.current.dateComponents([.day], from: checkIn, to: checkOut).day ?? 1
+
+        let totalPrice = selectedRooms.reduce(0) {
+            $0 + (Int($1.price) * nights)
+        }
 
         let reservation = Reservation(
             hotelId: hotel.id ?? "",
@@ -377,7 +397,7 @@ final class ChatbotVM {
             checkInDate: checkIn,
             checkOutDate: checkOut,
             guestCount: parsed.guestCount,
-            roomCount: 1,
+            roomCount: selectedRooms.count,
             selectedRoomNumbers: roomNumbers,
             totalPrice: totalPrice,
             fullName: userInfo.name ?? "",
@@ -424,8 +444,12 @@ final class ChatbotVM {
         group.notify(queue: .main) {
             if failedRooms.isEmpty {
                 self.delegate?.didReceiveHotelMessages([
-                    ChatMessage(sender: .bot, text: "🎉 Booking confirmed! Thank you.", type: .text, payload: nil)
+                    ChatMessage(sender: .bot, text: "🎉 Booking confirmed! Thank you. Redirecting to your bookings...", type: .text, payload: nil)
                 ])
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    self.delegate?.shouldNavigateToBookings()
+                }
             } else {
                 self.delegate?.didReceiveHotelMessages([
                     ChatMessage(sender: .bot, text: "⚠️ Booking confirmed, but some rooms couldn't be updated.", type: .text, payload: nil)
