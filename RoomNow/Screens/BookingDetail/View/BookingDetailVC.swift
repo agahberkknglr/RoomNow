@@ -11,7 +11,8 @@ final class BookingDetailVC: UIViewController {
     private let viewModel: BookingDetailVM
     private let tableView = UITableView()
     private let cancelButton = UIButton()
-
+    private let buttonView = UIView()
+    
     init(viewModel: BookingDetailVM) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -31,6 +32,17 @@ final class BookingDetailVC: UIViewController {
                 target: self,
                 action: #selector(deleteTapped)
             )
+        }
+        
+        viewModel.onHotelDataUpdated = { [weak self] in
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
+        }
+        viewModel.fetchRoomsForReservation { [weak self] in
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
         }
     }
 
@@ -66,15 +78,24 @@ final class BookingDetailVC: UIViewController {
         cancelButton.layer.cornerRadius = 8
         cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
 
-        view.addSubview(cancelButton)
+        buttonView.backgroundColor = .appSecondaryBackground
+        buttonView.addSubview(cancelButton)
+        view.addSubview(buttonView)
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
+        buttonView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            cancelButton.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 16),
-            cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            cancelButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            cancelButton.heightAnchor.constraint(equalToConstant: 48)
+            buttonView.topAnchor.constraint(equalTo: tableView.bottomAnchor),
+            buttonView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            buttonView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            buttonView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            cancelButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            cancelButton.topAnchor.constraint(equalTo: buttonView.topAnchor, constant: 16),
+            cancelButton.leadingAnchor.constraint(equalTo: buttonView.leadingAnchor, constant: 16),
+            cancelButton.trailingAnchor.constraint(equalTo: buttonView.trailingAnchor, constant: -16),
+            cancelButton.bottomAnchor.constraint(equalTo: buttonView.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            
         ])
     }
 
@@ -143,31 +164,35 @@ extension BookingDetailVC: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int { 3 }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        section == 2 ? viewModel.reservation.selectedRoomNumbers.count : 1
+        section == 1 ? viewModel.reservation.selectedRoomNumbers.count : 1
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reservation = viewModel.reservation
-
         switch indexPath.section {
         case 0:
             let cell = tableView.dequeue(BookingHotelInfoCell.self, for: indexPath)
+            guard let hotel = viewModel.hotel else { return cell }
             cell.configure(
-                hotelName: viewModel.reservation.hotelName,
-                location: viewModel.reservation.city,
-                checkIn: viewModel.reservation.checkInDate,
-                checkOut: viewModel.reservation.checkOutDate,
-                guestCount: viewModel.reservation.guestCount
+                hotelName: reservation.hotelName,
+                location: reservation.city,
+                checkIn: reservation.checkInDate,
+                checkOut: reservation.checkOutDate,
+                guestCount: reservation.guestCount,
+                imageURLs: hotel.imageUrls,
+                status: reservation.status
             )
             return cell
 
         case 1:
-            let roomNumber = viewModel.reservation.selectedRoomNumbers[indexPath.row]
-            let typeName = "Room Type Name in here..."
+            let roomNumber = "\(viewModel.reservation.selectedRoomNumbers[indexPath.row])"
+            let room = viewModel.bookedRooms[roomNumber]
+            let typeName = room?.roomType ?? ""
             let nights = viewModel.numberOfNights
-            let guest = viewModel.reservation.fullName
+            let guest = reservation.fullName
+            let desc = room?.description
             let cell = tableView.dequeue(BookingRoomInfoCell.self, for: indexPath)
-            cell.configure(roomNumber: roomNumber, typeName: typeName, nights: nights, guestName: guest)
+            cell.configure(roomNumber: roomNumber, typeName: typeName, nights: nights, guestName: guest, roomDescription: desc)
             return cell
 
         case 2:
