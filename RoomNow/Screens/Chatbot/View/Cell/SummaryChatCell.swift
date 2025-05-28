@@ -59,7 +59,7 @@ final class SummaryChatCell: UITableViewCell {
         dateLabel.font = .systemFont(ofSize: 14)
         guestRoomLabel.font = .systemFont(ofSize: 14)
 
-        searchButton.applyPrimaryStyle(with: "🔍 See Hotels" )
+        searchButton.applyPrimaryChatStyle(with: "🔍 See Hotels" )
         searchButton.addTarget(self, action: #selector(searchTapped), for: .touchUpInside)
 
         contentView.addSubview(avatarLabel)
