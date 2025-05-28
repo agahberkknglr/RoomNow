@@ -102,7 +102,8 @@ final class HotelCellVM {
                 roomCount: roomCombination.count,
                 selectedRoomNumber: selectedRoomNumber,
                 totalPrice: totalPrice,
-                numberOfNights: nights
+                numberOfNights: nights,
+                imageUrl: hotelImageUrl ?? ""
             )
 
             FirebaseManager.shared.saveHotel(saved) { [weak self] result in

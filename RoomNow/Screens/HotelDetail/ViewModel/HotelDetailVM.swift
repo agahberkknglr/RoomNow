@@ -211,7 +211,8 @@ final class HotelDetailVM: HotelDetailVMProtocol {
                 roomCount: searchParams.roomCount,
                 selectedRoomNumber: cheapest.roomNumber,
                 totalPrice: totalPrice,
-                numberOfNights: nights
+                numberOfNights: nights,
+                imageUrl: hotel.imageUrls.first ?? ""
             )
             
             FirebaseManager.shared.saveHotel(saved) { [weak self] result in

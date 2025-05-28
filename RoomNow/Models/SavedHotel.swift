@@ -20,4 +20,5 @@ struct SavedHotel: Codable {
     let selectedRoomNumber: String?
     let totalPrice: Int
     let numberOfNights: Int
+    let imageUrl: String
 }

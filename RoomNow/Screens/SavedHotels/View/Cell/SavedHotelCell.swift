@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SDWebImage
 
 final class SavedHotelCell: UICollectionViewCell {
 
@@ -79,7 +80,6 @@ final class SavedHotelCell: UICollectionViewCell {
         nightImage.contentMode = .scaleAspectFit
         nightImage.tintColor = .appAccent
 
-        imageView.image = UIImage(named: "hotelph")
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 12
@@ -158,7 +158,12 @@ final class SavedHotelCell: UICollectionViewCell {
         guestLabel.text = "\(saved.guestCount) \(saved.guestCount == 1 ? "guest" : "guests")"
         priceLabel.text = "\(saved.numberOfNights) nights: ₺\(saved.totalPrice)"
         cityLabel.text = "\(saved.city.capitalized), \(saved.location)"
-
+        
+        if let url = URL(string: saved.imageUrl) {
+            imageView.sd_setImage(with: url, placeholderImage: UIImage(named: "placeholder"))
+        } else {
+            imageView.image = UIImage(named: "placeholder")
+        }
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d"
         let checkIn = formatter.string(from: saved.checkInDate)
