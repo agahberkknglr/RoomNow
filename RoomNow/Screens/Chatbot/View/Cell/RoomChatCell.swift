@@ -43,7 +43,7 @@ final class RoomChatCell: UITableViewCell {
         avatarLabel.font = .systemFont(ofSize: 24)
         avatarLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        bubbleView.backgroundColor = .systemGray5
+        bubbleView.backgroundColor = .appSecondaryBackground
         bubbleView.layer.cornerRadius = 16
         bubbleView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -55,8 +55,12 @@ final class RoomChatCell: UITableViewCell {
             $0.translatesAutoresizingMaskIntoConstraints = false
             stackView.addArrangedSubview($0)
         }
-
-        selectButton.setTitle("✅ Select Room", for: .normal)
+        
+        typeLabel.font = .boldSystemFont(ofSize: 15)
+        bedLabel.font = .systemFont(ofSize: 14)
+        priceLabel.font = .systemFont(ofSize: 14)
+        
+        selectButton.applyPrimaryChatStyle(with: "Select Room")
         selectButton.addTarget(self, action: #selector(selectTapped), for: .touchUpInside)
 
         bubbleView.addSubview(stackView)
