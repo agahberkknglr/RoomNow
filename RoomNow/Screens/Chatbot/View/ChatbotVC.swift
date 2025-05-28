@@ -6,11 +6,12 @@
 //
 
 import UIKit
+import IQKeyboardManagerSwift
 
 final class ChatbotVC: UIViewController {
     
     private let tableView = UITableView()
-    private let inputField = UITextField()
+    private let inputTextView = UITextView()
     private let sendButton = UIButton(type: .system)
     
     private var messages: [ChatMessage] = []
@@ -26,52 +27,78 @@ final class ChatbotVC: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             self.viewModel.sendInitialGreeting()
         }
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+
     }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        IQKeyboardManager.shared.isEnabled = false
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        IQKeyboardManager.shared.isEnabled = true
+    }
+
+    private var inputTextViewHeightConstraint: NSLayoutConstraint!
+    private var inputContainerBottomConstraint: NSLayoutConstraint!
+
 
     private func setupUI() {
         view.backgroundColor = .appBackground
         navigationItem.title = "Assistant"
 
+        // Table View
         tableView.backgroundColor = .clear
         tableView.dataSource = self
         tableView.separatorStyle = .none
         tableView.keyboardDismissMode = .interactive
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
-
-        inputField.placeholder = "Type a message..."
-        inputField.borderStyle = .roundedRect
-        inputField.autocorrectionType = .no
-        
-        sendButton.setTitle("Send", for: .normal)
-        sendButton.addTarget(self, action: #selector(sendTapped), for: .touchUpInside)
-
-        let inputContainer = UIStackView(arrangedSubviews: [inputField, sendButton])
-        inputContainer.axis = .horizontal
-        inputContainer.spacing = 8
-        inputContainer.translatesAutoresizingMaskIntoConstraints = false
-
-        inputField.translatesAutoresizingMaskIntoConstraints = false
-        sendButton.translatesAutoresizingMaskIntoConstraints = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 60
-        tableView.allowsSelection = true
-        tableView.isUserInteractionEnabled = true
-        
+
         tableView.registerCell(type: ChatBubbleCell.self)
         tableView.registerCell(type: HotelChatCell.self)
         tableView.registerCell(type: SummaryChatCell.self)
         tableView.registerCell(type: RoomChatCell.self)
 
+        // Input Text View
+        inputTextView.font = .systemFont(ofSize: 16)
+        inputTextView.layer.cornerRadius = 8
+        inputTextView.layer.borderColor = UIColor.systemGray4.cgColor
+        inputTextView.layer.borderWidth = 1
+        inputTextView.isScrollEnabled = false
+        inputTextView.delegate = self
+        inputTextView.translatesAutoresizingMaskIntoConstraints = false
+
+        // Send Button
+        sendButton.setTitle("Send", for: .normal)
+        sendButton.addTarget(self, action: #selector(sendTapped), for: .touchUpInside)
+        sendButton.translatesAutoresizingMaskIntoConstraints = false
+
+        // Input Container
+        let inputContainer = UIStackView(arrangedSubviews: [inputTextView, sendButton])
+        inputContainer.axis = .horizontal
+        inputContainer.spacing = 8
+        inputContainer.translatesAutoresizingMaskIntoConstraints = false
+
         view.addSubview(tableView)
         view.addSubview(inputContainer)
+
+        // Input height constraint (grows dynamically)
+        inputTextViewHeightConstraint = inputTextView.heightAnchor.constraint(equalToConstant: 40)
+        inputTextViewHeightConstraint.isActive = true
+        
+        inputContainerBottomConstraint = inputContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
 
         NSLayoutConstraint.activate([
             inputContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             inputContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            inputContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
-            inputField.heightAnchor.constraint(equalToConstant: 40),
+            inputContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            inputContainerBottomConstraint,
+            inputTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 40),
+            inputTextView.heightAnchor.constraint(lessThanOrEqualToConstant: 100),
             sendButton.widthAnchor.constraint(equalToConstant: 60),
 
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -80,6 +107,7 @@ final class ChatbotVC: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: inputContainer.topAnchor, constant: -8)
         ])
     }
+
     
     private func setupNavBar() {
         navigationItem.rightBarButtonItem = UIBarButtonItem(
@@ -102,9 +130,14 @@ final class ChatbotVC: UIViewController {
     }
     
     @objc private func sendTapped() {
-        guard let text = inputField.text, !text.isEmpty else { return }
+        let text = inputTextView.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+
         appendMessage(text, sender: .user)
-        inputField.text = ""
+        inputTextView.text = ""
+        inputTextViewHeightConstraint.constant = 40
+        view.layoutIfNeeded()
+
         viewModel.handleUserInput(text)
     }
 
@@ -120,13 +153,21 @@ final class ChatbotVC: UIViewController {
         messages.append(message)
 
         tableView.reloadData()
-        tableView.scrollToRow(at: IndexPath(row: messages.count - 1, section: 0), at: .bottom, animated: true)
+        tableView.layoutIfNeeded()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            let indexPath = IndexPath(row: self.messages.count - 1, section: 0)
+            self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+        }
     }
     
     func appendMessage(_ message: ChatMessage) {
         messages.append(message)
         tableView.reloadData()
-        tableView.scrollToRow(at: IndexPath(row: messages.count - 1, section: 0), at: .bottom, animated: true)
+        tableView.layoutIfNeeded()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            let indexPath = IndexPath(row: self.messages.count - 1, section: 0)
+            self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+        }
     }
     
     private func handleRoomSelectionChanged() {
@@ -147,6 +188,28 @@ final class ChatbotVC: UIViewController {
             } else {
                 appendMessage("⚠️ The selected rooms can't accommodate all guests. Please adjust your selection.", sender: .bot)
             }
+        }
+    }
+    
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+              let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval else { return }
+
+        inputContainerBottomConstraint.constant = -keyboardFrame.height + view.safeAreaInsets.bottom - 16
+
+        UIView.animate(withDuration: duration) {
+            self.view.layoutIfNeeded()
+        }
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval else { return }
+
+        inputContainerBottomConstraint.constant = 0
+
+        UIView.animate(withDuration: duration) {
+            self.view.layoutIfNeeded()
         }
     }
 }
@@ -288,6 +351,15 @@ extension ChatbotVC: UITableViewDataSource {
     }
 }
 
+extension ChatbotVC: UITextViewDelegate {
+    func textViewDidChange(_ textView: UITextView) {
+        let size = CGSize(width: textView.frame.width, height: .infinity)
+        let estimatedSize = textView.sizeThatFits(size)
+        inputTextViewHeightConstraint.constant = min(120, estimatedSize.height)
+        view.layoutIfNeeded()
+    }
+}
+
 extension ChatbotVC: ChatbotVMDelegate {
     func didReceiveSearchData(_ data: ParsedSearchData) {
         print("📩 Received parsed search data:", data)
@@ -311,12 +383,21 @@ extension ChatbotVC: ChatbotVMDelegate {
     }
     
     func didReceiveHotelMessages(_ hotelMessages: [ChatMessage]) {
-        for message in hotelMessages { messages.append(message) }
+        for message in hotelMessages {
+            messages.append(message)
+        }
         tableView.reloadData()
-        tableView.scrollToRow(at: IndexPath(row: messages.count - 1, section: 0), at: .bottom, animated: true)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.tableView.scrollToRow(at: IndexPath(row: self.messages.count - 1, section: 0), at: .bottom, animated: true)
+        }
     }
     
     func didFailWithError(_ error: Error) {
         appendMessage("⚠️ Error: \(error.localizedDescription)", sender: .bot)
+    }
+    
+    func shouldNavigateToBookings() {
+        tabBarController?.selectedIndex = 2
     }
 }
