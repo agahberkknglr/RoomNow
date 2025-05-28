@@ -10,12 +10,47 @@ import FirebaseAuth
 
 final class BookingDetailVM {
     
+    private(set) var hotel: Hotel?
+    private(set) var bookedRooms: [String: Room] = [:]
     var reservation: Reservation
     private(set) var reservationId: String
+    
+    var onHotelDataUpdated: (() -> Void)?
     
     init(reservation: Reservation, reservationId: String) {
         self.reservation = reservation
         self.reservationId = reservationId
+        fetchHotelData()
+    }
+    
+    private func fetchHotelData() {
+        FirebaseManager.shared.fetchHotel(by: reservation.hotelId) { [weak self] result in
+            switch result {
+            case .success(let hotel):
+                self?.hotel = hotel
+                self?.onHotelDataUpdated?()
+            case .failure(let error):
+                print("Failed to fetch hotel data: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func fetchRoomsForReservation(completion: @escaping () -> Void) {
+        FirebaseManager.shared.fetchRooms(for: [reservation.hotelId]) { [weak self] result in
+            switch result {
+            case .success(let allRooms):
+
+                let selectedNumbers = Set(self?.reservation.selectedRoomNumbers ?? [])
+                let matchedRooms = allRooms.filter { selectedNumbers.contains($0.roomNumber) }
+                for room in matchedRooms {
+                    self?.bookedRooms[room.roomNumber] = room
+                }
+                completion()
+            case .failure(let error):
+                print("Failed to fetch rooms: \(error)")
+                completion()
+            }
+        }
     }
 
     var isCancelable: Bool {
