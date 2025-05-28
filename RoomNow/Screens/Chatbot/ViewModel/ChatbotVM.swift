@@ -323,13 +323,21 @@ final class ChatbotVM {
 
         let summary = """
         ✅ Here's your reservation:
+        
         🏨 \(selectedHotel.name)
+        
         🛏 Rooms \(roomNumbers) - ₺\(totalPrice) total
+        
         📍 \(search.destination)
+        
         📅 \(search.toShortReadableDate(from: search.checkIn)) to \(search.toShortReadableDate(from: search.checkOut))
+        
         👤 \(userInfo.name ?? "-")
+        
         📧 \(userInfo.email ?? "-")
+        
         📱 \(userInfo.phone ?? "-")
+        
         📝 \(userInfo.note ?? "-")
 
         Tap to confirm your booking ✅
