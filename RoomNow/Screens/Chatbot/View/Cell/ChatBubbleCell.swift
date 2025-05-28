@@ -96,7 +96,7 @@ final class ChatBubbleCell: UITableViewCell {
             
             avatarLabel.widthAnchor.constraint(equalToConstant: 30),
             avatarLabel.heightAnchor.constraint(equalToConstant: 30),
-            avatarLabel.centerYAnchor.constraint(equalTo: bubbleView.centerYAnchor)
+            avatarLabel.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor, constant: -8)
         ])
         
         // Bot (left) layout
