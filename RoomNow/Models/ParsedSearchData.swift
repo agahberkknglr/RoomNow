@@ -25,4 +25,11 @@ extension ParsedSearchData {
             roomCount: roomCount
         )
     }
+    
+    func toShortReadableDate(from raw: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+        guard let date = inputFormatter.date(from: raw) else { return raw }
+        return date.toShortReadableFormat()
+    }
 }
