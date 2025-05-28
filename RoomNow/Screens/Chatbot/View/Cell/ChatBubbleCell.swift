@@ -67,7 +67,7 @@ final class ChatBubbleCell: UITableViewCell {
         bubbleView.backgroundColor = .appSecondaryBackground
 
         messageLabel.translatesAutoresizingMaskIntoConstraints = false
-        messageLabel.font = .systemFont(ofSize: 15)
+        messageLabel.font = .systemFont(ofSize: 14)
         messageLabel.numberOfLines = 0
         
         confirmButton.applyPrimaryChatStyle(with: "Confirm Booking")
