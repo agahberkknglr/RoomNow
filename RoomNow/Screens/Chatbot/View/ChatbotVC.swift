@@ -402,6 +402,17 @@ extension ChatbotVC: ChatbotVMDelegate {
     }
     
     func shouldNavigateToBookings() {
-        tabBarController?.selectedIndex = 2
+        guard let tabBarVC = self.tabBarController as? TabBarVC else { return }
+
+        self.viewModel.resetConversation()
+
+        if let searchNav = tabBarVC.viewControllers?[0] as? UINavigationController,
+           let rootSearchVC = searchNav.viewControllers.first as? SearchVC {
+            searchNav.setViewControllers([rootSearchVC], animated: false)
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            tabBarVC.selectedIndex = 2
+        }
     }
 }
