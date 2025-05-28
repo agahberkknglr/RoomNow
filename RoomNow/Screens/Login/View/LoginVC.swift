@@ -10,7 +10,34 @@ import UIKit
 final class LoginVC: UIViewController {
 
     private let viewModel: LoginVMProtocol = LoginVM()
+    
+    private let scrollView: UIScrollView = {
+        let sv = UIScrollView()
+        sv.alwaysBounceVertical = true
+        sv.keyboardDismissMode = .interactive
+        return sv
+    }()
 
+    private let contentStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 12
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+
+    private let formBackgroundView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .appSecondaryBackground
+        view.layer.cornerRadius = 16
+        view.layer.shadowColor = UIColor.black.cgColor
+        view.layer.shadowOpacity = 0.1
+        view.layer.shadowOffset = CGSize(width: 0, height: 2)
+        view.layer.shadowRadius = 8
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     private let emailField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Email"
@@ -19,6 +46,7 @@ final class LoginVC: UIViewController {
         tf.borderStyle = .roundedRect
         tf.textContentType = .emailAddress
         tf.returnKeyType = .next
+        tf.font = .systemFont(ofSize: 16)
         tf.autocorrectionType = .no
         tf.backgroundColor = .appSecondaryBackground
         return tf
@@ -31,8 +59,18 @@ final class LoginVC: UIViewController {
         tf.borderStyle = .roundedRect
         tf.textContentType = .password
         tf.returnKeyType = .done
+        tf.font = .systemFont(ofSize: 16)
         tf.autocorrectionType = .no
         tf.backgroundColor = .appSecondaryBackground
+        
+        let toggleButton = UIButton(type: .custom)
+        toggleButton.setImage(UIImage(systemName: "eye.slash"), for: .normal)
+        toggleButton.tintColor = .gray
+        toggleButton.frame = CGRect(x: -8, y: 0, width: 24, height: 24)
+        tf.rightView = toggleButton
+        tf.rightViewMode = .always
+        toggleButton.addTarget(nil, action: #selector(togglePasswordVisibility), for: .touchUpInside)
+        
         return tf
     }()
 
@@ -49,6 +87,7 @@ final class LoginVC: UIViewController {
         label.font = .systemFont(ofSize: 14)
         label.textAlignment = .center
         label.isHidden = true
+        label.backgroundColor = .clear
         return label
     }()
     
@@ -93,15 +132,26 @@ final class LoginVC: UIViewController {
     
     @objc private func loginTapped() {
         guard
-            let email = emailField.text, !email.isEmpty,
-            let password = passwordField.text, !password.isEmpty
+            let email = emailField.text?.trimmingCharacters(in: .whitespacesAndNewlines), !email.isEmpty,
+            let password = passwordField.text?.trimmingCharacters(in: .whitespacesAndNewlines), !password.isEmpty
         else {
             showError("Please fill in all fields")
             return
         }
 
+        guard email.isValidEmail else {
+            showError("Please enter a valid email.")
+            return
+        }
+
+        showLoadingIndicator()
+        loginButton.isEnabled = false
+
         viewModel.login(email: email, password: password) { [weak self] errorMessage in
             DispatchQueue.main.async {
+                self?.hideLoadingIndicator()
+                self?.loginButton.isEnabled = true
+
                 if let errorMessage = errorMessage {
                     self?.showError(errorMessage)
                 } else {
@@ -111,6 +161,7 @@ final class LoginVC: UIViewController {
             }
         }
     }
+
     
     private func registerAction() {
         let tap = UITapGestureRecognizer(target: self, action: #selector(openRegister))
@@ -158,23 +209,60 @@ final class LoginVC: UIViewController {
             tabBarVC.selectedIndex = 3
         }
     }
+    
+    @objc private func togglePasswordVisibility() {
+        passwordField.isSecureTextEntry.toggle()
+        let imageName = passwordField.isSecureTextEntry ? "eye.slash" : "eye"
+        if let button = passwordField.rightView as? UIButton {
+            button.setImage(UIImage(systemName: imageName), for: .normal)
+        }
+    }
 
     private func setupUI() {
         view.backgroundColor = .appBackground
         setNavigation(title: "Login")
-        let stack = UIStackView(arrangedSubviews: [emailField, passwordField, forgotPasswordLabel, loginButton, registerLabel, errorLabel])
-        stack.axis = .vertical
-        stack.spacing = 12
-        stack.translatesAutoresizingMaskIntoConstraints = false
-
-        view.addSubview(stack)
-
+        
+        view.addSubview(scrollView)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            stack.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            loginButton.heightAnchor.constraint(equalToConstant: 44)
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
+        
+        scrollView.addSubview(contentStack)
+        NSLayoutConstraint.activate([
+            contentStack.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 200),
+            contentStack.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 24),
+            contentStack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -24),
+            contentStack.bottomAnchor.constraint(lessThanOrEqualTo: scrollView.bottomAnchor),
+            contentStack.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -48)
+        ])
+
+        let formFieldsStack = UIStackView(arrangedSubviews: [
+            emailField,
+            passwordField,
+            forgotPasswordLabel,
+            loginButton,
+            errorLabel
+        ])
+        formFieldsStack.axis = .vertical
+        formFieldsStack.spacing = 12
+        formFieldsStack.translatesAutoresizingMaskIntoConstraints = false
+
+        formBackgroundView.addSubview(formFieldsStack)
+        NSLayoutConstraint.activate([
+            formFieldsStack.topAnchor.constraint(equalTo: formBackgroundView.topAnchor, constant: 20),
+            formFieldsStack.leadingAnchor.constraint(equalTo: formBackgroundView.leadingAnchor, constant: 16),
+            formFieldsStack.trailingAnchor.constraint(equalTo: formBackgroundView.trailingAnchor, constant: -16),
+            formFieldsStack.bottomAnchor.constraint(equalTo: formBackgroundView.bottomAnchor, constant: -20)
+        ])
+
+        contentStack.addArrangedSubview(formBackgroundView)
+        contentStack.addArrangedSubview(registerLabel)
+
+        loginButton.heightAnchor.constraint(equalToConstant: 44).isActive = true
     }
 }
 
