@@ -46,7 +46,8 @@ final class RoomSelectionVC: UIViewController {
         view.backgroundColor = .appBackground
         groupedRooms = Dictionary(grouping: viewModel.availableRooms, by: { $0.roomType })
             .sorted { $0.key < $1.key }
-            .map { (type: $0.key, rooms: $0.value) }
+            //.map { (type: $0.key, rooms: $0.value) }
+            .map { (type: $0.key, rooms: $0.value.sorted { $0.price < $1.price }) }
         setupTableView()
         setupButton()
     }
