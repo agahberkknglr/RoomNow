@@ -11,6 +11,10 @@ protocol ProfileVMProtocol {
     var user: AppUser? { get }
     func fetchUser(completion: @escaping () -> Void)
     func logout(completion: @escaping (Result<Void, Error>) -> Void)
+    func setDateOfBirth(_ dob: String)
+    func setUser(_ user: AppUser)
+    func updateUser(_ user: AppUser, completion: @escaping (Result<Void, Error>) -> Void)
+    func setProfileImage(base64: String)
 }
 
 final class ProfileVM: ProfileVMProtocol {
@@ -30,5 +34,21 @@ final class ProfileVM: ProfileVMProtocol {
 
     func logout(completion: @escaping (Result<Void, Error>) -> Void) {
         AuthManager.shared.logout(completion: completion)
+    }
+    
+    func setDateOfBirth(_ dob: String) {
+        user?.dateOfBirth = dob
+    }
+    
+    func setUser(_ user: AppUser) {
+        self.user = user
+    }
+
+    func updateUser(_ user: AppUser, completion: @escaping (Result<Void, Error>) -> Void) {
+        AuthManager.shared.updateUserData(user, completion: completion)
+    }
+    
+    func setProfileImage(base64: String) {
+        user?.profileImageBase64 = base64
     }
 }
