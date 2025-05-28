@@ -76,7 +76,7 @@ final class BookingCell: UITableViewCell {
     }
 
     
-    func configure(with reservation: Reservation) {
+    func configure(with reservation: Reservation, imageURL: String?) {
         titleLabel.text = reservation.hotelName
         
         let formatter = DateFormatter()
@@ -105,6 +105,12 @@ final class BookingCell: UITableViewCell {
         case .cancelled:
             statusLabel.text = "Cancelled"
             statusLabel.textColor = .appError
+        }
+        
+        if let urlString = imageURL, let url = URL(string: urlString) {
+            hotelImageView.sd_setImage(with: url, placeholderImage: UIImage(named: "hotelph"))
+        } else {
+            hotelImageView.image = UIImage(named: "hotelph")
         }
     }
 }

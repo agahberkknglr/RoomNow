@@ -89,7 +89,8 @@ extension BookingsVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeue(BookingCell.self, for: indexPath)
         let reservation = viewModel.reservation(at: indexPath)
-        cell.configure(with: reservation)
+        let imageUrl = viewModel.imageURL(for: reservation.hotelId)
+        cell.configure(with: reservation, imageURL: imageUrl)
         return cell
     }
     

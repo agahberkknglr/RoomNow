@@ -502,6 +502,25 @@ extension FirebaseManager: FirebaseManagerProtocol {
             }
     }
 
+    func fetchHotelImageURL(hotelId: String, completion: @escaping (String?) -> Void) {
+        let db = Firestore.firestore()
+        db.collection("hotels").document(hotelId).getDocument { snapshot, error in
+            if let error = error {
+                print("Error fetching hotel image: \(error.localizedDescription)")
+                completion(nil)
+                return
+            }
+
+            guard let data = snapshot?.data(),
+                  let urls = data["imageUrls"] as? [String],
+                  let firstUrl = urls.first else {
+                completion(nil)
+                return
+            }
+
+            completion(firstUrl)
+        }
+    }
 
     
     
