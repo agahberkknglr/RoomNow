@@ -69,10 +69,7 @@ final class ChatBubbleCell: UITableViewCell {
         messageLabel.font = .systemFont(ofSize: 15)
         messageLabel.numberOfLines = 0
         
-        confirmButton.backgroundColor = .systemGreen
-        confirmButton.setTitleColor(.white, for: .normal)
-        confirmButton.layer.cornerRadius = 8
-        confirmButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
+        confirmButton.applyPrimaryChatStyle(with: "Confirm Booking")
         confirmButton.isHidden = true
 
         messageStack.axis = .vertical
@@ -92,7 +89,7 @@ final class ChatBubbleCell: UITableViewCell {
             messageStack.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: 12),
             messageStack.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -12),
             
-            bubbleView.widthAnchor.constraint(lessThanOrEqualToConstant: 260),
+            bubbleView.widthAnchor.constraint(lessThanOrEqualToConstant: 200),
             bubbleView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             bubbleView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
             
