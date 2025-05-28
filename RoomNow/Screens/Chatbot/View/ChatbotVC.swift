@@ -128,6 +128,27 @@ final class ChatbotVC: UIViewController {
         tableView.reloadData()
         tableView.scrollToRow(at: IndexPath(row: messages.count - 1, section: 0), at: .bottom, animated: true)
     }
+    
+    private func handleRoomSelectionChanged() {
+        let result = viewModel.processRoomSelectionChange()
+
+        if result.remaining > 0 {
+            appendMessage("You need to select \(result.remaining) more room(s).", sender: .bot)
+        } else {
+            if result.enoughBeds {
+                let message = ChatMessage(
+                    sender: .bot,
+                    text: "✅ You've selected all required rooms. Tap below to continue.",
+                    type: .roomConfirm,
+                    payload: viewModel.selectedRooms,
+                    showAvatar: true
+                )
+                appendMessage(message)
+            } else {
+                appendMessage("⚠️ The selected rooms can't accommodate all guests. Please adjust your selection.", sender: .bot)
+            }
+        }
+    }
 }
 
 extension ChatbotVC: UITableViewDataSource {
@@ -208,18 +229,43 @@ extension ChatbotVC: UITableViewDataSource {
             return cell
             
         case .roomOption:
-            guard let room = message.payload as? Room else {
-                return UITableViewCell()
-            }
+            guard let room = message.payload as? Room else { return UITableViewCell() }
             let cell = tableView.dequeue(RoomChatCell.self, for: indexPath)
-            cell.configure(with: room, showAvatar: message.showAvatar)
             
-            cell.onSelectTapped = { [weak self] in
-                self?.appendMessage("✅ Room \(room.roomNumber) selected. Let's complete your reservation.", sender: .bot)
-                self?.viewModel.selectedRoom = room
+            let isSelected = viewModel.selectedRooms.contains(where: { $0.id == room.id })
+
+            if isSelected {
+                cell.configure(
+                    with: room,
+                    showAvatar: message.showAvatar,
+                    buttonTitle: "❌ Remove Room"
+                ) { [weak self] in
+                    guard let self else { return }
+                    self.viewModel.selectedRooms.removeAll { $0.id == room.id }
+                    self.appendMessage("🗑️ Room \(room.roomNumber) removed.", sender: .bot)
+                    self.handleRoomSelectionChanged()
+                }
+            } else {
+                cell.configure(
+                    with: room,
+                    showAvatar: message.showAvatar,
+                    buttonTitle: "✅ Select Room"
+                ) { [weak self] in
+                    guard let self else { return }
+                    self.viewModel.selectedRooms.append(room)
+                    self.appendMessage("✅ Room \(room.roomNumber) selected.", sender: .bot)
+                    self.handleRoomSelectionChanged()
+                }
+            }
+
+            return cell
+            
+        case .roomConfirm:
+            let cell = tableView.dequeue(ChatBubbleCell.self, for: indexPath)
+            cell.configure(with: message)
+            cell.addConfirmationButton(title: "✅ Confirm Rooms") { [weak self] in
                 self?.viewModel.startCollectingUserInfo()
             }
-            
             return cell
             
         case .loginPrompt:

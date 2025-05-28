@@ -15,6 +15,7 @@ enum ChatMessageType {
     case summary
     case hotelCard
     case roomOption
+    case roomConfirm
     case bookingConfirm
     case loginPrompt
 }
@@ -28,7 +29,7 @@ struct ChatMessage {
     
     var isActionable: Bool {
         switch type {
-        case .summary, .hotelCard, .roomOption, .bookingConfirm, .loginPrompt:
+        case .summary, .hotelCard, .roomOption, .roomConfirm, .bookingConfirm, .loginPrompt:
             return true
         case .text:
             return false

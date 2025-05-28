@@ -28,11 +28,14 @@ final class RoomChatCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(with room: Room, showAvatar: Bool) {
+    func configure(with room: Room, showAvatar: Bool, buttonTitle: String, onButtonTapped: @escaping () -> Void) {
         typeLabel.text = "🛏 Room \(room.roomNumber)"
         bedLabel.text = "👥 Sleeps \(room.bedCapacity)"
         priceLabel.text = "💸 ₺\(Int(room.price)) per night"
         avatarLabel.isHidden = !showAvatar
+        
+        selectButton.setTitle(buttonTitle, for: .normal)
+        self.onSelectTapped = onButtonTapped
     }
 
     private func setupUI() {

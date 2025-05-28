@@ -30,7 +30,7 @@ final class ChatbotVM {
     var userInfo = UserReservationInfo()
     var lastSearchData: ParsedSearchData?
     var selectedHotel: Hotel?
-    var selectedRoom: Room?
+    var selectedRooms: [Room] = []
     var availableCities: [String] = []
     
     func sendMessage(_ userMessage: String) {
@@ -149,6 +149,28 @@ final class ChatbotVM {
         }
     }
     
+    func handleRoomSelection(_ room: Room) {
+        if !selectedRooms.contains(where: { $0.roomNumber == room.roomNumber }) {
+            selectedRooms.append(room)
+        } else {
+            selectedRooms.removeAll { $0.roomNumber == room.roomNumber }
+        }
+    }
+    
+    func processRoomSelectionChange() -> (remaining: Int, enoughBeds: Bool) {
+        let requiredRoomCount = lastSearchData?.roomCount ?? 1
+        let guestCount = lastSearchData?.guestCount ?? 1
+
+        let selectedCount = selectedRooms.count
+        let totalBeds = selectedRooms.reduce(0) { $0 + $1.bedCapacity }
+
+        let remaining = requiredRoomCount - selectedCount
+        let enoughBeds = totalBeds >= guestCount
+
+        return (remaining, enoughBeds)
+    }
+
+    
     func startCollectingUserInfo() {
         guard let _ = AuthManager.shared.currentUser else {
             delegate?.didReceiveHotelMessages([
@@ -223,6 +245,22 @@ final class ChatbotVM {
             return
         }
         
+        if text.lowercased() == "confirm rooms" {
+            if selectedRooms.isEmpty {
+                delegate?.didReceiveHotelMessages([
+                    ChatMessage(sender: .bot, text: "❌ You haven't selected any rooms.", type: .text, payload: nil)
+                ])
+                return
+            }
+            startCollectingUserInfo()
+            return
+        }
+        
+        if text.lowercased().starts(with: "remove") {
+            handleRoomRemovalCommand(text)
+            return
+        }
+        
         switch inputStep {
         case .askingName:
             userInfo.name = text
@@ -257,12 +295,15 @@ final class ChatbotVM {
 
     
     func showBookingSummary() {
-        guard let search = lastSearchData,  let selectedHotel = selectedHotel, let selectedRoom = selectedRoom else { return }
+        guard let search = lastSearchData,  let selectedHotel = selectedHotel, !selectedRooms.isEmpty else { return }
+
+        let totalPrice = selectedRooms.reduce(0) { $0 + Int($1.price) }
+        let roomNumbers = selectedRooms.map { $0.roomNumber }.joined(separator: ", ")
 
         let summary = """
         ✅ Here's your reservation:
         🏨 \(selectedHotel.name)
-        🛏 Room \(selectedRoom.roomNumber) - ₺\(Int(selectedRoom.price)) / night
+        🛏 Rooms \(roomNumbers) - ₺\(totalPrice) total
         📍 \(search.destination)
         📅 \(search.toShortReadableDate(from: search.checkIn)) to \(search.toShortReadableDate(from: search.checkOut))
         👤 \(userInfo.name ?? "-")
@@ -277,7 +318,7 @@ final class ChatbotVM {
             sender: .bot,
             text: summary,
             type: .bookingConfirm,
-            payload: selectedRoom,
+            payload: selectedRooms,
             showAvatar: true
         )
 
@@ -285,7 +326,6 @@ final class ChatbotVM {
     }
     
     func confirmReservationFromChat() {
-        
         guard AuthManager.shared.currentUser != nil else {
             delegate?.didReceiveHotelMessages([
                 ChatMessage(
@@ -299,7 +339,7 @@ final class ChatbotVM {
         }
         guard
             let hotel = selectedHotel,
-            let room = selectedRoom,
+            !selectedRooms.isEmpty,
             let parsed = lastSearchData
         else {
             delegate?.didReceiveHotelMessages([
@@ -320,6 +360,9 @@ final class ChatbotVM {
             ])
             return
         }
+        
+        let roomNumbers = selectedRooms.map { $0.roomNumber }
+        let totalPrice = selectedRooms.reduce(0) { $0 + Int($1.price) }
 
         let reservation = Reservation(
             hotelId: hotel.id ?? "",
@@ -329,8 +372,8 @@ final class ChatbotVM {
             checkOutDate: checkOut,
             guestCount: parsed.guestCount,
             roomCount: 1,
-            selectedRoomNumbers: [room.roomNumber],
-            totalPrice: Int(room.price),
+            selectedRoomNumbers: roomNumbers,
+            totalPrice: totalPrice,
             fullName: userInfo.name ?? "",
             email: userInfo.email ?? "",
             phone: userInfo.phone ?? "",
@@ -342,48 +385,78 @@ final class ChatbotVM {
         )
 
         FirebaseManager.shared.saveReservation(reservation) { [weak self] result in
+            guard let self = self else { return }
             switch result {
             case .success:
-                self?.updateRoomDatesForChat(
-                    roomId: room.id,
+                self.updateMultipleRoomDatesForChat(
+                    roomIds: self.selectedRooms.compactMap { $0.id },
                     checkIn: checkIn,
                     checkOut: checkOut
                 )
             case .failure(let error):
-                self?.delegate?.didReceiveHotelMessages([
+                self.delegate?.didReceiveHotelMessages([
                     ChatMessage(sender: .bot, text: "❌ Booking failed: \(error.localizedDescription)", type: .text, payload: nil)
                 ])
             }
         }
     }
 
-    private func updateRoomDatesForChat(roomId: String?, checkIn: Date, checkOut: Date) {
-        guard let roomId = roomId else {
+    private func updateMultipleRoomDatesForChat(roomIds: [String], checkIn: Date, checkOut: Date) {
+        let group = DispatchGroup()
+        var failedRooms: [String] = []
+
+        for roomId in roomIds {
+            group.enter()
+            FirebaseManager.shared.updateBookedDates(for: roomId, startDate: checkIn, endDate: checkOut) { result in
+                if case .failure = result {
+                    failedRooms.append(roomId)
+                }
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            if failedRooms.isEmpty {
+                self.delegate?.didReceiveHotelMessages([
+                    ChatMessage(sender: .bot, text: "🎉 Booking confirmed! Thank you.", type: .text, payload: nil)
+                ])
+            } else {
+                self.delegate?.didReceiveHotelMessages([
+                    ChatMessage(sender: .bot, text: "⚠️ Booking confirmed, but some rooms couldn't be updated.", type: .text, payload: nil)
+                ])
+            }
+
+            self.resetConversation()
+        }
+    }
+    
+    private func handleRoomRemovalCommand(_ text: String) {
+        let trimmed = text.replacingOccurrences(of: "remove", with: "").trimmingCharacters(in: .whitespaces)
+
+        if trimmed == "all" {
+            selectedRooms.removeAll()
             delegate?.didReceiveHotelMessages([
-                ChatMessage(sender: .bot, text: "⚠️ Room ID is missing.", type: .text, payload: nil)
+                ChatMessage(sender: .bot, text: "🗑 All selected rooms removed.", type: .text, payload: nil)
             ])
             return
         }
 
-        FirebaseManager.shared.updateBookedDates(for: roomId, startDate: checkIn, endDate: checkOut) { [weak self] result in
-            switch result {
-            case .success:
-                self?.delegate?.didReceiveHotelMessages([
-                    ChatMessage(sender: .bot, text: "🎉 Booking confirmed! Thank you.", type: .text, payload: nil)
-                ])
-                self?.resetConversation()
-            case .failure(let error):
-                self?.delegate?.didReceiveHotelMessages([
-                    ChatMessage(sender: .bot, text: "⚠️ Booked but failed to update dates: \(error.localizedDescription)", type: .text, payload: nil)
-                ])
-            }
+        if let index = selectedRooms.firstIndex(where: { $0.roomNumber == trimmed }) {
+            let removed = selectedRooms.remove(at: index)
+            delegate?.didReceiveHotelMessages([
+                ChatMessage(sender: .bot, text: "🗑 Room \(removed.roomNumber) removed.", type: .text, payload: nil)
+            ])
+        } else {
+            delegate?.didReceiveHotelMessages([
+                ChatMessage(sender: .bot, text: "⚠️ Could not find room \(trimmed) in your selection.", type: .text, payload: nil)
+            ])
         }
     }
     
     func resetConversation() {
         inputStep = .idle
         userInfo = UserReservationInfo()
-        selectedRoom = nil
+        selectedRooms = []
         selectedHotel = nil
         lastSearchData = nil
         messages.removeAll()
