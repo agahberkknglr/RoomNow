@@ -107,6 +107,12 @@ extension FirebaseManager: FirebaseManagerProtocol {
     
     func fetchRooms(for hotelIds: [String], completion: @escaping (Result<[Room], Error>) -> Void) {
         let db = Firestore.firestore()
+        
+        guard !hotelIds.isEmpty else {
+            completion(.success([]))
+            return
+        }
+        
         db.collection("rooms")
             .whereField("hotelId", in: hotelIds)
             .getDocuments { snapshot, error in
