@@ -37,24 +37,6 @@ final class HotelImageCell: UITableViewCell {
             scrollView.heightAnchor.constraint(equalToConstant: 200)
         ])
     }
-    
-    //func configure(with imageNames: [String]) {
-    //    scrollView.subviews.forEach { $0.removeFromSuperview() }
-//
-    //    let width = UIScreen.main.bounds.width
-    //    let height: CGFloat = 200
-//
-    //    for (index, name) in imageNames.enumerated() {
-    //        let imageView = UIImageView()
-    //        imageView.image = UIImage(named: name)
-    //        imageView.contentMode = .scaleAspectFill
-    //        imageView.clipsToBounds = true
-    //        imageView.frame = CGRect(x: CGFloat(index) * width, y: 0, width: width, height: height)
-    //        scrollView.addSubview(imageView)
-    //    }
-//
-    //    scrollView.contentSize = CGSize(width: width * CGFloat(imageNames.count), height: height)
-    //}
 
     func configure(with imageUrls: [String]) {
         scrollView.subviews.forEach { $0.removeFromSuperview() }
