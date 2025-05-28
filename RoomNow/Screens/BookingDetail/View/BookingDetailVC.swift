@@ -61,6 +61,8 @@ final class BookingDetailVC: UIViewController {
         tableView.registerCell(type: BookingHotelInfoCell.self)
         tableView.registerCell(type: BookingPriceInfoCell.self)
         tableView.registerCell(type: BookingRoomInfoCell.self)
+        tableView.registerCell(type: BookingMapInfoCell.self)
+        tableView.registerCell(type: BookingOtherInfoCell.self)
         view.addSubview(tableView)
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -161,7 +163,7 @@ final class BookingDetailVC: UIViewController {
 }
 
 extension BookingDetailVC: UITableViewDataSource {
-    func numberOfSections(in tableView: UITableView) -> Int { 3 }
+    func numberOfSections(in tableView: UITableView) -> Int { 5 }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         section == 1 ? viewModel.reservation.selectedRoomNumbers.count : 1
@@ -202,7 +204,31 @@ extension BookingDetailVC: UITableViewDataSource {
                 nights: viewModel.numberOfNights
             )
             return cell
-
+            
+        case 3:
+            let cell = tableView.dequeue(BookingMapInfoCell.self, for: indexPath)
+            guard let hotel = viewModel.hotel else { return cell }
+            let latitude = hotel.latitude
+            let longitude = hotel.longitude
+            let location = "\(hotel.city.capitalized), \(hotel.location)"
+            cell.configure(latitude: latitude, longitude: longitude, name: location)
+            return cell
+            
+        case 4:
+            let cell = tableView.dequeue(BookingOtherInfoCell.self, for: indexPath)
+            if let hotel = viewModel.hotel {
+                let amenities = hotel.amenities.compactMap { Amenity.from(string: $0) }
+                cell.configure(
+                    description: hotel.description,
+                    isExpanded: viewModel.isDescriptionExpanded,
+                    amenities: amenities,
+                    onToggle: { [weak self] in
+                        self?.viewModel.isDescriptionExpanded.toggle()
+                        self?.tableView.reloadRows(at: [indexPath], with: .automatic)
+                    }
+                )
+            }
+            return cell
         default:
             return UITableViewCell()
         }
