@@ -277,11 +277,17 @@ final class ChatbotVM {
             ])
 
         case .askingPhone:
-            userInfo.phone = text
-            inputStep = .askingNote
-            delegate?.didReceiveHotelMessages([
-                ChatMessage(sender: .bot, text: "📝 Any notes? (Optional — type 'skip')", type: .text, payload: nil)
-            ])
+            if isValidPhoneNumber(text) {
+                userInfo.phone = text
+                inputStep = .askingNote
+                delegate?.didReceiveHotelMessages([
+                    ChatMessage(sender: .bot, text: "📝 Any notes? (Optional — type 'skip')", type: .text, payload: nil)
+                ])
+            } else {
+                delegate?.didReceiveHotelMessages([
+                    ChatMessage(sender: .bot, text: "❌ Invalid phone number. Please enter a valid Turkish number like `05XXXXXXXXX` or `+90XXXXXXXXXX`.", type: .text, payload: nil)
+                ])
+            }
 
         case .askingNote:
             userInfo.note = (text.lowercased() == "skip" ? nil : text)
@@ -451,6 +457,13 @@ final class ChatbotVM {
                 ChatMessage(sender: .bot, text: "⚠️ Could not find room \(trimmed) in your selection.", type: .text, payload: nil)
             ])
         }
+    }
+    
+    private func isValidPhoneNumber(_ number: String) -> Bool {
+        let pattern = #"^(?:\+90|0)?5\d{9}$"#
+        let regex = try? NSRegularExpression(pattern: pattern)
+        let range = NSRange(location: 0, length: number.utf16.count)
+        return regex?.firstMatch(in: number, options: [], range: range) != nil
     }
     
     func resetConversation() {
