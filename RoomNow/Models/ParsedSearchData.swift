@@ -32,4 +32,10 @@ extension ParsedSearchData {
         guard let date = inputFormatter.date(from: raw) else { return raw }
         return date.toShortReadableFormat()
     }
+    
+    func toDate(from string: String) -> Date {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.date(from: string) ?? Date()
+    }
 }
