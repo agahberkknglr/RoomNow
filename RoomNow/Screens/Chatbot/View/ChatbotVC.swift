@@ -222,6 +222,15 @@ extension ChatbotVC: UITableViewDataSource {
             
             return cell
             
+        case .loginPrompt:
+            let cell = tableView.dequeue(ChatBubbleCell.self, for: indexPath)
+            cell.configure(with: message)
+            cell.addConfirmationButton(title: "🔐 Log In") { [weak self] in
+                guard let tabBarVC = self?.tabBarController as? TabBarVC else { return }
+                tabBarVC.selectedIndex = 3
+            }
+            return cell
+            
         case .bookingConfirm:
             let cell = tableView.dequeue(ChatBubbleCell.self, for: indexPath)
             cell.configure(with: message)

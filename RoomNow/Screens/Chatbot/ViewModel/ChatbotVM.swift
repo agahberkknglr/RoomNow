@@ -150,6 +150,19 @@ final class ChatbotVM {
     }
     
     func startCollectingUserInfo() {
+        guard let _ = AuthManager.shared.currentUser else {
+            delegate?.didReceiveHotelMessages([
+                ChatMessage(
+                    sender: .bot,
+                    text: "🔐 To complete your reservation, please sign in from the profile tab.",
+                    type: .loginPrompt,
+                    payload: nil,
+                    showAvatar: true
+                )
+            ])
+            return
+        }
+        
         if let cachedUser = AuthManager.shared.currentAppUser {
             fillFrom(user: cachedUser)
             askNextInfoFieldIfNeeded()
@@ -272,6 +285,18 @@ final class ChatbotVM {
     }
     
     func confirmReservationFromChat() {
+        
+        guard AuthManager.shared.currentUser != nil else {
+            delegate?.didReceiveHotelMessages([
+                ChatMessage(
+                    sender: .bot,
+                    text: "❌ You must be signed in to confirm your booking.",
+                    type: .text,
+                    payload: nil
+                )
+            ])
+            return
+        }
         guard
             let hotel = selectedHotel,
             let room = selectedRoom,
