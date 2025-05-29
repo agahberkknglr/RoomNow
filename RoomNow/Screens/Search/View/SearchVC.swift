@@ -97,6 +97,21 @@ final class SearchVC: UIViewController {
     }
     
     private func configureNavBar() {
+        let logo = UIImage(named: "roomnow-logo.png")
+        let imageView = UIImageView(image: logo)
+        imageView.contentMode = .scaleAspectFit
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+
+        let titleView = UIView()
+        titleView.addSubview(imageView)
+        NSLayoutConstraint.activate([
+            imageView.centerXAnchor.constraint(equalTo: titleView.centerXAnchor),
+            imageView.centerYAnchor.constraint(equalTo: titleView.centerYAnchor),
+            imageView.widthAnchor.constraint(equalToConstant: 120),
+            imageView.heightAnchor.constraint(equalToConstant: 40)
+        ])
+        navigationItem.titleView = titleView
+
         let chatButton = makeBarButton(systemName: "message", action: #selector(chatbotTapped))
         setNavigation(title: "", rightButtons: [chatButton])
     }
