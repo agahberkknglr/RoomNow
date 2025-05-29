@@ -84,7 +84,7 @@ final class LoginVC: UIViewController {
 
     private let loginButton: UIButton = {
         let button = UIButton()
-        button.applyPrimaryStyle(with: "Login")
+        button.applyPrimaryStyle(with: "Sign in")
         return button
     }()
 
@@ -228,7 +228,7 @@ final class LoginVC: UIViewController {
 
     private func setupUI() {
         view.backgroundColor = .appBackground
-        setNavigation(title: "Login")
+        setNavigation(title: "Sign in")
         
         titleLabel.applyTitleStyle()
         titleLabel.font = .systemFont(ofSize: 32, weight: .bold)
