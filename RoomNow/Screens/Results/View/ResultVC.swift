@@ -44,6 +44,7 @@ final class ResultVC: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        showLoadingIndicator()
         collectionView.reloadData()
         setTitleFromSearchParams()
     }
@@ -71,6 +72,7 @@ final class ResultVC: UIViewController {
 extension ResultVC: ResultVMDelegate {
     func didFetchHotels() {
         DispatchQueue.main.async {
+            self.hideLoadingIndicator()
             self.collectionView.reloadData()
             self.emptyLabel.isHidden = self.viewModel.hotelRooms.count > 0
         }
