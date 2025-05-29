@@ -8,9 +8,7 @@
 import UIKit
 
 final class PersonalInfoVC: UIViewController {
-
     private let tableView = UITableView()
-    
     private let continueButton = UIButton()
     private let buttonView: UIView = {
         let view = UIView()
@@ -18,7 +16,6 @@ final class PersonalInfoVC: UIViewController {
         view.backgroundColor = .appSecondaryBackground
         return view
     }()
-    
     private let viewModel: PersonalInfoVM
 
     init(viewModel: PersonalInfoVM) {
@@ -36,76 +33,42 @@ final class PersonalInfoVC: UIViewController {
         title = "Your Personal Information"
         setupTableView()
         setupContinueButton()
-        notifyVM()
-    }
-    
-    private func notifyVM() {
+        
         viewModel.notifyViewUpdate = { [weak self] in
-            guard let self = self else { return }
-            self.tableView.reloadData()
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
         }
     }
     
+    func reloadTableView() {
+        tableView.reloadData()
+    }
+
     private func setupTableView() {
-        tableView.backgroundColor = .clear
-        tableView.separatorStyle = .none
-        tableView.allowsSelection = false
-        tableView.dataSource = self
-        tableView.registerCell(type: PersonalInfoCell.self)
         tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.separatorStyle = .none
+        tableView.dataSource = self
+        tableView.allowsSelection = false
         tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 150
+        tableView.backgroundColor = .appBackground
+        tableView.registerCell(type: PersonalInfoCell.self)
         view.addSubview(tableView)
+
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
         ])
     }
-    
-    private func createToolbar(tag: Int, title: String, isLast: Bool) -> UIToolbar {
-        let toolbar = UIToolbar()
-        toolbar.sizeToFit()
 
-        let titleLabel = UILabel()
-        titleLabel.text = title
-        titleLabel.textAlignment = .center
-        titleLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        titleLabel.textColor = .secondaryLabel
-        titleLabel.sizeToFit()
-
-        let titleItem = UIBarButtonItem(customView: titleLabel)
-        let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-
-        let buttonTitle = isLast ? "Done" : "Next"
-        let action = isLast ? #selector(doneButtonTapped) : #selector(nextButtonTapped)
-        let actionButton = UIBarButtonItem(title: buttonTitle, style: .done, target: self, action: action)
-        actionButton.tag = tag
-
-        toolbar.setItems([spacer, titleItem, spacer, actionButton], animated: false)
-        return toolbar
-    }
-    
-    @objc private func nextButtonTapped(_ sender: UIBarButtonItem) {
-        let nextTag = sender.tag + 1
-        if let nextField = tableView.viewWithTag(nextTag) as? UITextField {
-            nextField.becomeFirstResponder()
-        } else {
-            view.endEditing(true)
-        }
-    }
-    
-    @objc private func doneButtonTapped() {
-        view.endEditing(true)
-    }
-    
     private func setupContinueButton() {
         continueButton.translatesAutoresizingMaskIntoConstraints = false
         continueButton.applyPrimaryStyle(with: "Next Step")
+        continueButton.layer.cornerRadius = 10
         continueButton.addTarget(self, action: #selector(continueTapped), for: .touchUpInside)
         buttonView.addSubview(continueButton)
         view.addSubview(buttonView)
-        
         NSLayoutConstraint.activate([
             buttonView.topAnchor.constraint(equalTo: tableView.bottomAnchor),
             buttonView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -118,12 +81,16 @@ final class PersonalInfoVC: UIViewController {
             continueButton.bottomAnchor.constraint(equalTo: buttonView.safeAreaLayoutGuide.bottomAnchor, constant: -12),
             continueButton.heightAnchor.constraint(equalToConstant: 48)
         ])
-
     }
 
     @objc private func continueTapped() {
-        guard !viewModel.fullName.isEmpty, !viewModel.email.isEmpty, !viewModel.phone.isEmpty else {
-            showAlert("Please fill all fields.")
+        guard !viewModel.phone.isEmpty else {
+            showAlert(title: "Phone number missing", message: "Please enter your phone number.")
+            return
+        }
+
+        guard isValidPhone(viewModel.phone) else {
+            showAlert(title: "Phone number is not valid", message: "Invalid phone number. Please enter a valid Turkish number like `5XXXXXXXXX` or `+90XXXXXXXXXX`.")
             return
         }
 
@@ -139,53 +106,85 @@ final class PersonalInfoVC: UIViewController {
 
         navigationController?.pushViewController(ReservationVC(viewModel: summaryVM), animated: true)
     }
+    
+    private func isValidPhone(_ number: String) -> Bool {
+        let phoneRegex = #"^(?:\+90|0)?5\d{9}$"#
+        return NSPredicate(format: "SELF MATCHES %@", phoneRegex).evaluate(with: number)
+    }
 
-    private func showAlert(_ message: String) {
-        let alert = UIAlertController(title: "Missing Info", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
+    private func toolbar(for tag: Int, title: String, isLast: Bool) -> UIToolbar {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+
+        let label = UILabel()
+        label.text = title
+        label.textColor = .secondaryLabel
+        let titleItem = UIBarButtonItem(customView: label)
+
+        let action = isLast ? #selector(doneTapped) : #selector(nextTapped(_:))
+        let nextItem = UIBarButtonItem(title: isLast ? "Done" : "Next", style: .done, target: self, action: action)
+        nextItem.tag = tag
+
+        toolbar.items = [.flexibleSpace(), titleItem, .flexibleSpace(), nextItem]
+        return toolbar
+    }
+
+    @objc private func doneTapped() {
+        view.endEditing(true)
+    }
+
+    @objc private func nextTapped(_ sender: UIBarButtonItem) {
+        let nextTag = sender.tag + 1
+        if let responder = tableView.viewWithTag(nextTag) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                responder.becomeFirstResponder()
+            }
+        } else {
+            view.endEditing(true)
+        }
     }
 }
 
-extension PersonalInfoVC: UITableViewDataSource {
+// MARK: - UITableViewDataSource
 
+extension PersonalInfoVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { 4 }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeue(PersonalInfoCell.self, for: indexPath)
-        let tag = indexPath.row
         cell.textField.delegate = self
-        cell.textField.tag = tag
+        cell.textView.delegate = self
 
-        let toolbarTitle: String
-        let isLast = indexPath.row == 3
+        let tag = indexPath.row
+        let isLast = tag == 3
 
-        switch indexPath.row {
+        switch tag {
         case 0:
-            cell.configure(placeholder: "Full Name", text: viewModel.fullName)
-            toolbarTitle = "Full Name"
+            cell.configure(title: "Full Name", text: viewModel.fullName)
+            cell.textField.tag = tag
+            cell.textField.inputAccessoryView = toolbar(for: tag, title: "Full Name", isLast: isLast)
         case 1:
-            cell.configure(placeholder: "Email", text: viewModel.email, keyboard: .emailAddress)
-            toolbarTitle = "Email"
+            cell.configure(title: "Email", text: viewModel.email, keyboard: .emailAddress)
+            cell.textField.tag = tag
+            cell.textField.inputAccessoryView = toolbar(for: tag, title: "Email", isLast: isLast)
         case 2:
-            cell.configure(placeholder: "Phone", text: viewModel.phone, keyboard: .phonePad)
-            toolbarTitle = "Phone"
+            cell.configure(title: "Phone", text: viewModel.phone, keyboard: .phonePad)
+            cell.textField.tag = tag
+            cell.textField.inputAccessoryView = toolbar(for: tag, title: "Phone", isLast: isLast)
         case 3:
-            cell.textView.delegate = self
-            cell.configure(placeholder: "Note (Optional)", text: viewModel.note, isNote: true)
-            toolbarTitle = "Note"
-        default:
-            toolbarTitle = ""
+            cell.configure(title: "Note (Optional)", text: viewModel.note, isNote: true)
+            cell.textView.tag = tag
+            cell.textView.inputAccessoryView = toolbar(for: tag, title: "Note", isLast: isLast)
+        default: break
         }
-
-        cell.textField.inputAccessoryView = createToolbar(tag: tag, title: toolbarTitle, isLast: isLast)
 
         return cell
     }
 }
 
-extension PersonalInfoVC: UITextFieldDelegate {
+// MARK: - Delegates
 
+extension PersonalInfoVC: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         switch textField.tag {
         case 0: viewModel.fullName = textField.text ?? ""
@@ -194,20 +193,14 @@ extension PersonalInfoVC: UITextFieldDelegate {
         default: break
         }
     }
-
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        let nextTag = textField.tag + 1
-        if let nextField = tableView.viewWithTag(nextTag) as? UITextField {
-            nextField.becomeFirstResponder()
-        } else {
-            textField.resignFirstResponder()
-        }
-        return true
-    }
 }
 
 extension PersonalInfoVC: UITextViewDelegate {
     func textViewDidEndEditing(_ textView: UITextView) {
-        viewModel.note = textView.text
+        if textView.tag == 3 {
+            viewModel.note = textView.text
+        }
     }
 }
+
+
