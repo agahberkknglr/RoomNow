@@ -93,7 +93,15 @@ final class RoomSelectionVC: UIViewController {
             searchParams: viewModel.searchParams,
             selectedRooms: viewModel.selectedRooms
         )
+
         let vc = PersonalInfoVC(viewModel: vm)
+
+        vm.notifyViewUpdate = { [weak vc] in
+            DispatchQueue.main.async {
+                vc?.reloadTableView()
+            }
+        }
+
         navigationController?.pushViewController(vc, animated: true)
     }
     
