@@ -14,6 +14,9 @@ final class PersonalInfoVM {
     var phone: String = ""
     var note: String?
     
+    var isUserLoggedIn: Bool {
+        return AuthManager.shared.currentUser != nil
+    }
     var notifyViewUpdate: (() -> Void)?
 
     // MARK: - Data required for reservation
@@ -42,7 +45,7 @@ final class PersonalInfoVM {
                         self?.email = user.email
                         self?.notifyViewUpdate?()
                     case .failure(let error):
-                        print("❌ Could not load user:", error)
+                        print("Could not load user:", error)
                     }
                 }
             }

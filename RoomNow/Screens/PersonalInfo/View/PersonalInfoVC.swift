@@ -93,6 +93,16 @@ final class PersonalInfoVC: UIViewController {
             showAlert(title: "Phone number is not valid", message: "Invalid phone number. Please enter a valid Turkish number like `5XXXXXXXXX` or `+90XXXXXXXXXX`.")
             return
         }
+        
+        guard viewModel.isUserLoggedIn else {
+            let loginSheetVC = LoginSheetVC()
+            if let sheet = loginSheetVC.sheetPresentationController {
+                sheet.detents = [.medium()]
+                sheet.prefersGrabberVisible = true
+            }
+            present(loginSheetVC, animated: true)
+            return
+        }
 
         let summaryVM = ReservationVM(
             hotel: viewModel.hotel,
