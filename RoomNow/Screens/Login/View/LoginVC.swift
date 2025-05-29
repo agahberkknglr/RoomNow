@@ -38,6 +38,14 @@ final class LoginVC: UIViewController {
         return view
     }()
     
+    private let titleLabel = UILabel()
+    private let titleView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     private let emailField: UITextField = {
         let tf = UITextField()
         tf.placeholder = "Email"
@@ -222,6 +230,19 @@ final class LoginVC: UIViewController {
         view.backgroundColor = .appBackground
         setNavigation(title: "Login")
         
+        titleLabel.applyTitleStyle()
+        titleLabel.font = .systemFont(ofSize: 32, weight: .bold)
+        titleLabel.text = "Welcome back"
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        titleView.addSubview(titleLabel)
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: titleView.topAnchor, constant: 8),
+            titleLabel.leadingAnchor.constraint(equalTo: titleView.leadingAnchor, constant: 16),
+            titleLabel.trailingAnchor.constraint(equalTo: titleView.trailingAnchor, constant: -16),
+            titleLabel.bottomAnchor.constraint(equalTo: titleView.bottomAnchor, constant: -8)
+        ])
+        
         view.addSubview(scrollView)
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -233,11 +254,11 @@ final class LoginVC: UIViewController {
         
         scrollView.addSubview(contentStack)
         NSLayoutConstraint.activate([
-            contentStack.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 200),
+            contentStack.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 130),
             contentStack.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 24),
             contentStack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -24),
             contentStack.bottomAnchor.constraint(lessThanOrEqualTo: scrollView.bottomAnchor),
-            contentStack.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -48)
+            contentStack.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -48),
         ])
 
         let formFieldsStack = UIStackView(arrangedSubviews: [
@@ -256,9 +277,9 @@ final class LoginVC: UIViewController {
             formFieldsStack.topAnchor.constraint(equalTo: formBackgroundView.topAnchor, constant: 20),
             formFieldsStack.leadingAnchor.constraint(equalTo: formBackgroundView.leadingAnchor, constant: 16),
             formFieldsStack.trailingAnchor.constraint(equalTo: formBackgroundView.trailingAnchor, constant: -16),
-            formFieldsStack.bottomAnchor.constraint(equalTo: formBackgroundView.bottomAnchor, constant: -20)
+            formFieldsStack.bottomAnchor.constraint(equalTo: formBackgroundView.bottomAnchor, constant: -20),
         ])
-
+        contentStack.addArrangedSubview(titleView)
         contentStack.addArrangedSubview(formBackgroundView)
         contentStack.addArrangedSubview(registerLabel)
 
