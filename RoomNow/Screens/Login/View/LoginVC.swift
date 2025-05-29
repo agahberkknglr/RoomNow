@@ -161,7 +161,8 @@ final class LoginVC: UIViewController {
                 self?.loginButton.isEnabled = true
 
                 if let errorMessage = errorMessage {
-                    self?.showError(errorMessage)
+                    self?.showError("Password is incorrect or email doesn't exist")
+                    print(errorMessage)
                 } else {
                     self?.errorLabel.isHidden = true
                     self?.navigateAfterLogin()
