@@ -24,7 +24,8 @@ final class ResultVC: UIViewController {
         label.isHidden = true
         return label
     }()
-
+    private var isFirstAppearance = true
+    
     init(searchParameters: HotelSearchParameters) {
         let vm = ResultVM(searchParameters: searchParameters)
         self.viewModel = vm
@@ -44,9 +45,13 @@ final class ResultVC: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        showLoadingIndicator()
-        collectionView.reloadData()
         setTitleFromSearchParams()
+        if isFirstAppearance {
+            showLoadingIndicator()
+            isFirstAppearance = false
+        }
+        collectionView.reloadData()
+
     }
     
     
