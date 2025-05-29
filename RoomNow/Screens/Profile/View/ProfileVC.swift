@@ -195,7 +195,7 @@ extension ProfileVC: UITableViewDelegate {
 
         let footerView = UIView()
         let button = UIButton(type: .system)
-        button.setTitle("Log Out", for: .normal)
+        button.setTitle("Sign Out", for: .normal)
         button.addTarget(self, action: #selector(logoutTapped), for: .touchUpInside)
         button.applyLogOutStyle()
 
@@ -211,19 +211,31 @@ extension ProfileVC: UITableViewDelegate {
     }
     
     @objc private func logoutTapped() {
-        viewModel.logout { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    if let tabBarVC = self?.tabBarController as? TabBarVC {
-                        tabBarVC.reloadTabsAfterLogout()
-                        tabBarVC.selectedIndex = 3
+        let alert = UIAlertController(
+            title: "Sign Out",
+            message: "Are you sure you want to sign out?",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+        alert.addAction(UIAlertAction(title: "Sign Out", style: .destructive, handler: { [weak self] _ in
+            self?.viewModel.logout { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success:
+                        if let tabBarVC = self?.tabBarController as? TabBarVC {
+                            tabBarVC.reloadTabsAfterLogout()
+                            tabBarVC.selectedIndex = 3
+                        }
+                    case .failure(let error):
+                        print("Logout failed:", error.localizedDescription)
                     }
-                case .failure(let error):
-                    print("Logout failed:", error.localizedDescription)
                 }
             }
-        }
+        }))
+
+        present(alert, animated: true)
     }
 }
 
