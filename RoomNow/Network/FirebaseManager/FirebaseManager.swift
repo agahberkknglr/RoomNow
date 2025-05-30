@@ -522,7 +522,54 @@ extension FirebaseManager: FirebaseManagerProtocol {
         }
     }
 
-    
+    func checkRoomAvailability( roomIds: [String], startDate: Date, endDate: Date, completion: @escaping (Result<Bool, Error>) -> Void ) {
+        let db = Firestore.firestore()
+        let group = DispatchGroup()
+        var allAvailable = true
+        var firstError: Error?
+
+        for roomId in roomIds {
+            group.enter()
+            db.collection("rooms").document(roomId).getDocument { snapshot, error in
+                defer { group.leave() }
+
+                if let error = error {
+                    firstError = error
+                    allAvailable = false
+                    return
+                }
+
+                guard let data = snapshot?.data(),
+                      let bookedArray = data["bookedDates"] as? [[String: Timestamp]] else {
+                    return
+                }
+
+                let bookedRanges = bookedArray.compactMap { dict -> BookedDateRange? in
+                    guard let start = dict["start"]?.dateValue(),
+                          let end = dict["end"]?.dateValue() else { return nil }
+                    return BookedDateRange(start: start, end: end)
+                }
+
+                for booking in bookedRanges {
+                    if let bStart = booking.start, let bEnd = booking.end,
+                       (startDate < bEnd && endDate > bStart) {
+                        allAvailable = false
+                        return
+                    }
+                }
+            }
+        }
+
+        group.notify(queue: .main) {
+            if let error = firstError {
+                completion(.failure(error))
+            } else {
+                completion(.success(allAvailable))
+            }
+        }
+    }
+
+
     
     
     
