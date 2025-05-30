@@ -28,6 +28,7 @@ final class SavedVC: UIViewController {
         super.viewDidLoad()
         setupUI()
         fetchData()
+        navigateToSignIn()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -75,6 +76,20 @@ final class SavedVC: UIViewController {
                 self.tableView.isHidden = !hasData
                 self.emptyView.isHidden = hasData
                 self.tableView.reloadData()
+            }
+        }
+    }
+    
+    private func navigateToSignIn() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            guard self.viewModel.isUserLoggedIn else {
+                let loginSheetVC = LoginSheetVC()
+                if let sheet = loginSheetVC.sheetPresentationController {
+                    sheet.detents = [.medium()]
+                    sheet.prefersGrabberVisible = true
+                }
+                self.present(loginSheetVC, animated: true)
+                return
             }
         }
     }

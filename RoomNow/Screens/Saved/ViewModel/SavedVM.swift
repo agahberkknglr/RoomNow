@@ -9,6 +9,10 @@ import Foundation
 
 final class SavedVM {
     private(set) var cityHotelMap: [String: [SavedHotel]] = [:]
+    
+    var isUserLoggedIn: Bool {
+        return AuthManager.shared.currentUser != nil
+    }
 
     func fetchSavedData(completion: @escaping () -> Void) {
         FirebaseManager.shared.fetchSavedHotels { [weak self] result in
