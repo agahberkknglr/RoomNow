@@ -47,40 +47,63 @@ final class ReservationVM {
     
     func confirmReservation(completion: @escaping (Result<Void, Error>) -> Void) {
         guard let hotelId = hotel.id else {
-            completion(.failure(NSError(domain: "Missing hotel ID", code: 0)))
+            let error = NSError(domain: "ReservationError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Hotel ID is missing."])
+            completion(.failure(error))
             return
         }
 
-        let reservation = Reservation(
-            hotelId: hotelId,
-            hotelName: hotel.name,
-            city: hotel.city,
-            checkInDate: searchParams.checkInDate,
-            checkOutDate: searchParams.checkOutDate,
-            guestCount: searchParams.guestCount,
-            roomCount: selectedRooms.count,
-            selectedRoomNumbers: selectedRooms.map { $0.roomNumber },
-            totalPrice: totalPrice,
-            fullName: fullName,
-            email: email,
-            phone: phone,
-            note: note,
-            reservedAt: Date(),
-            status: .active,
-            completedAt: nil,
-            cancelledAt: nil
-        )
+        let roomIds = selectedRooms.compactMap { $0.id }
 
-        FirebaseManager.shared.saveReservation(reservation) { [weak self] result in
+        FirebaseManager.shared.checkRoomAvailability(
+            roomIds: roomIds,
+            startDate: searchParams.checkInDate,
+            endDate: searchParams.checkOutDate
+        ) { [weak self] result in
             switch result {
-            case .success:
-                self?.updateRoomDates(completion: completion)
+            case .success(let allAvailable):
+                guard allAvailable else {
+                    let error = NSError(domain: "ReservationError", code: 1, userInfo: [NSLocalizedDescriptionKey: "One or more rooms are no longer available."])
+                    completion(.failure(error))
+                    return
+                }
+
+                guard let self = self else { return }
+
+                let reservation = Reservation(
+                    hotelId: hotelId,
+                    hotelName: hotel.name,
+                    city: hotel.city,
+                    checkInDate: self.searchParams.checkInDate,
+                    checkOutDate: self.searchParams.checkOutDate,
+                    guestCount: self.searchParams.guestCount,
+                    roomCount: self.selectedRooms.count,
+                    selectedRoomNumbers: self.selectedRooms.map { $0.roomNumber },
+                    totalPrice: self.totalPrice,
+                    fullName: self.fullName,
+                    email: self.email,
+                    phone: self.phone,
+                    note: self.note?.isEmpty == true ? nil : self.note,
+                    reservedAt: Date(),
+                    status: .active,
+                    completedAt: nil,
+                    cancelledAt: nil
+                )
+
+                FirebaseManager.shared.saveReservation(reservation) { result in
+                    switch result {
+                    case .success:
+                        self.updateRoomDates(completion: completion)
+                    case .failure(let error):
+                        completion(.failure(error))
+                    }
+                }
+
             case .failure(let error):
                 completion(.failure(error))
             }
         }
     }
-    
+
     func updateRoomDates(completion: @escaping (Result<Void, Error>) -> Void) {
         let group = DispatchGroup()
         var firstError: Error?
