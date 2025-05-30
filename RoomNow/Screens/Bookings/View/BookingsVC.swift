@@ -64,9 +64,11 @@ final class BookingsVC: UIViewController {
     }
     
     private func fetchLatestReservations() {
+        showLoadingIndicator()
         viewModel.fetchReservations { [weak self] in
             DispatchQueue.main.async {
                 guard let self = self else { return }
+                self.hideLoadingIndicator()
                 let isEmpty = self.viewModel.groupedReservations.isEmpty
                 self.tableView.isHidden = isEmpty
                 self.emptyView.isHidden = !isEmpty
