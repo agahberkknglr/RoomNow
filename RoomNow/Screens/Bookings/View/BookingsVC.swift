@@ -27,6 +27,7 @@ final class BookingsVC: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupTableView()
+        navigateToSignIn()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -73,6 +74,20 @@ final class BookingsVC: UIViewController {
                 self.tableView.isHidden = isEmpty
                 self.emptyView.isHidden = !isEmpty
                 self.tableView.reloadData()
+            }
+        }
+    }
+    
+    private func navigateToSignIn() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            guard self.viewModel.isUserLoggedIn else {
+                let loginSheetVC = LoginSheetVC()
+                if let sheet = loginSheetVC.sheetPresentationController {
+                    sheet.detents = [.medium()]
+                    sheet.prefersGrabberVisible = true
+                }
+                self.present(loginSheetVC, animated: true)
+                return
             }
         }
     }

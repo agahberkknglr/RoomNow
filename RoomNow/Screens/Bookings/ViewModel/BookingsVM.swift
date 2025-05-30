@@ -12,6 +12,10 @@ final class BookingsVM {
     private(set) var groupedReservations: [(city: String, reservations: [Reservation])] = []
     private var imageCache: [String: String] = [:] 
 
+    var isUserLoggedIn: Bool {
+        return AuthManager.shared.currentUser != nil
+    }
+    
     func fetchReservations(completion: @escaping () -> Void) {
         FirebaseManager.shared.fetchReservations { [weak self] result in
             guard let self = self else { return }
