@@ -16,29 +16,33 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
-        
-        configureGlobalNavigationBarAppearance()
-        
         guard let windowScene = (scene as? UIWindowScene) else { return }
+
+        configureGlobalNavigationBarAppearance()
+
         AuthManager.shared.observeAuthState { user in
             DispatchQueue.main.async {
                 let window = UIWindow(windowScene: windowScene)
-                let tabBarVC = TabBarVC()
-                window.makeKeyAndVisible()
-                window.rootViewController = tabBarVC
                 window.overrideUserInterfaceStyle = .dark
 
-                if user == nil {
-                    print(" User is not logged in")
-                    tabBarVC.reloadTabsAfterLogout()
+                let hasSeenOnboarding = UserDefaults.standard.bool(forKey: "hasSeenOnboarding")
+
+                if !hasSeenOnboarding {
+                    window.rootViewController = OnboardingContainerVC()
                 } else {
-                    print(" User is logged in: \(user!.email ?? "Unknown")")
+                    let tabBarVC = TabBarVC()
+                    window.rootViewController = tabBarVC
+
+                    if user == nil {
+                        print("User is not logged in")
+                        tabBarVC.reloadTabsAfterLogout()
+                    } else {
+                        print("User is logged in: \(user?.email ?? "Unknown")")
+                    }
                 }
 
-                window.rootViewController = tabBarVC
-                self.window = window
                 window.makeKeyAndVisible()
+                self.window = window
             }
         }
     }
