@@ -26,6 +26,15 @@ extension UIButton {
         self.clipsToBounds = true
     }
     
+    func applyPrimaryOnboardingStyle(with title: String) {
+        self.backgroundColor = UIColor.appButtonBackground
+        self.setTitle(title, for: .normal)
+        self.setTitleColor(.appAccent, for: .normal)
+        self.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
+        self.layer.cornerRadius = 16
+        self.clipsToBounds = true
+    }
+    
     func applyLogOutStyle() {
         self.backgroundColor = UIColor.appButtonBackground
         self.setTitleColor(.appError, for: .normal)
