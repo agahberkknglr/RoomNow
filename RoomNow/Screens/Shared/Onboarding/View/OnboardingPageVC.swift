@@ -42,7 +42,6 @@ final class OnboardingPageVC: UIViewController {
         logoView.addSubview(logoImageView)
         view.addSubview(logoView)
 
-        //update scale aspect to fit
         imageView.image = UIImage(named: page.imageName)
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
@@ -77,18 +76,15 @@ final class OnboardingPageVC: UIViewController {
             logoImageView.leadingAnchor.constraint(equalTo: logoView.leadingAnchor),
             logoImageView.trailingAnchor.constraint(equalTo: logoView.trailingAnchor),
 
-            // Main image
             imageView.topAnchor.constraint(equalTo: logoView.bottomAnchor, constant: 32),
             imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             imageView.widthAnchor.constraint(equalToConstant: 220),
             imageView.heightAnchor.constraint(equalToConstant: 220),
 
-            // Title
             titleLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 40),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
 
-            // Subtitle
             subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
             subtitleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             subtitleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
