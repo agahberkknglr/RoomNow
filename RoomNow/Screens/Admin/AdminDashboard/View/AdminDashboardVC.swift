@@ -94,7 +94,6 @@ extension AdminDashboardVC: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let hotel = viewModel.hotels[indexPath.row]
-        // Navigate to HotelManagementVC(hotel: hotel)
         let vc = HotelManagementVC()
         navigationController?.pushViewController(vc, animated: true)
     }
