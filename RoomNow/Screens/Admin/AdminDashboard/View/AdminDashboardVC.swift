@@ -71,7 +71,8 @@ final class AdminDashboardVC: UIViewController {
     }
 
     @objc private func addHotelTapped() {
-        // Navigate to AddHotelVC (or HotelEditorVC in add mode)
+        let vc = HotelManagementVC()
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
