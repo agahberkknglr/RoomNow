@@ -7,6 +7,11 @@
 
 import Foundation
 
+enum UserRole: String, Codable {
+    case user
+    case admin
+}
+
 struct AppUser: Codable {
     let uid: String
     var username: String
@@ -14,4 +19,5 @@ struct AppUser: Codable {
     var gender: String
     var dateOfBirth: String
     var profileImageBase64: String?
+    let role: UserRole
 }
