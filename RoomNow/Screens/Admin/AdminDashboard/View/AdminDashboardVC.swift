@@ -71,8 +71,6 @@ final class AdminDashboardVC: UIViewController {
     }
 
     @objc private func addHotelTapped() {
-        let vc = HotelManagementVC()
-        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
@@ -95,7 +93,6 @@ extension AdminDashboardVC: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let hotel = viewModel.hotels[indexPath.row]
-        let vc = HotelManagementVC()
-        navigationController?.pushViewController(vc, animated: true)
+        print(hotel)
     }
 }
