@@ -25,7 +25,13 @@ final class AdminDashboardVC: UIViewController {
         title = "Dashboard"
         view.backgroundColor = .appBackground
         view.addSubview(tableView)
-
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .add,
+            target: self,
+            action: #selector(addHotelTapped)
+        )
+        
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.pinToEdges(of: view)
     }
