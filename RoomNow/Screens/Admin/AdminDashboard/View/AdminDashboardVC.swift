@@ -25,7 +25,7 @@ final class AdminDashboardVC: UIViewController {
 
     private func setupUI() {
         title = "Admin Dashboard"
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .appBackground
 
         headerLabel.text = "Welcome, \(viewModel.adminName)"
         headerLabel.font = .boldSystemFont(ofSize: 24)
