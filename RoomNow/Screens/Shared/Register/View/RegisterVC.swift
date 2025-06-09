@@ -196,7 +196,7 @@ final class RegisterVC: UIViewController {
 
     private func handleSuccess() {
         print("Registration successful")
-        if let tabBarVC = self.tabBarController as? TabBarVC {
+        if let tabBarVC = self.tabBarController as? UserTabBarVC {
             tabBarVC.reloadTabsAfterLogin()
             tabBarVC.selectedIndex = 3
         }

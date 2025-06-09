@@ -1,5 +1,5 @@
 //
-//  TabBarVC.swift
+//  UserTabBarVC.swift
 //  RoomNow
 //
 //  Created by Agah Berkin Güler on 22.03.2025.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class TabBarVC: UITabBarController {
+final class UserTabBarVC: UITabBarController {
 
     override func viewDidLoad() {
         super.viewDidLoad()

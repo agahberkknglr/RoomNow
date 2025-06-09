@@ -224,7 +224,7 @@ extension ProfileVC: UITableViewDelegate {
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
-                        if let tabBarVC = self?.tabBarController as? TabBarVC {
+                        if let tabBarVC = self?.tabBarController as? UserTabBarVC {
                             tabBarVC.reloadTabsAfterLogout()
                             tabBarVC.selectedIndex = 3
                         }

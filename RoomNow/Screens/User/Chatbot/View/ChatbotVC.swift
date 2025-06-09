@@ -339,7 +339,7 @@ extension ChatbotVC: UITableViewDataSource {
             let cell = tableView.dequeue(ChatBubbleCell.self, for: indexPath)
             cell.configure(with: message)
             cell.addConfirmationButton(title: "🔐 Log In") { [weak self] in
-                guard let tabBarVC = self?.tabBarController as? TabBarVC else { return }
+                guard let tabBarVC = self?.tabBarController as? UserTabBarVC else { return }
                 tabBarVC.selectedIndex = 3
             }
             return cell
@@ -402,7 +402,7 @@ extension ChatbotVC: ChatbotVMDelegate {
     }
     
     func shouldNavigateToBookings() {
-        guard let tabBarVC = self.tabBarController as? TabBarVC else { return }
+        guard let tabBarVC = self.tabBarController as? UserTabBarVC else { return }
 
         self.viewModel.resetConversation()
 

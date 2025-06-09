@@ -83,7 +83,7 @@ final class OnboardingContainerVC: UIViewController {
     private func goToMainApp() {
         UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
         
-        let tabBarVC = TabBarVC()
+        let tabBarVC = UserTabBarVC()
         tabBarVC.modalPresentationStyle = .fullScreen
         self.present(tabBarVC, animated: true)
     }

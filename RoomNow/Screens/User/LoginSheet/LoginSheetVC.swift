@@ -75,7 +75,7 @@ final class LoginSheetVC: UIViewController {
         dismiss(animated: true) {
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let window = windowScene.windows.first,
-               let tabBar = window.rootViewController as? TabBarVC {
+               let tabBar = window.rootViewController as? UserTabBarVC {
                 tabBar.selectedIndex = 3
             }
         }
