@@ -59,7 +59,7 @@ final class AdminHotelCell: UITableViewCell {
 
     func configure(with hotel: Hotel) {
         titleLabel.text = hotel.name
-        subtitleLabel.text = hotel.city
+        subtitleLabel.text = hotel.city.capitalized
         ratingLabel.text = "★ \(hotel.rating)"
         if let firstImageUrlString = hotel.imageUrls.first,
            let url = URL(string: firstImageUrlString) {
