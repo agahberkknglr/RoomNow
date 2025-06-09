@@ -30,16 +30,37 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 if !hasSeenOnboarding {
                     window.rootViewController = OnboardingContainerVC()
                 } else {
-                    let tabBarVC = TabBarVC()
-                    window.rootViewController = tabBarVC
+                    if let user = user {
+                        AuthManager.shared.fetchUserData { result in
+                            DispatchQueue.main.async {
+                                switch result {
+                                case .success(let appUser):
+                                    print("Fetched AppUser:", appUser.role.rawValue)
+                                    if appUser.role == .admin {
+                                        window.rootViewController = AdminTabBarVC()
+                                    } else {
+                                        window.rootViewController = UserTabBarVC()
+                                    }
 
-                    if user == nil {
-                        print("User is not logged in")
-                        tabBarVC.reloadTabsAfterLogout()
+                                case .failure(let error):
+                                    print("Failed to fetch AppUser:", error)
+                                    window.rootViewController = UserTabBarVC()
+                                }
+
+                                window.makeKeyAndVisible()
+                                self.window = window
+                            }
+                        }
                     } else {
-                        print("User is logged in: \(user?.email ?? "Unknown")")
+                        print("User is not logged in")
+                        let tabBarVC = UserTabBarVC()
+                        tabBarVC.reloadTabsAfterLogout()
+                        window.rootViewController = tabBarVC
+                        window.makeKeyAndVisible()
+                        self.window = window
                     }
                 }
+
 
                 window.makeKeyAndVisible()
                 self.window = window
