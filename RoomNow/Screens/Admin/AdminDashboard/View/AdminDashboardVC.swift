@@ -12,8 +12,6 @@ final class AdminDashboardVC: UIViewController {
     private let viewModel = AdminDashboardVM()
 
     private let tableView = UITableView()
-    private let headerLabel = UILabel()
-    private let addButton = UIButton(type: .system)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,40 +22,21 @@ final class AdminDashboardVC: UIViewController {
     }
 
     private func setupUI() {
-        title = "Admin Dashboard"
+        title = "Dashboard"
         view.backgroundColor = .appBackground
-
-        headerLabel.text = "Welcome, \(viewModel.adminName)"
-        headerLabel.font = .boldSystemFont(ofSize: 24)
-
-        addButton.setTitle("➕ Add New Hotel", for: .normal)
-        addButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
-        addButton.addTarget(self, action: #selector(addHotelTapped), for: .touchUpInside)
-
-        view.addSubview(headerLabel)
-        view.addSubview(addButton)
         view.addSubview(tableView)
 
-        headerLabel.translatesAutoresizingMaskIntoConstraints = false
-        addButton.translatesAutoresizingMaskIntoConstraints = false
         tableView.translatesAutoresizingMaskIntoConstraints = false
-
-        NSLayoutConstraint.activate([
-            headerLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            headerLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-
-            addButton.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 12),
-            addButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-
-            tableView.topAnchor.constraint(equalTo: addButton.bottomAnchor, constant: 16),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+        tableView.pinToEdges(of: view)
     }
 
     private func setupTableView() {
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "HotelCell")
+        tableView.separatorStyle = .singleLine
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 80
+        tableView.backgroundColor = .appBackground
+        tableView.registerCell(type: AdminHotelCell.self)
+        tableView.registerCell(type: AdminDashboardHeaderCell.self)
         tableView.dataSource = self
         tableView.delegate = self
     }
@@ -71,28 +50,48 @@ final class AdminDashboardVC: UIViewController {
     }
 
     @objc private func addHotelTapped() {
+        print("add button tapped")
+    }
+    
+    private func presentCityFilter() {
+        let cities = viewModel.cities
+        let vc = CityFilterVC(cities: cities)
+        vc.onCitySelected = { [weak self] selectedCity in
+            self?.viewModel.filter(by: selectedCity)
+        }
+        let nav = UINavigationController(rootViewController: vc)
+        present(nav, animated: true)
     }
 }
 
-extension AdminDashboardVC: UITableViewDataSource, UITableViewDelegate {
+extension AdminDashboardVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.hotels.count
+        return viewModel.filteredHotels.count + 1
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let hotel = viewModel.hotels[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "HotelCell", for: indexPath)
-        var config = cell.defaultContentConfiguration()
-        config.text = hotel.name
-        config.secondaryText = hotel.city
-        config.image = UIImage(systemName: "building.2.fill")
-        cell.contentConfiguration = config
+        if indexPath.row == 0 {
+            let cell = tableView.dequeue(AdminDashboardHeaderCell.self, for: indexPath)
+            cell.configure(hotelCount: viewModel.filteredHotels.count, adminName: viewModel.adminName)
+            cell.onFilterTapped = { [weak self] in
+                self?.presentCityFilter()
+            }
+            return cell
+        }
+
+        let hotel = viewModel.filteredHotels[indexPath.row - 1]
+        let cell = tableView.dequeue(AdminHotelCell.self, for: indexPath)
+        cell.configure(with: hotel)
         cell.accessoryType = .disclosureIndicator
+        cell.backgroundColor = .appBackground
         return cell
     }
+}
 
+extension AdminDashboardVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let hotel = viewModel.hotels[indexPath.row]
+        guard indexPath.row > 0 else { return }
+        let hotel = viewModel.filteredHotels[indexPath.row - 1]
         print(hotel)
     }
 }
