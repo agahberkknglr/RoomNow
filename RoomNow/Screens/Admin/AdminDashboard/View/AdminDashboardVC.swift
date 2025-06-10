@@ -100,6 +100,8 @@ extension AdminDashboardVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard indexPath.row > 0 else { return }
         let hotel = viewModel.filteredHotels[indexPath.row - 1]
-        print(hotel)
+        let vc = AdminHotelSettingsVC()
+        vc.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
