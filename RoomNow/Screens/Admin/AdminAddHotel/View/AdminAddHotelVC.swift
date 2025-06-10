@@ -1,5 +1,5 @@
 //
-//  AddHotelVC.swift
+//  AdminAddHotelVC.swift
 //  RoomNow
 //
 //  Created by Agah Berkin Güler on 10.06.2025.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class AddHotelVC: UIViewController {
+final class AdminAddHotelVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
