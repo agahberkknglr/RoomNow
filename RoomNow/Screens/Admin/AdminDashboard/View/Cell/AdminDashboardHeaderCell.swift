@@ -24,6 +24,7 @@ final class AdminDashboardHeaderCell: UITableViewCell {
     }
 
     private func setupUI() {
+        selectionStyle = .none
         contentView.backgroundColor = .appBackground
         
         welcomeLabel.applyTitleStyle()

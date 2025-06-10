@@ -24,6 +24,9 @@ final class AdminHotelCell: UITableViewCell {
     }
 
     private func setupUI() {
+        selectionStyle = .none
+        contentView.backgroundColor = .appBackground
+
         hotelImageView.contentMode = .scaleAspectFill
         hotelImageView.layer.cornerRadius = 8
         hotelImageView.clipsToBounds = true
