@@ -56,7 +56,7 @@ final class AdminDashboardVC: UIViewController {
     }
 
     @objc private func addHotelTapped() {
-        let vc = AddHotelVC()
+        let vc = AdminAddHotelVC()
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
     }
