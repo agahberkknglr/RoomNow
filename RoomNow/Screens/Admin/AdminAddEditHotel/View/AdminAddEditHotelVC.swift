@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import MapKit
 
 final class AdminAddEditHotelVC: UIViewController {
 
@@ -13,16 +14,18 @@ final class AdminAddEditHotelVC: UIViewController {
     private let contentStack = UIStackView()
 
     private let nameField = UITextField()
-    private let ratingField = UITextField()
     private let locationField = UITextField()
     private let descriptionView = UITextView()
-    private let latitudeField = UITextField()
-    private let longitudeField = UITextField()
     private let imageUrlField = UITextField()
     private let amenitiesField = UITextField()
     private let citySelectorButton = UIButton(type: .system)
+    private let ratingStack = UIStackView()
+    private var starButtons: [UIButton] = []
+    private var selectedRating: Int = 0
     private let saveButton = UIButton(type: .system)
-
+    private let mapPreview = MKMapView()
+    private var selectedCoordinate: CLLocationCoordinate2D?
+    
     private let viewModel: AdminAddEditHotelVM
 
     init(hotel: Hotel? = nil) {
@@ -86,7 +89,28 @@ final class AdminAddEditHotelVC: UIViewController {
         citySelectorButton.addTarget(self, action: #selector(selectCityTapped), for: .touchUpInside)
         contentStack.addArrangedSubview(citySelectorButton)
 
-        styledField("Rating (e.g. 4.5)", ratingField)
+        let ratingLabel = UILabel()
+        ratingLabel.text = "Hotel Rating"
+        ratingLabel.font = .systemFont(ofSize: 16, weight: .medium)
+
+        ratingStack.axis = .horizontal
+        ratingStack.spacing = 8
+        ratingStack.distribution = .fillEqually
+        ratingStack.alignment = .center
+
+        for i in 1...5 {
+            let button = UIButton(type: .system)
+            button.setImage(UIImage(systemName: "star"), for: .normal)
+            button.tintColor = .appAccent
+            button.tag = i
+            button.addTarget(self, action: #selector(starTapped(_:)), for: .touchUpInside)
+            ratingStack.addArrangedSubview(button)
+            starButtons.append(button)
+        }
+
+        contentStack.addArrangedSubview(ratingLabel)
+        contentStack.addArrangedSubview(ratingStack)
+
         styledField("Location (e.g. Taksim)", locationField)
 
         let descLabel = UILabel()
@@ -100,8 +124,20 @@ final class AdminAddEditHotelVC: UIViewController {
         contentStack.addArrangedSubview(descriptionView)
         descriptionView.heightAnchor.constraint(equalToConstant: 120).isActive = true
 
-        styledField("Latitude (e.g. 41.0082)", latitudeField)
-        styledField("Longitude (e.g. 28.9784)", longitudeField)
+        let locationLabel = UILabel()
+        locationLabel.text = "Hotel Location"
+        locationLabel.font = .systemFont(ofSize: 16, weight: .medium)
+        contentStack.addArrangedSubview(locationLabel)
+
+        mapPreview.layer.cornerRadius = 8
+        mapPreview.isScrollEnabled = false
+        mapPreview.isUserInteractionEnabled = true
+        mapPreview.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        contentStack.addArrangedSubview(mapPreview)
+
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(selectLocationTapped))
+        mapPreview.addGestureRecognizer(tapGesture)
+        
         styledField("Image URL (optional)", imageUrlField)
         styledField("Amenities (comma-separated)", amenitiesField)
 
@@ -118,16 +154,22 @@ final class AdminAddEditHotelVC: UIViewController {
 
     private func fillFormIfNeeded() {
         nameField.text = viewModel.name
-        ratingField.text = viewModel.rating
         locationField.text = viewModel.location
         descriptionView.text = viewModel.description
-        latitudeField.text = viewModel.latitude
-        longitudeField.text = viewModel.longitude
         imageUrlField.text = viewModel.imageURL
         amenitiesField.text = viewModel.amenities
 
         if let city = viewModel.selectedCity {
             citySelectorButton.setTitle(city.name.capitalized, for: .normal)
+        }
+        
+        selectedRating = Int(Double(viewModel.rating) ?? 0)
+        updateStarUI()
+        
+        if let lat = Double(viewModel.latitude), let lng = Double(viewModel.longitude) {
+            let coord = CLLocationCoordinate2D(latitude: lat, longitude: lng)
+            selectedCoordinate = coord
+            updateMapPreview(with: coord)
         }
     }
 
@@ -143,14 +185,48 @@ final class AdminAddEditHotelVC: UIViewController {
             self.present(nav, animated: true)
         }
     }
+    
+    @objc private func starTapped(_ sender: UIButton) {
+        selectedRating = sender.tag
+        updateStarUI()
+    }
+
+    private func updateStarUI() {
+        for (index, button) in starButtons.enumerated() {
+            let filled = index < selectedRating
+            let imageName = filled ? "star.fill" : "star"
+            button.setImage(UIImage(systemName: imageName), for: .normal)
+        }
+    }
+    
+    @objc private func selectLocationTapped() {
+        let mapVC = MapSelectionVC()
+        mapVC.onLocationSelected = { [weak self] coordinate in
+            self?.selectedCoordinate = coordinate
+            self?.viewModel.latitude = String(coordinate.latitude)
+            self?.viewModel.longitude = String(coordinate.longitude)
+            self?.updateMapPreview(with: coordinate)
+        }
+        let nav = UINavigationController(rootViewController: mapVC)
+        present(nav, animated: true)
+    }
+    
+    private func updateMapPreview(with coordinate: CLLocationCoordinate2D) {
+        mapPreview.removeAnnotations(mapPreview.annotations)
+
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = coordinate
+        mapPreview.addAnnotation(annotation)
+
+        let region = MKCoordinateRegion(center: coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
+        mapPreview.setRegion(region, animated: false)
+    }
 
     @objc private func saveTapped() {
         viewModel.name = nameField.text ?? ""
-        viewModel.rating = ratingField.text ?? ""
+        viewModel.rating = String(selectedRating)
         viewModel.location = locationField.text ?? ""
         viewModel.description = descriptionView.text ?? ""
-        viewModel.latitude = latitudeField.text ?? ""
-        viewModel.longitude = longitudeField.text ?? ""
         viewModel.imageURL = imageUrlField.text ?? ""
         viewModel.amenities = amenitiesField.text ?? ""
         
