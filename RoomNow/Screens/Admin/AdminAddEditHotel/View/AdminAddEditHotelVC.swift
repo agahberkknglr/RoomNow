@@ -13,7 +13,6 @@ final class AdminAddEditHotelVC: UIViewController {
     private let contentStack = UIStackView()
 
     private let nameField = UITextField()
-    private let cityField = UITextField()
     private let ratingField = UITextField()
     private let locationField = UITextField()
     private let descriptionView = UITextView()
@@ -21,7 +20,7 @@ final class AdminAddEditHotelVC: UIViewController {
     private let longitudeField = UITextField()
     private let imageUrlField = UITextField()
     private let amenitiesField = UITextField()
-
+    private let citySelectorButton = UIButton(type: .system)
     private let saveButton = UIButton(type: .system)
 
     private let viewModel: AdminAddEditHotelVM
@@ -76,7 +75,17 @@ final class AdminAddEditHotelVC: UIViewController {
         }
 
         styledField("Hotel Name", nameField)
-        styledField("City", cityField)
+
+        citySelectorButton.setTitle("Select City ▾", for: .normal)
+        citySelectorButton.contentHorizontalAlignment = .left
+        citySelectorButton.titleLabel?.font = .systemFont(ofSize: 16)
+        citySelectorButton.setTitleColor(.label, for: .normal)
+        citySelectorButton.backgroundColor = .systemGray6
+        citySelectorButton.layer.cornerRadius = 8
+        citySelectorButton.contentEdgeInsets = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+        citySelectorButton.addTarget(self, action: #selector(selectCityTapped), for: .touchUpInside)
+        contentStack.addArrangedSubview(citySelectorButton)
+
         styledField("Rating (e.g. 4.5)", ratingField)
         styledField("Location (e.g. Taksim)", locationField)
 
@@ -109,7 +118,6 @@ final class AdminAddEditHotelVC: UIViewController {
 
     private func fillFormIfNeeded() {
         nameField.text = viewModel.name
-        cityField.text = viewModel.city
         ratingField.text = viewModel.rating
         locationField.text = viewModel.location
         descriptionView.text = viewModel.description
@@ -117,11 +125,27 @@ final class AdminAddEditHotelVC: UIViewController {
         longitudeField.text = viewModel.longitude
         imageUrlField.text = viewModel.imageURL
         amenitiesField.text = viewModel.amenities
+
+        if let city = viewModel.selectedCity {
+            citySelectorButton.setTitle(city.name.capitalized, for: .normal)
+        }
+    }
+
+    @objc private func selectCityTapped() {
+        viewModel.loadCities { [weak self] in
+            guard let self = self else { return }
+            let cityVC = CitySelectionVC(cities: self.viewModel.availableCities)
+            cityVC.onCitySelected = { selected in
+                self.viewModel.selectedCity = selected
+                self.citySelectorButton.setTitle(selected.name.capitalized, for: .normal)
+            }
+            let nav = UINavigationController(rootViewController: cityVC)
+            self.present(nav, animated: true)
+        }
     }
 
     @objc private func saveTapped() {
         viewModel.name = nameField.text ?? ""
-        viewModel.city = cityField.text ?? ""
         viewModel.rating = ratingField.text ?? ""
         viewModel.location = locationField.text ?? ""
         viewModel.description = descriptionView.text ?? ""
