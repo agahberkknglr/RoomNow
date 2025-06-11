@@ -105,7 +105,7 @@ final class AdminAddEditHotelVC: UIViewController {
         styledField("Image URL (optional)", imageUrlField)
         styledField("Amenities (comma-separated)", amenitiesField)
 
-        saveButton.setTitle("Save Hotel", for: .normal)
+        saveButton.setTitle(viewModel.isEditMode ? "Save Changes" : "Add Hotel", for: .normal)
         saveButton.titleLabel?.font = .boldSystemFont(ofSize: 18)
         saveButton.backgroundColor = .systemBlue
         saveButton.tintColor = .white
@@ -153,6 +153,11 @@ final class AdminAddEditHotelVC: UIViewController {
         viewModel.longitude = longitudeField.text ?? ""
         viewModel.imageURL = imageUrlField.text ?? ""
         viewModel.amenities = amenitiesField.text ?? ""
+        
+        if let errorMessage = viewModel.validateFields() {
+            showAlert(title: "Validation Error", message: errorMessage)
+            return
+        }
 
         viewModel.saveHotel { [weak self] result in
             DispatchQueue.main.async {
@@ -160,9 +165,7 @@ final class AdminAddEditHotelVC: UIViewController {
                 case .success:
                     self?.navigationController?.popViewController(animated: true)
                 case .failure(let error):
-                    let alert = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default))
-                    self?.present(alert, animated: true)
+                    self?.showAlert(title: "Save Failed", message: error.localizedDescription)
                 }
             }
         }

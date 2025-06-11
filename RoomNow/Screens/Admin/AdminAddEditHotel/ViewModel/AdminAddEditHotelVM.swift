@@ -58,6 +58,27 @@ final class AdminAddEditHotelVM {
             completion()
         }
     }
+    
+    func validateFields() -> String? {
+        if name.isEmpty { return "Hotel name is required." }
+        if selectedCity == nil { return "Please select a city." }
+        if location.isEmpty { return "Location is required." }
+        if description.isEmpty { return "Description is required." }
+
+        guard let ratingVal = Double(rating), ratingVal >= 0 && ratingVal <= 5 else {
+            return "Rating must be a number between 0 and 5."
+        }
+
+        guard Double(latitude) != nil else {
+            return "Latitude must be a valid number."
+        }
+
+        guard Double(longitude) != nil else {
+            return "Longitude must be a valid number."
+        }
+
+        return nil 
+    }
 
     func saveHotel(completion: @escaping (Result<Void, Error>) -> Void) {
         guard
