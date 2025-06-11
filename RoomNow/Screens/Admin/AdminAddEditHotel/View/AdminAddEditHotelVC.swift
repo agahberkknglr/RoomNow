@@ -167,7 +167,7 @@ final class AdminAddEditHotelVC: UIViewController {
         amenityCollectionView.dataSource = self
         amenityCollectionView.delegate = self
         amenityCollectionView.backgroundColor = .clear
-        amenityCollectionView.heightAnchor.constraint(equalToConstant: 200).isActive = true
+        amenityCollectionView.heightAnchor.constraint(equalToConstant: 220).isActive = true
 
         contentStack.addArrangedSubview(amenityCollectionView)
 
