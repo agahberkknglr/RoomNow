@@ -7,6 +7,7 @@
 
 import UIKit
 import MapKit
+import PhotosUI
 
 final class AdminAddEditHotelVC: UIViewController {
 
@@ -16,7 +17,6 @@ final class AdminAddEditHotelVC: UIViewController {
     private let nameField = UITextField()
     private let locationField = UITextField()
     private let descriptionView = UITextView()
-    private let imageUrlField = UITextField()
     private let amenitiesField = UITextField()
     private let citySelectorButton = UIButton(type: .system)
     private let ratingStack = UIStackView()
@@ -25,6 +25,15 @@ final class AdminAddEditHotelVC: UIViewController {
     private let saveButton = UIButton(type: .system)
     private let mapPreview = MKMapView()
     private var selectedCoordinate: CLLocationCoordinate2D?
+    private var photoCollectionView: UICollectionView!
+    private var hotelImages: [HotelImage] = []
+
+    private var decodedImages: [UIImage] {
+        viewModel.base64Images.compactMap {
+            guard let data = Data(base64Encoded: $0) else { return nil }
+            return UIImage(data: data)
+        }
+    }
     
     private let viewModel: AdminAddEditHotelVM
 
@@ -138,7 +147,8 @@ final class AdminAddEditHotelVC: UIViewController {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(selectLocationTapped))
         mapPreview.addGestureRecognizer(tapGesture)
         
-        styledField("Image URL (optional)", imageUrlField)
+        setupPhotoSection()
+
         styledField("Amenities (comma-separated)", amenitiesField)
 
         saveButton.setTitle(viewModel.isEditMode ? "Save Changes" : "Add Hotel", for: .normal)
@@ -156,7 +166,6 @@ final class AdminAddEditHotelVC: UIViewController {
         nameField.text = viewModel.name
         locationField.text = viewModel.location
         descriptionView.text = viewModel.description
-        imageUrlField.text = viewModel.imageURL
         amenitiesField.text = viewModel.amenities
 
         if let city = viewModel.selectedCity {
@@ -165,6 +174,10 @@ final class AdminAddEditHotelVC: UIViewController {
         
         selectedRating = Int(Double(viewModel.rating) ?? 0)
         updateStarUI()
+        
+        if viewModel.base64Images.isEmpty == false {
+            hotelImages = viewModel.base64Images.map { HotelImage.existing(base64: $0) }
+        }
         
         if let lat = Double(viewModel.latitude), let lng = Double(viewModel.longitude) {
             let coord = CLLocationCoordinate2D(latitude: lat, longitude: lng)
@@ -223,14 +236,78 @@ final class AdminAddEditHotelVC: UIViewController {
         mapPreview.setRegion(region, animated: false)
     }
 
+    private func setupPhotoSection() {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.itemSize = CGSize(width: 100, height: 100)
+        layout.minimumInteritemSpacing = 12
+
+        photoCollectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        photoCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        photoCollectionView.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        photoCollectionView.backgroundColor = .clear
+        photoCollectionView.showsHorizontalScrollIndicator = false
+
+        photoCollectionView.register(PhotoCell.self, forCellWithReuseIdentifier: "PhotoCell")
+        photoCollectionView.register(AddPhotoCell.self, forCellWithReuseIdentifier: "AddPhotoCell")
+
+        photoCollectionView.dataSource = self
+        photoCollectionView.delegate = self
+
+        contentStack.addArrangedSubview(photoCollectionView)
+    }
+    
+    @objc private func removePhotoTapped(_ sender: UIButton) {
+        let index = sender.tag
+        guard index < hotelImages.count else { return }
+        hotelImages.remove(at: index)
+        photoCollectionView.reloadData()
+    }
+    
+    private func presentPhotoPicker() {
+        var config = PHPickerConfiguration()
+        config.selectionLimit = 10
+        config.filter = .images
+
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+    
+    private func presentCamera() {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = self
+        picker.allowsEditing = false
+        present(picker, animated: true)
+    }
+    
+    private func showPhotoSourceOptions() {
+        let alert = UIAlertController(title: "Add Photo", message: nil, preferredStyle: .actionSheet)
+
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            alert.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
+                self.presentCamera()
+            }))
+        }
+
+        alert.addAction(UIAlertAction(title: "Choose from Library", style: .default, handler: { _ in
+            self.presentPhotoPicker()
+        }))
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+        present(alert, animated: true)
+    }
+    
     @objc private func saveTapped() {
         viewModel.name = nameField.text ?? ""
         viewModel.rating = String(selectedRating)
         viewModel.location = locationField.text ?? ""
         viewModel.description = descriptionView.text ?? ""
-        viewModel.imageURL = imageUrlField.text ?? ""
         viewModel.amenities = amenitiesField.text ?? ""
-        
+        viewModel.setImages(hotelImages)
+
         if let errorMessage = viewModel.validateFields() {
             showAlert(title: "Validation Error", message: errorMessage)
             return
@@ -246,5 +323,71 @@ final class AdminAddEditHotelVC: UIViewController {
                 }
             }
         }
+    }
+}
+
+extension AdminAddEditHotelVC: UICollectionViewDataSource, UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return hotelImages.count + 1
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if indexPath.item == hotelImages.count {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "AddPhotoCell", for: indexPath) as! AddPhotoCell
+            return cell
+        } else {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCell", for: indexPath) as! PhotoCell
+            cell.imageView.image = hotelImages[indexPath.item].uiImage
+            cell.removeButton.tag = indexPath.item
+            cell.removeButton.addTarget(self, action: #selector(removePhotoTapped(_:)), for: .touchUpInside)
+            return cell
+        }
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if indexPath.item == viewModel.base64Images.count {
+            showPhotoSourceOptions()
+        }
+    }
+}
+
+extension AdminAddEditHotelVC: PHPickerViewControllerDelegate {
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        picker.dismiss(animated: true)
+
+        let dispatchGroup = DispatchGroup()
+
+        for result in results {
+            if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
+                dispatchGroup.enter()
+                result.itemProvider.loadObject(ofClass: UIImage.self) { [weak self] object, _ in
+                    defer { dispatchGroup.leave() }
+                    if let image = object as? UIImage {
+                        DispatchQueue.main.async {
+                            self?.hotelImages.append(.new(image: image))
+                        }
+                    }
+                }
+            }
+        }
+
+        dispatchGroup.notify(queue: .main) {
+            self.photoCollectionView.reloadData()
+        }
+    }
+}
+
+extension AdminAddEditHotelVC: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true)
+
+        if let image = info[.originalImage] as? UIImage {
+            hotelImages.append(.new(image: image))
+            photoCollectionView.reloadData()
+        }
+    }
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true)
     }
 }

@@ -18,8 +18,12 @@ final class AdminAddEditHotelVM {
     var description: String = ""
     var latitude: String = ""
     var longitude: String = ""
-    var imageURL: String = ""
     var amenities: String = ""
+
+    private(set) var hotelImages: [HotelImage] = []
+    var base64Images: [String] {
+        hotelImages.compactMap { $0.base64String }
+    }
 
     var availableCities: [City] = []
     
@@ -37,9 +41,27 @@ final class AdminAddEditHotelVM {
             description = hotel.description
             latitude = String(hotel.latitude)
             longitude = String(hotel.longitude)
-            imageURL = hotel.imageUrls.first ?? ""
             amenities = hotel.amenities.joined(separator: ", ")
+            setInitialImages(from: hotel)
         }
+    }
+    
+    func setInitialImages(from hotel: Hotel) {
+        hotelImages = hotel.imageUrls.compactMap { str in
+            if str.hasPrefix("http"),
+               let url = URL(string: str),
+               let data = try? Data(contentsOf: url) {
+                return .existing(base64: data.base64EncodedString())
+            } else if Data(base64Encoded: str) != nil {
+                return .existing(base64: str)
+            } else {
+                return nil
+            }
+        }
+    }
+    
+    func setImages(_ images: [HotelImage]) {
+        self.hotelImages = images
     }
     
     func loadCities(completion: @escaping () -> Void) {
@@ -99,7 +121,7 @@ final class AdminAddEditHotelVM {
             description: description,
             latitude: lat,
             longitude: lng,
-            imageUrls: imageURL.isEmpty ? [] : [imageURL],
+            imageUrls: base64Images,
             amenities: amenities
                 .split(separator: ",")
                 .map { $0.trimmingCharacters(in: .whitespaces) }
