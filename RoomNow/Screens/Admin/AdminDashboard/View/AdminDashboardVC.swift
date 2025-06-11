@@ -20,6 +20,11 @@ final class AdminDashboardVC: UIViewController {
         viewModel.fetchHotels()
         bindViewModel()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.fetchHotels()
+    }
 
     private func setupUI() {
         title = "Dashboard"
