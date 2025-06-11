@@ -346,6 +346,9 @@ final class AdminAddEditHotelVC: UIViewController {
     }
     
     @objc private func saveTapped() {
+        saveButton.isEnabled = false
+        showLoadingIndicator()
+        
         viewModel.name = nameField.text ?? ""
         viewModel.rating = String(selectedRating)
         viewModel.location = locationField.text ?? ""
@@ -354,6 +357,8 @@ final class AdminAddEditHotelVC: UIViewController {
 
         if let errorMessage = viewModel.validateFields() {
             showAlert(title: "Validation Error", message: errorMessage)
+            hideLoadingIndicator()
+            saveButton.isEnabled = true
             return
         }
         
@@ -363,6 +368,9 @@ final class AdminAddEditHotelVC: UIViewController {
 
         viewModel.saveHotel { [weak self] result in
             DispatchQueue.main.async {
+                self?.hideLoadingIndicator()
+                self?.saveButton.isEnabled = true
+                
                 switch result {
                 case .success:
                     self?.navigationController?.popViewController(animated: true)
