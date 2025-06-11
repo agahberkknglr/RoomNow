@@ -129,6 +129,9 @@ extension FirebaseManager: FirebaseManagerProtocol {
             }
     }
 
+    func fetchRooms(for hotelId: String, completion: @escaping (Result<[Room], Error>) -> Void) {
+        fetchRooms(for: [hotelId], completion: completion)
+    }
 
 
     
@@ -587,6 +590,7 @@ extension FirebaseManager: FirebaseManagerProtocol {
         let hotelId = hotel.id ?? UUID().uuidString
 
         var data: [String: Any] = [
+            "id": hotelId,
             "name": hotel.name,
             "city": hotel.city,
             "rating": hotel.rating,

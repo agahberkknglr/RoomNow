@@ -11,6 +11,7 @@ final class AdminAddEditHotelVM {
 
     var hotelToEdit: Hotel?
 
+    var id: String = ""
     var name: String = ""
     var selectedCity: City?
     var rating: String = ""
@@ -112,8 +113,10 @@ final class AdminAddEditHotelVM {
             return
         }
 
+        let hotelId = hotelToEdit?.id ?? UUID().uuidString
+
         let newHotel = Hotel(
-            id: hotelToEdit?.id ?? UUID().uuidString,
+            id: hotelId,
             name: name,
             city: selectedCity?.name ?? "",
             rating: ratingVal,
@@ -125,7 +128,16 @@ final class AdminAddEditHotelVM {
             amenities: amenityList
         )
 
-        FirebaseManager.shared.addOrUpdateHotel(newHotel, completion: completion)
+        FirebaseManager.shared.addOrUpdateHotel(newHotel) { [weak self] result in
+            switch result {
+            case .success:
+                self?.hotelToEdit = newHotel
+                completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
+
 }
 
