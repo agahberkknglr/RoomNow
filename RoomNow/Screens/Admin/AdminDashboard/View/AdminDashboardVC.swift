@@ -56,7 +56,7 @@ final class AdminDashboardVC: UIViewController {
     }
 
     @objc private func addHotelTapped() {
-        let vc = AdminAddHotelVC()
+        let vc = AdminAddEditHotelVC()
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
     }
@@ -100,7 +100,7 @@ extension AdminDashboardVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard indexPath.row > 0 else { return }
         let hotel = viewModel.filteredHotels[indexPath.row - 1]
-        let vc = AdminHotelSettingsVC()
+        let vc = AdminAddEditHotelVC(hotel: hotel)
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
     }
