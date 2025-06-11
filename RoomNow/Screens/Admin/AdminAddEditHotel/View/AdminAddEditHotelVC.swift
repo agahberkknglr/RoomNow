@@ -87,6 +87,8 @@ final class AdminAddEditHotelVC: UIViewController {
         }
 
         styledField("Hotel Name", nameField)
+        nameField.applyButtonStyleLook()
+        nameField.constrainHeight(to: 48)
 
         citySelectorButton.setTitle("Select City ▾", for: .normal)
         citySelectorButton.contentHorizontalAlignment = .left
@@ -100,7 +102,7 @@ final class AdminAddEditHotelVC: UIViewController {
 
         let ratingLabel = UILabel()
         ratingLabel.text = "Hotel Rating"
-        ratingLabel.font = .systemFont(ofSize: 16, weight: .medium)
+        ratingLabel.applySubtitleSecondStyle()
 
         ratingStack.axis = .horizontal
         ratingStack.spacing = 8
@@ -121,21 +123,21 @@ final class AdminAddEditHotelVC: UIViewController {
         contentStack.addArrangedSubview(ratingStack)
 
         styledField("Location (e.g. Taksim)", locationField)
+        locationField.applyButtonStyleLook()
+        locationField.constrainHeight(to: 48)
 
         let descLabel = UILabel()
         descLabel.text = "Description"
+        descLabel.applySubtitleSecondStyle()
         contentStack.addArrangedSubview(descLabel)
 
-        descriptionView.font = .systemFont(ofSize: 16)
-        descriptionView.layer.borderColor = UIColor.separator.cgColor
-        descriptionView.layer.borderWidth = 1
-        descriptionView.layer.cornerRadius = 8
+        descriptionView.applyButtonStyleLook()
         contentStack.addArrangedSubview(descriptionView)
         descriptionView.heightAnchor.constraint(equalToConstant: 120).isActive = true
 
         let locationLabel = UILabel()
         locationLabel.text = "Hotel Location"
-        locationLabel.font = .systemFont(ofSize: 16, weight: .medium)
+        locationLabel.applySubtitleSecondStyle()
         contentStack.addArrangedSubview(locationLabel)
 
         mapPreview.layer.cornerRadius = 8
@@ -151,6 +153,7 @@ final class AdminAddEditHotelVC: UIViewController {
 
         let amenityLabel = UILabel()
         amenityLabel.text = "Amenities"
+        amenityLabel.applySubtitleSecondStyle()
         contentStack.addArrangedSubview(amenityLabel)
 
         let layout = UICollectionViewFlowLayout()
