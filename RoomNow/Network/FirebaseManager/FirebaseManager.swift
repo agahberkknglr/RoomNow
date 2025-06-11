@@ -581,6 +581,31 @@ extension FirebaseManager: FirebaseManagerProtocol {
             }
         }
     }
+    
+    func addOrUpdateHotel(_ hotel: Hotel, completion: @escaping (Result<Void, Error>) -> Void) {
+        let db = Firestore.firestore()
+        let hotelId = hotel.id ?? UUID().uuidString
+
+        var data: [String: Any] = [
+            "name": hotel.name,
+            "city": hotel.city,
+            "rating": hotel.rating,
+            "location": hotel.location,
+            "description": hotel.description,
+            "latitude": hotel.latitude,
+            "longitude": hotel.longitude,
+            "imageUrls": hotel.imageUrls,
+            "amenities": hotel.amenities
+        ]
+
+        db.collection("hotels").document(hotelId).setData(data, merge: true) { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
 
 
 
