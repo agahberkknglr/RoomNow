@@ -46,6 +46,14 @@ extension UILabel {
         self.adjustsFontForContentSizeCategory = true
     }
     
+    func applySubtitleSecondStyle() {
+        self.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        self.textColor = .appSecondaryText
+        self.numberOfLines = 0
+        self.textAlignment = .left
+        self.adjustsFontForContentSizeCategory = true
+    }
+    
     func applyCellTitleStyle() {
         self.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         self.textColor = .appPrimaryText
