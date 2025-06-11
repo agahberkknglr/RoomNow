@@ -12,7 +12,7 @@ final class MapSelectionVC: UIViewController {
 
     private let mapView = MKMapView()
     private var selectedCoordinate: CLLocationCoordinate2D?
-
+    var initialCoordinate: CLLocationCoordinate2D?
     var onLocationSelected: ((CLLocationCoordinate2D) -> Void)?
 
     override func viewDidLoad() {
@@ -28,8 +28,15 @@ final class MapSelectionVC: UIViewController {
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(mapView)
 
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(mapTapped(_:)))
-        mapView.addGestureRecognizer(tapGesture)
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(mapTapped(_:)))
+        mapView.addGestureRecognizer(gesture)
+
+        if let coord = initialCoordinate {
+            dropPin(at: coord)
+            selectedCoordinate = coord // ✅ This allows "Select" to work without tapping again
+            let region = MKCoordinateRegion(center: coord, latitudinalMeters: 1000, longitudinalMeters: 1000)
+            mapView.setRegion(region, animated: false)
+        }
     }
 
     private func setupNavBar() {
@@ -38,8 +45,8 @@ final class MapSelectionVC: UIViewController {
                                                             target: self,
                                                             action: #selector(selectTapped))
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel,
-                                                            target: self,
-                                                            action: #selector(dismissSelf))
+                                                           target: self,
+                                                           action: #selector(dismissSelf))
     }
 
     @objc private func mapTapped(_ gesture: UITapGestureRecognizer) {
@@ -49,8 +56,12 @@ final class MapSelectionVC: UIViewController {
 
         mapView.removeAnnotations(mapView.annotations)
 
+        dropPin(at: coord)
+    }
+
+    private func dropPin(at coordinate: CLLocationCoordinate2D) {
         let annotation = MKPointAnnotation()
-        annotation.coordinate = coord
+        annotation.coordinate = coordinate
         annotation.title = "Selected Location"
         mapView.addAnnotation(annotation)
     }
@@ -70,3 +81,4 @@ final class MapSelectionVC: UIViewController {
         dismiss(animated: true)
     }
 }
+

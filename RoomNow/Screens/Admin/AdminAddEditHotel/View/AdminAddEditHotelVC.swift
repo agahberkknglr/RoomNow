@@ -40,7 +40,7 @@ final class AdminAddEditHotelVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .appBackground
         setupScrollView()
         setupFields()
         fillFormIfNeeded()
@@ -201,6 +201,7 @@ final class AdminAddEditHotelVC: UIViewController {
     
     @objc private func selectLocationTapped() {
         let mapVC = MapSelectionVC()
+        mapVC.initialCoordinate = selectedCoordinate
         mapVC.onLocationSelected = { [weak self] coordinate in
             self?.selectedCoordinate = coordinate
             self?.viewModel.latitude = String(coordinate.latitude)
