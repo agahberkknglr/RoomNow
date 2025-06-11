@@ -17,7 +17,6 @@ final class AdminAddEditHotelVC: UIViewController {
     private let nameField = UITextField()
     private let locationField = UITextField()
     private let descriptionView = UITextView()
-    private let amenitiesField = UITextField()
     private let citySelectorButton = UIButton(type: .system)
     private let ratingStack = UIStackView()
     private var starButtons: [UIButton] = []
@@ -27,13 +26,14 @@ final class AdminAddEditHotelVC: UIViewController {
     private var selectedCoordinate: CLLocationCoordinate2D?
     private var photoCollectionView: UICollectionView!
     private var hotelImages: [HotelImage] = []
-
     private var decodedImages: [UIImage] {
         viewModel.base64Images.compactMap {
             guard let data = Data(base64Encoded: $0) else { return nil }
             return UIImage(data: data)
         }
     }
+    private var selectedAmenities: Set<Amenity> = []
+    private var amenityCollectionView: UICollectionView!
     
     private let viewModel: AdminAddEditHotelVM
 
@@ -149,7 +149,24 @@ final class AdminAddEditHotelVC: UIViewController {
         
         setupPhotoSection()
 
-        styledField("Amenities (comma-separated)", amenitiesField)
+        let amenityLabel = UILabel()
+        amenityLabel.text = "Amenities"
+        contentStack.addArrangedSubview(amenityLabel)
+
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.itemSize = CGSize(width: 100, height: 80)
+        layout.minimumLineSpacing = 12
+        layout.minimumInteritemSpacing = 8
+
+        amenityCollectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        amenityCollectionView.register(AmenityCell.self, forCellWithReuseIdentifier: "AmenityCell")
+        amenityCollectionView.dataSource = self
+        amenityCollectionView.delegate = self
+        amenityCollectionView.backgroundColor = .clear
+        amenityCollectionView.heightAnchor.constraint(equalToConstant: 200).isActive = true
+
+        contentStack.addArrangedSubview(amenityCollectionView)
 
         saveButton.setTitle(viewModel.isEditMode ? "Save Changes" : "Add Hotel", for: .normal)
         saveButton.titleLabel?.font = .boldSystemFont(ofSize: 18)
@@ -166,7 +183,12 @@ final class AdminAddEditHotelVC: UIViewController {
         nameField.text = viewModel.name
         locationField.text = viewModel.location
         descriptionView.text = viewModel.description
-        amenitiesField.text = viewModel.amenities
+        
+        let savedAmenities = viewModel.amenityList
+
+        selectedAmenities = Set(savedAmenities.compactMap { Amenity.from(string: $0) })
+
+        amenityCollectionView.reloadData()
 
         if let city = viewModel.selectedCity {
             citySelectorButton.setTitle(city.name.capitalized, for: .normal)
@@ -305,13 +327,16 @@ final class AdminAddEditHotelVC: UIViewController {
         viewModel.rating = String(selectedRating)
         viewModel.location = locationField.text ?? ""
         viewModel.description = descriptionView.text ?? ""
-        viewModel.amenities = amenitiesField.text ?? ""
         viewModel.setImages(hotelImages)
 
         if let errorMessage = viewModel.validateFields() {
             showAlert(title: "Validation Error", message: errorMessage)
             return
         }
+        
+        let selectedAmenityTitles = selectedAmenities.map { $0.rawValue }
+
+        viewModel.amenityList = selectedAmenityTitles
 
         viewModel.saveHotel { [weak self] result in
             DispatchQueue.main.async {
@@ -328,25 +353,49 @@ final class AdminAddEditHotelVC: UIViewController {
 
 extension AdminAddEditHotelVC: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return hotelImages.count + 1
+        if collectionView == photoCollectionView {
+            return hotelImages.count + 1
+        } else if collectionView == amenityCollectionView {
+            return Amenity.allCases.count
+        }
+        return 0
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if indexPath.item == hotelImages.count {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "AddPhotoCell", for: indexPath) as! AddPhotoCell
-            return cell
-        } else {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCell", for: indexPath) as! PhotoCell
-            cell.imageView.image = hotelImages[indexPath.item].uiImage
-            cell.removeButton.tag = indexPath.item
-            cell.removeButton.addTarget(self, action: #selector(removePhotoTapped(_:)), for: .touchUpInside)
+        if collectionView == photoCollectionView {
+            if indexPath.item == hotelImages.count {
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "AddPhotoCell", for: indexPath) as! AddPhotoCell
+                return cell
+            } else {
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCell", for: indexPath) as! PhotoCell
+                cell.imageView.image = hotelImages[indexPath.item].uiImage
+                cell.removeButton.tag = indexPath.item
+                cell.removeButton.addTarget(self, action: #selector(removePhotoTapped(_:)), for: .touchUpInside)
+                return cell
+            }
+        } else if collectionView == amenityCollectionView {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "AmenityCell", for: indexPath) as! AmenityCell
+            let amenity = Amenity.allCases[indexPath.item]
+            cell.configure(with: amenity, selected: selectedAmenities.contains(amenity))
             return cell
         }
+
+        fatalError("Unknown collectionView")
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if indexPath.item == viewModel.base64Images.count {
-            showPhotoSourceOptions()
+        if collectionView == photoCollectionView {
+            if indexPath.item == hotelImages.count {
+                showPhotoSourceOptions()
+            }
+        } else if collectionView == amenityCollectionView {
+            let amenity = Amenity.allCases[indexPath.item]
+            if selectedAmenities.contains(amenity) {
+                selectedAmenities.remove(amenity)
+            } else {
+                selectedAmenities.insert(amenity)
+            }
+            collectionView.reloadItems(at: [indexPath])
         }
     }
 }

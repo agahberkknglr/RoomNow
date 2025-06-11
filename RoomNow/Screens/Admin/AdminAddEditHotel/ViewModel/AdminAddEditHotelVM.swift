@@ -18,7 +18,7 @@ final class AdminAddEditHotelVM {
     var description: String = ""
     var latitude: String = ""
     var longitude: String = ""
-    var amenities: String = ""
+    var amenityList: [String] = []
 
     private(set) var hotelImages: [HotelImage] = []
     var base64Images: [String] {
@@ -41,7 +41,7 @@ final class AdminAddEditHotelVM {
             description = hotel.description
             latitude = String(hotel.latitude)
             longitude = String(hotel.longitude)
-            amenities = hotel.amenities.joined(separator: ", ")
+            amenityList = hotel.amenities
             setInitialImages(from: hotel)
         }
     }
@@ -122,9 +122,7 @@ final class AdminAddEditHotelVM {
             latitude: lat,
             longitude: lng,
             imageUrls: base64Images,
-            amenities: amenities
-                .split(separator: ",")
-                .map { $0.trimmingCharacters(in: .whitespaces) }
+            amenities: amenityList
         )
 
         FirebaseManager.shared.addOrUpdateHotel(newHotel, completion: completion)
