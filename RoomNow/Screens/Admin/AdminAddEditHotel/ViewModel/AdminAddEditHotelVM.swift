@@ -12,7 +12,7 @@ final class AdminAddEditHotelVM {
     var hotelToEdit: Hotel?
 
     var name: String = ""
-    var city: String = ""
+    var selectedCity: City?
     var rating: String = ""
     var location: String = ""
     var description: String = ""
@@ -21,6 +21,8 @@ final class AdminAddEditHotelVM {
     var imageURL: String = ""
     var amenities: String = ""
 
+    var availableCities: [City] = []
+    
     var isEditMode: Bool {
         hotelToEdit != nil
     }
@@ -29,7 +31,7 @@ final class AdminAddEditHotelVM {
         self.hotelToEdit = hotel
         if let hotel = hotel {
             name = hotel.name
-            city = hotel.city
+            selectedCity = City(id: "", name: hotel.city)
             rating = String(hotel.rating)
             location = hotel.location
             description = hotel.description
@@ -37,6 +39,23 @@ final class AdminAddEditHotelVM {
             longitude = String(hotel.longitude)
             imageURL = hotel.imageUrls.first ?? ""
             amenities = hotel.amenities.joined(separator: ", ")
+        }
+    }
+    
+    func loadCities(completion: @escaping () -> Void) {
+        FirebaseManager.shared.fetchCities { result in
+            switch result {
+            case .success(let cities):
+                self.availableCities = cities
+
+                if let editing = self.hotelToEdit {
+                    self.selectedCity = cities.first { $0.name.lowercased() == editing.city.lowercased() }
+                }
+
+            case .failure:
+                self.availableCities = []
+            }
+            completion()
         }
     }
 
@@ -53,7 +72,7 @@ final class AdminAddEditHotelVM {
         let newHotel = Hotel(
             id: hotelToEdit?.id ?? UUID().uuidString,
             name: name,
-            city: city,
+            city: selectedCity?.name ?? "",
             rating: ratingVal,
             location: location,
             description: description,
