@@ -64,11 +64,6 @@ final class AdminHotelCell: UITableViewCell {
         titleLabel.text = hotel.name
         subtitleLabel.text = hotel.city.capitalized
         ratingLabel.text = "★ \(hotel.rating)"
-        if let firstImageUrlString = hotel.imageUrls.first,
-           let url = URL(string: firstImageUrlString) {
-            hotelImageView.sd_setImage(with: url, placeholderImage: UIImage(systemName: "building.2.fill"))
-        } else {
-            hotelImageView.image = UIImage(systemName: "building.2.fill")
-        }
+        hotelImageView.setImage(fromBase64: hotel.imageUrls.first)
     }
 }
