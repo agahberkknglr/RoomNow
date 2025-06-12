@@ -54,6 +54,7 @@ final class AdminAddEditHotelVC: UIViewController {
         setupScrollView()
         setupFields()
         fillFormIfNeeded()
+        setupNavBar()
     }
 
     private func setupScrollView() {
@@ -77,6 +78,17 @@ final class AdminAddEditHotelVC: UIViewController {
             contentStack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -20),
             contentStack.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -40)
         ])
+    }
+    
+    private func setupNavBar() {
+        if viewModel.isEditMode {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(
+                title: "Manage Rooms",
+                style: .plain,
+                target: self,
+                action: #selector(manageRoomsTapped)
+            )
+        }
     }
 
     private func setupFields() {
@@ -171,22 +183,8 @@ final class AdminAddEditHotelVC: UIViewController {
         amenityCollectionView.heightAnchor.constraint(equalToConstant: 220).isActive = true
 
         contentStack.addArrangedSubview(amenityCollectionView)
-        
-        manageRoomsButton.setTitle("Manage Rooms", for: .normal)
-        manageRoomsButton.contentHorizontalAlignment = .left
-        manageRoomsButton.titleLabel?.font = .systemFont(ofSize: 16)
-        manageRoomsButton.setTitleColor(.label, for: .normal)
-        manageRoomsButton.backgroundColor = .systemGray6
-        manageRoomsButton.layer.cornerRadius = 8
-        manageRoomsButton.contentEdgeInsets = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
-        manageRoomsButton.addTarget(self, action: #selector(manageRoomsTapped), for: .touchUpInside)
-        contentStack.addArrangedSubview(manageRoomsButton)
 
-        saveButton.setTitle(viewModel.isEditMode ? "Save Changes" : "Add Hotel", for: .normal)
-        saveButton.titleLabel?.font = .boldSystemFont(ofSize: 18)
-        saveButton.backgroundColor = .systemBlue
-        saveButton.tintColor = .white
-        saveButton.layer.cornerRadius = 8
+        saveButton.applyPrimaryStyle(with: viewModel.isEditMode ? "Save Changes" : "Add Hotel")
         saveButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
         saveButton.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
 
@@ -337,10 +335,7 @@ final class AdminAddEditHotelVC: UIViewController {
     }
     
     @objc private func manageRoomsTapped() {
-        guard let hotelId = viewModel.hotelToEdit?.id else {
-            showAlert(title: "Hotel Saving Error", message: "Hotel must be saved before managing rooms.")
-            return
-        }
+        guard let hotelId = viewModel.hotelToEdit?.id else { return }
         let vc = RoomListVC(hotelId: hotelId)
         navigationController?.pushViewController(vc, animated: true)
     }
