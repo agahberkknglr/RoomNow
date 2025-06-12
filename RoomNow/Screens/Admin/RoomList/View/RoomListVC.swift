@@ -23,25 +23,47 @@ final class RoomListVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Rooms"
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .appBackground
         setupTableView()
-        setupAddButton()
+        setupNavBar()
         loadRooms()
     }
 
     private func setupTableView() {
+        tableView.backgroundColor = .appBackground
         tableView.dataSource = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "RoomCell")
+        tableView.register(RoomCell.self, forCellReuseIdentifier: RoomCell.reuseID)
         view.addSubview(tableView)
         tableView.frame = view.bounds
     }
-
-    private func setupAddButton() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
+    
+    private func setupNavBar() {
+        var addButton = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
             action: #selector(addRoomTapped)
         )
+        var sortButton = UIBarButtonItem(
+            title: "Sort",
+            style: .plain,
+            target: self,
+            action: #selector(sortTapped)
+        )
+        navigationItem.rightBarButtonItems = [sortButton, addButton]
+    }
+    
+    @objc private func sortTapped() {
+        let alert = UIAlertController(title: "Sort Rooms By", message: nil, preferredStyle: .actionSheet)
+        
+        RoomSortOption.allCases.forEach { option in
+            alert.addAction(UIAlertAction(title: option.rawValue, style: .default, handler: { _ in
+                self.viewModel.sortOption = option
+                self.tableView.reloadData()
+            }))
+        }
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(alert, animated: true)
     }
 
     private func loadRooms() {
@@ -60,13 +82,14 @@ final class RoomListVC: UIViewController {
 
 extension RoomListVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        viewModel.rooms.count
+        viewModel.sortedRooms().count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let room = viewModel.rooms[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "RoomCell", for: indexPath)
-        cell.textLabel?.text = "\(room.roomType) • Room \(room.roomNumber) • \(room.bedCapacity) beds • $\(room.price)"
+        let room = viewModel.sortedRooms()[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: RoomCell.reuseID, for: indexPath) as! RoomCell
+        cell.configure(with: room)
+        cell.backgroundColor = .appBackground
         return cell
     }
 }
