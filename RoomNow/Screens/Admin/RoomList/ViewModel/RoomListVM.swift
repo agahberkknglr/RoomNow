@@ -10,6 +10,7 @@ import Foundation
 final class RoomListVM {
     private(set) var rooms: [Room] = []
     private let hotelId: String
+    var sortOption: RoomSortOption = .roomNumber
 
     init(hotelId: String) {
         self.hotelId = hotelId
@@ -25,6 +26,19 @@ final class RoomListVM {
                 self.rooms = []
             }
             completion()
+        }
+    }
+    
+    func sortedRooms() -> [Room] {
+        switch sortOption {
+        case .priceLowToHigh:
+            return rooms.sorted { $0.price < $1.price }
+        case .priceHighToLow:
+            return rooms.sorted { $0.price > $1.price }
+        case .roomNumber:
+            return rooms.sorted { $0.roomNumber < $1.roomNumber }
+        case .bedCount:
+            return rooms.sorted { $0.bedCapacity > $1.bedCapacity }
         }
     }
 }
