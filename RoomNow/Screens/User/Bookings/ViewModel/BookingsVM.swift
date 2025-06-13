@@ -25,22 +25,37 @@ final class BookingsVM {
                 let updatedReservations = reservations.map { res -> Reservation in
                     var updated = res
                     let now = Date()
-                    
+                    let uid = Auth.auth().currentUser?.uid
+                    let id = updated.id
+
                     if now >= res.checkInDate && now < res.checkOutDate && res.status == .active {
                         updated.status = .ongoing
-                        if let uid = Auth.auth().currentUser?.uid, let id = updated.id {
-                            FirebaseManager.shared.markReservationOngoing(userId: uid, reservationId: id)
+                        if let uid, let id {
+                            FirebaseManager.shared.updateReservationStatus(
+                                userId: uid,
+                                reservationId: id,
+                                newStatus: .ongoing,
+                                completion: { _ in }
+                            )
                         }
-                    } else if now >= res.checkOutDate && res.status == .active {
+                    }
+                    else if now >= res.checkOutDate &&
+                            (res.status == .active || res.status == .ongoing) {
                         updated.status = .completed
                         updated.completedAt = now
-                        if let uid = Auth.auth().currentUser?.uid, let id = updated.id {
-                            FirebaseManager.shared.markReservationCompleted(userId: uid, reservationId: id, date: now)
+                        if let uid, let id {
+                            FirebaseManager.shared.updateReservationStatus(
+                                userId: uid,
+                                reservationId: id,
+                                newStatus: .completed,
+                                completion: { _ in }
+                            )
                         }
                     }
 
                     return updated
                 }
+
 
                 // Cache image URLs
                 let dispatchGroup = DispatchGroup()
