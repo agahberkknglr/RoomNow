@@ -613,8 +613,14 @@ extension FirebaseManager: FirebaseManagerProtocol {
 
     func addOrUpdateRoom(hotelId: String, room: Room, completion: @escaping (Result<Void, Error>) -> Void) {
         let db = Firestore.firestore()
+
+        guard let roomId = room.id else {
+            completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Missing room ID."])))
+            return
+        }
+
         let data: [String: Any] = [
-            "id": room.id ?? UUID().uuidString,
+            "id": roomId,
             "hotelId": hotelId,
             "roomNumber": room.roomNumber,
             "roomType": room.roomType,
@@ -629,9 +635,7 @@ extension FirebaseManager: FirebaseManagerProtocol {
             } ?? []
         ]
 
-        db.collection("hotels").document(hotelId)
-            .collection("rooms").document(room.id ?? UUID().uuidString)
-            .setData(data, merge: true) { error in
+        db.collection("rooms").document(roomId).setData(data, merge: true) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {
@@ -639,6 +643,7 @@ extension FirebaseManager: FirebaseManagerProtocol {
                 }
             }
     }
+
 
 
 
