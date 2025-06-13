@@ -7,6 +7,10 @@
 
 import Foundation
 
+enum RoomDeletionError: Error {
+    case hasBookings
+}
+
 final class RoomListVM {
     private(set) var rooms: [Room] = []
     private let hotelId: String
@@ -44,6 +48,28 @@ final class RoomListVM {
         case .bedCount:
             return rooms.sorted { $0.bedCapacity > $1.bedCapacity }
         }
+    }
+    
+    func hasRoomBookings(_ room: Room) -> Bool {
+        let now = Date()
+        return room.bookedDates?.contains(where: {
+            guard let start = $0.start, let end = $0.end else { return false }
+            return end > now
+        }) ?? false
+    }
+    
+    func attemptRoomDeletion(_ room: Room, completion: @escaping (Result<Void, Error>) -> Void) {
+        if hasRoomBookings(room) {
+            completion(.failure(RoomDeletionError.hasBookings))
+            return
+        }
+
+        guard let id = room.id else {
+            completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Missing room ID."])))
+            return
+        }
+
+        FirebaseManager.shared.deleteRoom(roomId: id, completion: completion)
     }
 }
 
