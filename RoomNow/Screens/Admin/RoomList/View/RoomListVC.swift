@@ -32,18 +32,19 @@ final class RoomListVC: UIViewController {
     private func setupTableView() {
         tableView.backgroundColor = .appBackground
         tableView.dataSource = self
+        tableView.delegate = self
         tableView.register(RoomCell.self, forCellReuseIdentifier: RoomCell.reuseID)
         view.addSubview(tableView)
         tableView.frame = view.bounds
     }
     
     private func setupNavBar() {
-        var addButton = UIBarButtonItem(
+        let addButton = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
             action: #selector(addRoomTapped)
         )
-        var sortButton = UIBarButtonItem(
+        let sortButton = UIBarButtonItem(
             title: "Sort",
             style: .plain,
             target: self,
@@ -75,8 +76,9 @@ final class RoomListVC: UIViewController {
     }
 
     @objc private func addRoomTapped() {
-        //let vc = AdminAddEditRoomVC(mode: .add(hotelId: viewModel.hotelId))
-        //navigationController?.pushViewController(vc, animated: true)
+        let hotelId = viewModel.getHotelId
+        let vc = AdminAddEditRoomVC(mode: .add(hotelId: hotelId))
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
@@ -89,8 +91,18 @@ extension RoomListVC: UITableViewDataSource {
         let room = viewModel.sortedRooms()[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: RoomCell.reuseID, for: indexPath) as! RoomCell
         cell.configure(with: room)
+        cell.selectionStyle = .none
         cell.backgroundColor = .appBackground
         return cell
+    }
+}
+
+extension RoomListVC: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let hotelId = viewModel.getHotelId
+        let room = viewModel.sortedRooms()[indexPath.row]
+        let vc = AdminAddEditRoomVC(mode: .edit(hotelId: hotelId, room: room))
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
