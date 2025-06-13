@@ -15,6 +15,10 @@ final class RoomListVM {
     init(hotelId: String) {
         self.hotelId = hotelId
     }
+    
+    var getHotelId: String {
+        return hotelId
+    }
 
     func fetchRooms(completion: @escaping () -> Void) {
         FirebaseManager.shared.fetchRooms(for: hotelId) { result in
