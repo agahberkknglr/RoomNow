@@ -28,6 +28,11 @@ final class RoomListVC: UIViewController {
         setupNavBar()
         loadRooms()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadRooms()
+    }
 
     private func setupTableView() {
         tableView.backgroundColor = .appBackground
@@ -101,6 +106,8 @@ extension RoomListVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let hotelId = viewModel.getHotelId
         let room = viewModel.sortedRooms()[indexPath.row]
+        print("Room id")
+        print(room.id ?? "room id yok")
         let vc = AdminAddEditRoomVC(mode: .edit(hotelId: hotelId, room: room))
         navigationController?.pushViewController(vc, animated: true)
     }
