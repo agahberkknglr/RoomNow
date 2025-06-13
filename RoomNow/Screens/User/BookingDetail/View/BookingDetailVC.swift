@@ -26,14 +26,6 @@ final class BookingDetailVC: UIViewController {
         super.viewDidLoad()
         setupUI()
         
-        if viewModel.canBeDeleted {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(
-                barButtonSystemItem: .trash,
-                target: self,
-                action: #selector(deleteTapped)
-            )
-        }
-        
         viewModel.onHotelDataUpdated = { [weak self] in
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
@@ -45,12 +37,39 @@ final class BookingDetailVC: UIViewController {
             }
         }
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        viewModel.updateReservationStatusIfNeeded { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    print("Reservation status updated if needed")
+                    self?.tableView.reloadData()
+                    self?.refreshCancelButton()
+                case .failure(let error):
+                    print("Failed to update status:", error.localizedDescription)
+                }
+            }
+        }
+        
+        if viewModel.canBeDeleted {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(
+                barButtonSystemItem: .trash,
+                target: self,
+                action: #selector(deleteTapped)
+            )
+        } else {
+            navigationItem.rightBarButtonItem = nil
+        }
+    }
+
 
     private func setupUI() {
         view.backgroundColor = .appBackground
         title = "Reservation Details"
         setupTableView()
-        setupCancelButtonIfNeeded()
     }
 
     private func setupTableView() {
@@ -124,6 +143,20 @@ final class BookingDetailVC: UIViewController {
 
         present(alert, animated: true)
     }
+    
+    private func refreshCancelButton() {
+        buttonView.subviews.forEach { $0.removeFromSuperview() }
+        buttonView.removeFromSuperview()
+
+        view.constraints.forEach {
+            if $0.firstItem as? UIView == tableView && $0.firstAttribute == .bottom {
+                view.removeConstraint($0)
+            }
+        }
+
+        setupCancelButtonIfNeeded()
+    }
+
 
     private func showErrorAlert(message: String) {
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
