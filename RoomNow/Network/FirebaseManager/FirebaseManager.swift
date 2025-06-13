@@ -629,8 +629,8 @@ extension FirebaseManager: FirebaseManagerProtocol {
             "price": room.price,
             "bookedDates": room.bookedDates?.map {
                 [
-                    "start": $0.start?.timeIntervalSince1970 as Any,
-                    "end": $0.end?.timeIntervalSince1970 as Any
+                    "start": $0.start != nil ? Timestamp(date: $0.start!) : NSNull(),
+                    "end": $0.end != nil ? Timestamp(date: $0.end!) : NSNull()
                 ]
             } ?? []
         ]
@@ -642,6 +642,15 @@ extension FirebaseManager: FirebaseManagerProtocol {
                     completion(.success(()))
                 }
             }
+    }
+    func deleteRoom(roomId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        Firestore.firestore().collection("rooms").document(roomId).delete { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
     }
 
 
