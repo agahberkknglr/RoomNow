@@ -170,7 +170,7 @@ final class BookingHotelInfoCell: UITableViewCell {
             let imageView = UIImageView()
             imageView.clipsToBounds = true
             imageView.contentMode = .scaleAspectFill
-            imageView.sd_setImage(with: URL(string: urlStr), placeholderImage: UIImage(systemName: "placeholder"))
+            imageView.setImage(fromBase64: urlStr)
             imageView.translatesAutoresizingMaskIntoConstraints = false
 
             imageScrollView.addSubview(imageView)
