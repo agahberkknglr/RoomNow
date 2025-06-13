@@ -13,7 +13,8 @@ final class RoomSelectionVC: UIViewController {
     
     private let viewModel: RoomSelectionVMProtocol
     private let tableView = UITableView()
-    
+    private var tableViewBottomConstraint: NSLayoutConstraint?
+
     private let continueButton: UIButton = {
         let button = UIButton(type: .system)
         button.applyPrimaryStyle(with: "Continue Reservation")
@@ -50,6 +51,7 @@ final class RoomSelectionVC: UIViewController {
             .map { (type: $0.key, rooms: $0.value.sorted { $0.price < $1.price }) }
         setupTableView()
         setupButton()
+        updateContinueButtonVisibility()
     }
 
     private func setupTableView() {
@@ -60,13 +62,35 @@ final class RoomSelectionVC: UIViewController {
         tableView.separatorStyle = .none
 
         tableView.registerCell(type: RoomTypeCell.self)
+        
+        tableViewBottomConstraint = tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
 
         view.addSubview(tableView)
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor, constant: 16),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
+            tableViewBottomConstraint!
         ])
+    }
+    
+    private func updateContinueButtonVisibility() {
+        let shouldShowButton = viewModel.isSelectionComplete
+        buttonView.isHidden = !shouldShowButton
+
+        tableViewBottomConstraint?.isActive = false
+
+        if shouldShowButton {
+            tableViewBottomConstraint = tableView.bottomAnchor.constraint(equalTo: buttonView.topAnchor)
+        } else {
+            tableViewBottomConstraint = tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        }
+
+        tableViewBottomConstraint?.isActive = true
+
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
     
     private func setupButton() {
@@ -103,10 +127,6 @@ final class RoomSelectionVC: UIViewController {
         }
 
         navigationController?.pushViewController(vc, animated: true)
-    }
-    
-    private func updateContinueButtonVisibility() {
-        buttonView.isHidden = !viewModel.isSelectionComplete
     }
 }
 
