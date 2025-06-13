@@ -10,16 +10,16 @@ import UIKit
 final class RoomListVC: UIViewController {
     private let viewModel: RoomListVM
     private let tableView = UITableView()
-
+    
     init(hotelId: String) {
         self.viewModel = RoomListVM(hotelId: hotelId)
         super.init(nibName: nil, bundle: nil)
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Rooms"
@@ -33,7 +33,7 @@ final class RoomListVC: UIViewController {
         super.viewWillAppear(animated)
         loadRooms()
     }
-
+    
     private func setupTableView() {
         tableView.backgroundColor = .appBackground
         tableView.dataSource = self
@@ -67,11 +67,11 @@ final class RoomListVC: UIViewController {
                 self.tableView.reloadData()
             }))
         }
-
+        
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         present(alert, animated: true)
     }
-
+    
     private func loadRooms() {
         viewModel.fetchRooms {
             DispatchQueue.main.async {
@@ -79,13 +79,30 @@ final class RoomListVC: UIViewController {
             }
         }
     }
-
+    
     @objc private func addRoomTapped() {
         let hotelId = viewModel.getHotelId
         let vc = AdminAddEditRoomVC(mode: .add(hotelId: hotelId))
         navigationController?.pushViewController(vc, animated: true)
     }
+    
+    func attemptRoomDeletion(room: Room) {
+        viewModel.attemptRoomDeletion(room) { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                switch result {
+                case .success:
+                    self.loadRooms()
+                case .failure(RoomDeletionError.hasBookings):
+                    self.showAlert(title: "Cannot Delete", message: "This room has active or upcoming reservations.")
+                case .failure(let error):
+                    self.showAlert(title: "Error", message: error.localizedDescription)
+                }
+            }
+        }
+    }
 }
+
 
 extension RoomListVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -106,10 +123,20 @@ extension RoomListVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let hotelId = viewModel.getHotelId
         let room = viewModel.sortedRooms()[indexPath.row]
-        print("Room id")
-        print(room.id ?? "room id yok")
         let vc = AdminAddEditRoomVC(mode: .edit(hotelId: hotelId, room: room))
         navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+
+        let room = viewModel.sortedRooms()[indexPath.row]
+
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completionHandler in
+            self?.attemptRoomDeletion(room: room)
+            completionHandler(true)
+        }
+
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
 }
 
