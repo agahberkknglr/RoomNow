@@ -9,9 +9,13 @@ import UIKit
 
 final class AdminAddEditRoomVC: UIViewController {
     private let viewModel: AdminAddEditRoomVM
+    
+    private let scrollView = UIScrollView()
+    private let contentStack = UIStackView()
 
     private let roomNumberField = UITextField()
     private let roomTypeField = UITextField()
+    private let descriptionView = UITextView()
     private let bedCountField = UITextField()
     private let priceField = UITextField()
     private let saveButton = UIButton(type: .system)
@@ -28,26 +32,43 @@ final class AdminAddEditRoomVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .appBackground
         setupFields()
         fillFieldsIfNeeded()
     }
 
     private func setupFields() {
-        let stack = UIStackView(arrangedSubviews: [roomNumberField, roomTypeField, bedCountField, priceField, saveButton])
-        stack.axis = .vertical
-        stack.spacing = 16
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(stack)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(scrollView)
 
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
+
+        contentStack.axis = .vertical
+        contentStack.spacing = 16
+        contentStack.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.addSubview(contentStack)
+
+        NSLayoutConstraint.activate([
+            contentStack.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 20),
+            contentStack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: -20),
+            contentStack.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20),
+            contentStack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -20),
+            contentStack.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -40)
+        ])
+
+        [roomNumberField, roomTypeField, descriptionView, bedCountField, priceField, saveButton].forEach {
+            contentStack.addArrangedSubview($0)
+        }
 
         [roomNumberField, roomTypeField, bedCountField, priceField].forEach {
             $0.borderStyle = .roundedRect
+            $0.applyButtonStyleLook()
+            $0.heightAnchor.constraint(equalToConstant: 48).isActive = true
         }
 
         roomNumberField.placeholder = "Room Number"
@@ -59,15 +80,21 @@ final class AdminAddEditRoomVC: UIViewController {
         roomNumberField.keyboardType = .numberPad
         priceField.keyboardType = .decimalPad
 
-        saveButton.setTitle("Save", for: .normal)
+        descriptionView.applyButtonStyleLook()
+        descriptionView.heightAnchor.constraint(equalToConstant: 120).isActive = true
+
+        saveButton.applyPrimaryStyle(with: "Save")
+        saveButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
         saveButton.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
     }
+
 
     private func fillFieldsIfNeeded() {
         guard let room = viewModel.existingRoom else { return }
 
         roomNumberField.text = "\(room.roomNumber)"
         roomTypeField.text = room.roomType
+        descriptionView.text = room.description
         bedCountField.text = "\(room.bedCapacity)"
         priceField.text = "\(room.price)"
     }
@@ -75,6 +102,7 @@ final class AdminAddEditRoomVC: UIViewController {
     @objc private func saveTapped() {
         viewModel.roomNumber = roomNumberField.text ?? ""
         viewModel.roomType = roomTypeField.text ?? ""
+        viewModel.description = descriptionView.text ?? ""
         viewModel.bedCapacity = Int(bedCountField.text ?? "")
         viewModel.price = Double(priceField.text ?? "")
 
