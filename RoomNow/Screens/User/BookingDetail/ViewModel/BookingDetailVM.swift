@@ -101,7 +101,14 @@ final class BookingDetailVM {
 
         for roomNumber in reservation.selectedRoomNumbers {
             group.enter()
-            let roomId = "\(reservation.hotelId)_\(roomNumber)"
+            
+            guard let room = bookedRooms[roomNumber],
+                  let roomId = room.id else {
+                print("Missing room or room ID for roomNumber \(roomNumber)")
+                group.leave()
+                continue
+            }
+
             FirebaseManager.shared.removeBookedDate(
                 roomId: roomId,
                 startDate: reservation.checkInDate,
@@ -122,4 +129,39 @@ final class BookingDetailVM {
             }
         }
     }
+    
+    func updateReservationStatusIfNeeded(completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "auth", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user logged in."])))
+            return
+        }
+
+        let now = Date()
+        let checkIn = reservation.checkInDate
+        let checkOut = reservation.checkOutDate
+
+        if now >= checkIn && now < checkOut && reservation.status == .active {
+            reservation.status = .ongoing
+            FirebaseManager.shared.updateReservationStatus(
+                userId: uid,
+                reservationId: reservationId,
+                newStatus: .ongoing,
+                completion: completion
+            )
+            
+        } else if now >= checkOut && (reservation.status == .active || reservation.status == .ongoing) {
+            reservation.status = .completed
+            reservation.completedAt = now
+            FirebaseManager.shared.updateReservationStatus(
+                userId: uid,
+                reservationId: reservationId,
+                newStatus: .completed,
+                completion: completion
+            )
+        } else {
+            completion(.success(()))
+        }
+    }
+
+
 }
