@@ -611,6 +611,35 @@ extension FirebaseManager: FirebaseManagerProtocol {
         }
     }
 
+    func addOrUpdateRoom(hotelId: String, room: Room, completion: @escaping (Result<Void, Error>) -> Void) {
+        let db = Firestore.firestore()
+        let data: [String: Any] = [
+            "id": room.id ?? UUID().uuidString,
+            "hotelId": hotelId,
+            "roomNumber": room.roomNumber,
+            "roomType": room.roomType,
+            "bedCapacity": room.bedCapacity,
+            "description": room.description,
+            "price": room.price,
+            "bookedDates": room.bookedDates?.map {
+                [
+                    "start": $0.start?.timeIntervalSince1970 as Any,
+                    "end": $0.end?.timeIntervalSince1970 as Any
+                ]
+            } ?? []
+        ]
+
+        db.collection("hotels").document(hotelId)
+            .collection("rooms").document(room.id ?? UUID().uuidString)
+            .setData(data, merge: true) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
+            }
+    }
+
 
 
     
