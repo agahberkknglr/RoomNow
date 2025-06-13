@@ -465,32 +465,6 @@ extension FirebaseManager: FirebaseManagerProtocol {
             }
         }
     }
-
-    func markReservationOngoing(userId: String, reservationId: String) {
-        let db = Firestore.firestore()
-        db.collection("users").document(userId)
-            .collection("reservations").document(reservationId)
-            .updateData([
-                "status": "ongoing"
-            ])
-    }
-
-    func markReservationCompleted(userId: String, reservationId: String, date: Date, completion: ((Result<Void, Error>) -> Void)? = nil) {
-        let db = Firestore.firestore()
-        let ref = db.collection("users").document(userId).collection("reservations").document(reservationId)
-        
-        ref.updateData([
-            "status": "completed",
-            "completedAt": Timestamp(date: date)
-        ]) { error in
-            if let error = error {
-                print("❌ Failed to mark completed:", error.localizedDescription)
-                completion?(.failure(error))
-            } else {
-                completion?(.success(()))
-            }
-        }
-    }
     
     func deleteReservation(userId: String, reservationId: String, completion: @escaping (Result<Void, Error>) -> Void) {
         let db = Firestore.firestore()
