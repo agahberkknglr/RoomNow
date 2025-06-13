@@ -9,7 +9,7 @@ import Foundation
 import FirebaseFirestore
 
 struct Room: Codable {
-    @DocumentID var id: String?
+    var id: String?
     let hotelId: String
     let roomType: String
     let roomNumber: String
