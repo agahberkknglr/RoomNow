@@ -107,10 +107,6 @@ final class BookingCell: UITableViewCell {
             statusLabel.textColor = .appError
         }
         
-        if let urlString = imageURL, let url = URL(string: urlString) {
-            hotelImageView.sd_setImage(with: url, placeholderImage: UIImage(named: "hotelph"))
-        } else {
-            hotelImageView.image = UIImage(named: "hotelph")
-        }
+        hotelImageView.setImage(fromBase64: imageURL)
     }
 }

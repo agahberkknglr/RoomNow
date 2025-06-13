@@ -170,12 +170,7 @@ final class HotelCell: UICollectionViewCell {
             infoLabel.text = ""
         }
         
-        if let imageUrlString = viewModel.hotelImageUrl,
-           let url = URL(string: imageUrlString) {
-            hotelImageView.sd_setImage(with: url)
-        } else {
-            hotelImageView.image = UIImage(named: "hotelph")
-        }
+        hotelImageView.setImage(fromBase64: viewModel.hotelImageUrl)
 
         viewModel.loadSavedStatus { [weak self] in
             DispatchQueue.main.async {

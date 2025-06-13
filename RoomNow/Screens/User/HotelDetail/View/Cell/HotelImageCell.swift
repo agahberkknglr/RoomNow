@@ -50,10 +50,8 @@ final class HotelImageCell: UITableViewCell {
             imageView.contentMode = .scaleAspectFill
             imageView.clipsToBounds = true
             imageView.frame = CGRect(x: CGFloat(index) * width, y: 0, width: width, height: height)
-
-            if let url = URL(string: urlString) {
-                imageView.sd_setImage(with: url, placeholderImage: UIImage(named: "hotelph"))
-            }
+            imageView.setImage(fromBase64: urlString)
+            
 
             scrollView.addSubview(imageView)
         }
