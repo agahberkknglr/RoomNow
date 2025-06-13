@@ -114,8 +114,20 @@ final class ReservationVC: UIViewController {
     }
     
     private func navigateAfterBooking() {
-        navigationController?.popToRootViewController(animated: true)
-        tabBarController?.selectedIndex = 2
+        guard let tabBarController = self.tabBarController else { return }
+
+        // Switch to the Bookings tab
+        tabBarController.selectedIndex = 2
+
+        // Dismiss to root if this VC was presented modally
+        if let presented = tabBarController.presentedViewController {
+            presented.dismiss(animated: true)
+        }
+
+        // Or pop to root if this VC is inside a nav controller
+        if let nav = tabBarController.viewControllers?[2] as? UINavigationController {
+            nav.popToRootViewController(animated: true)
+        }
     }
 }
 
