@@ -50,6 +50,7 @@ final class AuthManager {
             "username": username,
             "dateOfBirth": dateOfBirth,
             "gender": gender,
+            "role": UserRole.user.rawValue,
             "createdAt": FieldValue.serverTimestamp()
         ]
         
