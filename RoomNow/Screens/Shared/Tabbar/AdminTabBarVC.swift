@@ -20,7 +20,7 @@ final class AdminTabBarVC: UITabBarController {
         dashVC.tabBarItem.image = UIImage(systemName: "house")
         
         let settingsVC = UINavigationController(rootViewController: AdminSettingsVC())
-        settingsVC.title = "Settings"
+        settingsVC.title = "Manage"
         settingsVC.tabBarItem.image = UIImage(systemName: "gear")
 
         tabBar.tintColor = .appAccent
