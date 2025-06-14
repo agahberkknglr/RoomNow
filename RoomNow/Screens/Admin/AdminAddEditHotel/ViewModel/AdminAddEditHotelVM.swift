@@ -20,6 +20,7 @@ final class AdminAddEditHotelVM {
     var latitude: String = ""
     var longitude: String = ""
     var amenityList: [String] = []
+    var isAvailable: Bool = true
 
     private(set) var hotelImages: [HotelImage] = []
     var base64Images: [String] {
@@ -44,6 +45,7 @@ final class AdminAddEditHotelVM {
             longitude = String(hotel.longitude)
             amenityList = hotel.amenities
             setInitialImages(from: hotel)
+            isAvailable = hotel.isAvailable
         }
     }
     
@@ -125,7 +127,8 @@ final class AdminAddEditHotelVM {
             latitude: lat,
             longitude: lng,
             imageUrls: base64Images,
-            amenities: amenityList
+            amenities: amenityList,
+            isAvailable: isAvailable
         )
 
         FirebaseManager.shared.addOrUpdateHotel(newHotel) { [weak self] result in

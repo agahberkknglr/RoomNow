@@ -573,7 +573,8 @@ extension FirebaseManager: FirebaseManagerProtocol {
             "latitude": hotel.latitude,
             "longitude": hotel.longitude,
             "imageUrls": hotel.imageUrls,
-            "amenities": hotel.amenities
+            "amenities": hotel.amenities,
+            "isAvailable": hotel.isAvailable
         ]
 
         db.collection("hotels").document(hotelId).setData(data, merge: true) { error in

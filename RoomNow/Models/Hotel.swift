@@ -18,6 +18,7 @@ struct Hotel: Codable {
     let longitude: Double
     let imageUrls: [String]
     let amenities: [String]
+    let isAvailable: Bool
 }
 
 extension Hotel {
@@ -32,7 +33,8 @@ extension Hotel {
             latitude: 0.0,
             longitude: 0.0,
             imageUrls: [],
-            amenities: []
+            amenities: [],
+            isAvailable: true
         )
     }
 }

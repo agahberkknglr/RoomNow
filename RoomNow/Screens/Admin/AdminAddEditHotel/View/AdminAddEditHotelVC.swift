@@ -34,7 +34,13 @@ final class AdminAddEditHotelVC: UIViewController {
     }
     private var selectedAmenities: Set<Amenity> = []
     private var amenityCollectionView: UICollectionView!
-    private let manageRoomsButton = UIButton(type: .system)
+    private let availabilitySwitch = UISwitch()
+    private let availabilityLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Available"
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        return label
+    }()
 
     private let viewModel: AdminAddEditHotelVM
 
@@ -183,6 +189,14 @@ final class AdminAddEditHotelVC: UIViewController {
         amenityCollectionView.heightAnchor.constraint(equalToConstant: 220).isActive = true
 
         contentStack.addArrangedSubview(amenityCollectionView)
+        
+        let availabilityStack = UIStackView(arrangedSubviews: [availabilityLabel, availabilitySwitch])
+        availabilityStack.axis = .horizontal
+        availabilityStack.spacing = 12
+        availabilityStack.alignment = .center
+        availabilitySwitch.addTarget(self, action: #selector(availabilitySwitchChanged), for: .valueChanged)
+
+        contentStack.addArrangedSubview(availabilityStack)
 
         saveButton.applyPrimaryStyle(with: viewModel.isEditMode ? "Save Changes" : "Add Hotel")
         saveButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
@@ -218,6 +232,9 @@ final class AdminAddEditHotelVC: UIViewController {
             selectedCoordinate = coord
             updateMapPreview(with: coord)
         }
+        
+        availabilitySwitch.isOn = viewModel.isAvailable
+        availabilityLabel.text = viewModel.isAvailable ? "Hotel is Active" : "Hotel is Inactive"
     }
 
     @objc private func selectCityTapped() {
@@ -340,15 +357,20 @@ final class AdminAddEditHotelVC: UIViewController {
         navigationController?.pushViewController(vc, animated: true)
     }
     
+    @objc private func availabilitySwitchChanged() {
+        availabilityLabel.text = availabilitySwitch.isOn ? "Hotel is Active" : "Hotel is Inactive"
+    }
+    
     @objc private func saveTapped() {
         saveButton.isEnabled = false
         showLoadingIndicator()
-        
+
         viewModel.name = nameField.text ?? ""
         viewModel.rating = String(selectedRating)
         viewModel.location = locationField.text ?? ""
         viewModel.description = descriptionView.text ?? ""
         viewModel.setImages(hotelImages)
+        viewModel.isAvailable = availabilitySwitch.isOn
 
         if let errorMessage = viewModel.validateFields() {
             showAlert(title: "Validation Error", message: errorMessage)
