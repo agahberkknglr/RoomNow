@@ -41,4 +41,10 @@ final class AdminDashboardVM {
         }
         didUpdate?()
     }
+    
+    
+    
+    func deleteHotelIfAllowed(hotelId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        FirebaseManager.shared.deleteHotelIfNoRooms(hotelId: hotelId, completion: completion)
+    }
 }

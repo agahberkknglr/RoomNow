@@ -628,6 +628,33 @@ extension FirebaseManager: FirebaseManagerProtocol {
         }
     }
 
+    func deleteHotelIfNoRooms(hotelId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        let db = Firestore.firestore()
+        let roomRef = db.collection("rooms").whereField("hotelId", isEqualTo: hotelId).limit(to: 1)
+
+        roomRef.getDocuments { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            let hasRooms = !(snapshot?.documents.isEmpty ?? true)
+            if hasRooms {
+                let err = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Cannot delete hotel. Rooms exist."])
+                completion(.failure(err))
+                return
+            }
+
+            db.collection("hotels").document(hotelId).delete { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
+            }
+        }
+    }
+
 
 
 

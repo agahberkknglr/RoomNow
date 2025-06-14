@@ -75,6 +75,33 @@ final class AdminDashboardVC: UIViewController {
         let nav = UINavigationController(rootViewController: vc)
         present(nav, animated: true)
     }
+    
+    func attemptHotelDeletion(hotelId: String) {
+        let alert = UIAlertController(
+            title: "Delete Hotel",
+            message: "Are you sure you want to delete this hotel?",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { [weak self] _ in
+            guard let self = self else { return }
+
+            self.viewModel.deleteHotelIfAllowed(hotelId: hotelId) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success:
+                        self.showAlert(title: "Success", message: "Hotel deleted.")
+                        self.viewModel.fetchHotels()
+                    case .failure(let error):
+                        self.showAlert(title: "Failed", message: error.localizedDescription)
+                    }
+                }
+            }
+        }))
+
+        present(alert, animated: true)
+    }
 }
 
 extension AdminDashboardVC: UITableViewDataSource {
@@ -109,4 +136,16 @@ extension AdminDashboardVC: UITableViewDelegate {
         vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
     }
+    
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        guard indexPath.row > 0 else { return nil }
+        let hotel = viewModel.filteredHotels[indexPath.row - 1]
+
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completion in
+            self?.attemptHotelDeletion(hotelId: hotel.id ?? "")
+            completion(true)
+        }
+        return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
+
 }
