@@ -76,10 +76,10 @@ final class AdminDashboardVC: UIViewController {
         present(nav, animated: true)
     }
     
-    func attemptHotelDeletion(hotelId: String) {
+    func attemptHotelDeletion(hotelId: String, hotelName: String) {
         let alert = UIAlertController(
-            title: "Delete Hotel",
-            message: "Are you sure you want to delete this hotel?",
+            title: "Remove \(hotelName)",
+            message: "Are you sure you want to delete \(hotelName)?",
             preferredStyle: .alert
         )
 
@@ -91,7 +91,7 @@ final class AdminDashboardVC: UIViewController {
                 DispatchQueue.main.async {
                     switch result {
                     case .success:
-                        self.showAlert(title: "Success", message: "Hotel deleted.")
+                        self.showAlert(title: "Success", message: "\(hotelName) deleted.")
                         self.viewModel.fetchHotels()
                     case .failure(let error):
                         self.showAlert(title: "Failed", message: error.localizedDescription)
@@ -142,7 +142,7 @@ extension AdminDashboardVC: UITableViewDelegate {
         let hotel = viewModel.filteredHotels[indexPath.row - 1]
 
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completion in
-            self?.attemptHotelDeletion(hotelId: hotel.id ?? "")
+            self?.attemptHotelDeletion(hotelId: hotel.id ?? "", hotelName: hotel.name)
             completion(true)
         }
         return UISwipeActionsConfiguration(actions: [deleteAction])
