@@ -655,6 +655,48 @@ extension FirebaseManager: FirebaseManagerProtocol {
         }
     }
 
+    func fetchAllReservations(completion: @escaping ([AdminReservation]) -> Void) {
+        let db = Firestore.firestore()
+        
+        db.collection("users").getDocuments { snapshot, error in
+            if let error = error {
+                print("Failed to fetch users: \(error)")
+                completion([])
+                return
+            }
+
+            guard let userDocs = snapshot?.documents else {
+                completion([])
+                return
+            }
+
+            var allReservations: [AdminReservation] = []
+            let group = DispatchGroup()
+
+            for userDoc in userDocs {
+                let userId = userDoc.documentID
+                let reservationRef = db.collection("users").document(userId).collection("reservations")
+                
+                group.enter()
+                reservationRef.getDocuments { reservationSnap, error in
+                    defer { group.leave() }
+
+                    if let reservationDocs = reservationSnap?.documents {
+                        for doc in reservationDocs {
+                            if let reservation = try? doc.data(as: Reservation.self) {
+                                allReservations.append(AdminReservation(userId: userId, reservation: reservation))
+                            }
+                        }
+                    }
+                }
+            }
+
+            group.notify(queue: .main) {
+                let sorted = allReservations.sorted { $0.reservation.checkInDate < $1.reservation.checkInDate }
+                completion(sorted)
+            }
+        }
+    }
 
 
 
