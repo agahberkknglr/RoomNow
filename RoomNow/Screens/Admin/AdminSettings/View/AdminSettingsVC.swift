@@ -16,7 +16,8 @@ final class AdminSettingsVC: UITableViewController {
 
     private let actions: [String] = [
         "View All Reservations",
-        "View All Users" // future
+        "View All Users",
+        "View Analytics"
     ]
 
     override func viewDidLoad() {
@@ -77,7 +78,13 @@ final class AdminSettingsVC: UITableViewController {
                 vc.hidesBottomBarWhenPushed = true
                 navigationController?.pushViewController(vc, animated: true)
             case 1:
-                print("TODO: View all users")
+                let vc = AllUsersVC()
+                vc.hidesBottomBarWhenPushed = true
+                navigationController?.pushViewController(vc, animated: true)
+            case 2:
+                let vc = AdminAnalyticsVC()
+                vc.hidesBottomBarWhenPushed = true
+                navigationController?.pushViewController(vc, animated: true)
             default: break
             }
         case .account:
