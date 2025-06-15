@@ -73,11 +73,10 @@ final class AdminSettingsVC: UITableViewController {
         case .actions:
             switch indexPath.row {
             case 0:
-                // View All Reservations
                 let vc = AllReservationsVC()
+                vc.hidesBottomBarWhenPushed = true
                 navigationController?.pushViewController(vc, animated: true)
             case 1:
-                // View All Users – placeholder
                 print("TODO: View all users")
             default: break
             }
