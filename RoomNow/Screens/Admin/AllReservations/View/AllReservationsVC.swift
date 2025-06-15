@@ -28,7 +28,7 @@ final class AllReservationsVC: UIViewController {
     }
 
     private func setupTableView() {
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.registerCell(type: ReservationCell.self)
         tableView.dataSource = self
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 80
@@ -52,19 +52,9 @@ extension AllReservationsVC: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let res = viewModel.reservations[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        
-        cell.textLabel?.numberOfLines = 0
-        cell.textLabel?.text = """
-        Hotel: \(res.reservation.hotelName)
-        User: \(res.userId)
-        Check-in: \(formatter.string(from: res.reservation.checkInDate))
-        Check-out: \(formatter.string(from: res.reservation.checkOutDate))
-        Status: \(res.reservation.status.rawValue.capitalized)
-        """
+        let cell = tableView.dequeue(ReservationCell.self, for: indexPath)
+        cell.backgroundColor = .appBackground
+        cell.configure(with: res.reservation)
         return cell
     }
 }
