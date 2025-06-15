@@ -9,12 +9,14 @@ import UIKit
 
 final class BookingDetailVC: UIViewController {
     private let viewModel: BookingDetailVM
+    private var isAdminMode = false
     private let tableView = UITableView()
     private let cancelButton = UIButton()
     private let buttonView = UIView()
     
-    init(viewModel: BookingDetailVM) {
+    init(viewModel: BookingDetailVM, isAdminMode: Bool = false) {
         self.viewModel = viewModel
+        self.isAdminMode = isAdminMode
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -54,12 +56,17 @@ final class BookingDetailVC: UIViewController {
             }
         }
         
-        if viewModel.canBeDeleted {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(
-                barButtonSystemItem: .trash,
-                target: self,
-                action: #selector(deleteTapped)
-            )
+        if !isAdminMode {
+            refreshCancelButton()
+            if viewModel.canBeDeleted {
+                navigationItem.rightBarButtonItem = UIBarButtonItem(
+                    barButtonSystemItem: .trash,
+                    target: self,
+                    action: #selector(deleteTapped)
+                )
+            } else {
+                navigationItem.rightBarButtonItem = nil
+            }
         } else {
             navigationItem.rightBarButtonItem = nil
         }
@@ -91,6 +98,10 @@ final class BookingDetailVC: UIViewController {
     }
 
     private func setupCancelButtonIfNeeded() {
+        guard !isAdminMode && viewModel.isCancelable else {
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+            return
+        }
         guard viewModel.isCancelable else { return tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true }
 
         cancelButton.setTitle("Cancel Reservation", for: .normal)
