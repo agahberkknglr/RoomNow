@@ -51,6 +51,7 @@ final class AllReservationsVC: UIViewController {
     private func setupTableView() {
         tableView.registerCell(type: ReservationCell.self)
         tableView.dataSource = self
+        tableView.delegate = self
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 80
         tableView.separatorStyle = .singleLine
@@ -111,3 +112,17 @@ extension AllReservationsVC: UITableViewDataSource {
     }
 }
 
+extension AllReservationsVC: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let adminReservation = viewModel.reservations[indexPath.row].reservation
+        
+        guard let id = adminReservation.id else {
+            print("Reservation missing ID")
+            return
+        }
+
+        let vm = BookingDetailVM(reservation: adminReservation, reservationId: id)
+        let vc = BookingDetailVC(viewModel: vm, isAdminMode: true)
+        navigationController?.pushViewController(vc, animated: true)
+    }
+}
