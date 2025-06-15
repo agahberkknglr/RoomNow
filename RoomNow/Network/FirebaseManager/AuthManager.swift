@@ -46,6 +46,7 @@ final class AuthManager {
         let db = Firestore.firestore()
         
         var userData: [String: Any] = [
+            "uid": user.uid,
             "email": email,
             "username": username,
             "dateOfBirth": dateOfBirth,
