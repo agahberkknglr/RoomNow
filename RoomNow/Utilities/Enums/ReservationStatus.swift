@@ -8,7 +8,7 @@
 
 import UIKit
 
-enum ReservationStatus: String, Codable {
+enum ReservationStatus: String, Codable, CaseIterable {
     case active
     case ongoing
     case cancelled
