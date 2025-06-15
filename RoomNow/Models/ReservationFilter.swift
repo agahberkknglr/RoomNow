@@ -9,9 +9,13 @@ struct ReservationFilter {
     var selectedCities: Set<String> = []
     var selectedHotels: Set<String> = []
     var selectedStatuses: Set<ReservationStatus> = []
+    var userQuery: String = ""
 
     var isEmpty: Bool {
-        return selectedCities.isEmpty && selectedHotels.isEmpty && selectedStatuses.isEmpty
+        return selectedCities.isEmpty &&
+               selectedHotels.isEmpty &&
+               selectedStatuses.isEmpty &&
+               userQuery.isEmpty
     }
 
     func matches(_ reservation: AdminReservation) -> Bool {
@@ -19,6 +23,10 @@ struct ReservationFilter {
         let hotelMatch = selectedHotels.isEmpty || selectedHotels.contains(reservation.reservation.hotelName)
         let statusMatch = selectedStatuses.isEmpty || selectedStatuses.contains(reservation.reservation.status)
 
-        return cityMatch && hotelMatch && statusMatch
+        let query = userQuery.lowercased()
+        let nameMatch = userQuery.isEmpty || reservation.reservation.fullName.lowercased().contains(query)
+        let emailMatch = userQuery.isEmpty || reservation.reservation.email.lowercased().contains(query)
+
+        return cityMatch && hotelMatch && statusMatch && (nameMatch || emailMatch)
     }
 }
