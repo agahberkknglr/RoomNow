@@ -698,6 +698,33 @@ extension FirebaseManager: FirebaseManagerProtocol {
         }
     }
 
+    func fetchAllUsers(completion: @escaping (Result<[AppUser], Error>) -> Void) {
+        let db = Firestore.firestore()
+        db.collection("users").getDocuments { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let documents = snapshot?.documents else {
+                completion(.success([]))
+                return
+            }
+
+            let users: [AppUser] = documents.compactMap { doc in
+                do {
+                    return try doc.data(as: AppUser.self)
+                } catch {
+                    print(" Failed to decode user \(doc.documentID):", error)
+                    return nil
+                }
+            }
+            completion(.success(users))
+        }
+    }
+
+
+
 
 
     
