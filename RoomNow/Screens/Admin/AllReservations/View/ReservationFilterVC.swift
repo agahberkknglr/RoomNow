@@ -51,8 +51,7 @@ final class ReservationFilterVC: UIViewController {
         tableView.pinToEdges(of: view)
 
         let applyButton = UIButton(type: .system)
-        applyButton.setTitle("Apply Filter", for: .normal)
-        applyButton.titleLabel?.font = .boldSystemFont(ofSize: 18)
+        applyButton.applyPrimaryStyle(with: "Apply Filter")
         applyButton.addTarget(self, action: #selector(applyTapped), for: .touchUpInside)
         applyButton.translatesAutoresizingMaskIntoConstraints = false
         
@@ -61,9 +60,10 @@ final class ReservationFilterVC: UIViewController {
 
         let footer = UIView()
         footer.addSubview(applyButton)
-        applyButton.centerXAnchor.constraint(equalTo: footer.centerXAnchor).isActive = true
+        applyButton.leadingAnchor.constraint(equalTo: footer.leadingAnchor, constant: 16).isActive = true
+        applyButton.trailingAnchor.constraint(equalTo: footer.trailingAnchor, constant: -16).isActive = true
         applyButton.topAnchor.constraint(equalTo: footer.topAnchor, constant: 12).isActive = true
-        applyButton.bottomAnchor.constraint(equalTo: footer.bottomAnchor, constant: -12).isActive = true
+        applyButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
 
         tableView.tableFooterView = footer
         footer.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: 60)
