@@ -26,8 +26,11 @@ final class AllReservationsVC: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupTableView()
-        fetchData()
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(showFilterOptions))
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        fetchData()
     }
 
     private func setupUI() {
@@ -60,8 +63,10 @@ final class AllReservationsVC: UIViewController {
     }
 
     private func fetchData() {
+        showLoadingIndicator()
         viewModel.fetchReservations { [weak self] in
             DispatchQueue.main.async {
+                self?.hideLoadingIndicator()
                 self?.tableView.reloadData()
                 self?.updateEmptyView()
             }
