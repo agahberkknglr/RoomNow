@@ -39,6 +39,7 @@ final class BookingRoomInfoCell: UITableViewCell {
         roomInfoLabel.textColor = .appSecondaryText
         roomDescriptionLabel.font = .systemFont(ofSize: 14)
         roomDescriptionLabel.textColor = .appSecondaryText
+        roomDescriptionLabel.numberOfLines = 0
         roomUserNameLabel.font = .systemFont(ofSize: 14)
         roomUserNameLabel.textColor = .appAccent
 
