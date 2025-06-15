@@ -23,7 +23,7 @@ final class AllUsersVC: UIViewController {
     private func setupTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.register(UserCell.self, forCellReuseIdentifier: UserCell.identifier)
         tableView.backgroundColor = .appBackground
         view.addSubview(tableView)
         tableView.pinToEdges(of: view)
@@ -43,8 +43,9 @@ extension AllUsersVC: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let user = viewModel.users[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = "\(user.username) (\(user.email))"
+        let cell = tableView.dequeueReusableCell(withIdentifier: UserCell.identifier, for: indexPath) as! UserCell
+        cell.configure(with: user)
+        cell.backgroundColor = .appBackground
         return cell
     }
 }
