@@ -13,6 +13,7 @@
 		085026712DE4C0CD00AA1DC3 /* SDWebImageMapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 085026702DE4C0CD00AA1DC3 /* SDWebImageMapKit */; };
 		085026B52DE7213700AA1DC3 /* IQKeyboardManagerSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 085026B42DE7213700AA1DC3 /* IQKeyboardManagerSwift */; };
 		0887F3122DDC0D7B002FC2FE /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 0887F3112DDC0D7B002FC2FE /* FirebaseAuth */; };
+		08E626D52E007DD1006C67FE /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 08E626D42E007DD1006C67FE /* DGCharts */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +51,7 @@
 				0887F3122DDC0D7B002FC2FE /* FirebaseAuth in Frameworks */,
 				0850266F2DE4C0CD00AA1DC3 /* SDWebImage in Frameworks */,
 				0844737C2DBE8218003D384B /* FirebaseFirestore in Frameworks */,
+				08E626D52E007DD1006C67FE /* DGCharts in Frameworks */,
 				085026B52DE7213700AA1DC3 /* IQKeyboardManagerSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -99,6 +101,7 @@
 				0850266E2DE4C0CD00AA1DC3 /* SDWebImage */,
 				085026702DE4C0CD00AA1DC3 /* SDWebImageMapKit */,
 				085026B42DE7213700AA1DC3 /* IQKeyboardManagerSwift */,
+				08E626D42E007DD1006C67FE /* DGCharts */,
 			);
 			productName = RoomNow;
 			productReference = 080470AE2D8D602F00AAFEA8 /* RoomNow.app */;
@@ -133,6 +136,7 @@
 				0844737A2DBE8218003D384B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				0850266D2DE4C0CD00AA1DC3 /* XCRemoteSwiftPackageReference "SDWebImage" */,
 				085026B32DE7213700AA1DC3 /* XCRemoteSwiftPackageReference "IQKeyboardManager" */,
+				08E626D32E007DD1006C67FE /* XCRemoteSwiftPackageReference "Charts" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 080470AF2D8D602F00AAFEA8 /* Products */;
@@ -400,6 +404,14 @@
 				minimumVersion = 8.0.1;
 			};
 		};
+		08E626D32E007DD1006C67FE /* XCRemoteSwiftPackageReference "Charts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/danielgindi/Charts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -432,6 +444,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0844737A2DBE8218003D384B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		08E626D42E007DD1006C67FE /* DGCharts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 08E626D32E007DD1006C67FE /* XCRemoteSwiftPackageReference "Charts" */;
+			productName = DGCharts;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
