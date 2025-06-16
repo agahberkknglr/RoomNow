@@ -33,6 +33,7 @@ final class AllUsersVC: UIViewController {
     private func setupTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
+        tableView.delegate = self
         tableView.register(UserCell.self, forCellReuseIdentifier: UserCell.identifier)
         tableView.backgroundColor = .appBackground
         view.addSubview(tableView)
@@ -90,6 +91,16 @@ extension AllUsersVC: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: UserCell.identifier, for: indexPath) as! UserCell
         cell.configure(with: user)
         cell.backgroundColor = .appBackground
+        cell.selectionStyle = .none
         return cell
+    }
+}
+
+extension AllUsersVC: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedUser = viewModel.filteredUsers[indexPath.row]
+        let vm = UserDetailVM(user: selectedUser)
+        let vc = UserDetailVC(viewModel: vm)
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
