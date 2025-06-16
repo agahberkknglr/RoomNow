@@ -63,6 +63,38 @@ final class AllReservationsVC: UIViewController {
         tableView.backgroundColor = .appBackground
     }
     
+    private func updateHeaderTitle() {
+        let count = viewModel.reservations.count
+        let headerView = makeHeaderLabel(with: "Reservations: \(count)")
+        headerView.layoutIfNeeded()
+        let targetSize = CGSize(width: tableView.frame.width, height: UIView.layoutFittingCompressedSize.height)
+        let height = headerView.systemLayoutSizeFitting(targetSize).height
+        headerView.frame = CGRect(x: 0, y: 0, width: tableView.frame.width, height: height)
+        
+        tableView.tableHeaderView = headerView
+    }
+    
+    private func makeHeaderLabel(with text: String) -> UIView {
+        let container = UIView()
+        let label = UILabel()
+        label.text = text
+        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.textColor = .secondaryLabel
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+
+        container.addSubview(label)
+
+        NSLayoutConstraint.activate([
+            label.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
+            label.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
+            label.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            label.trailingAnchor.constraint(equalTo: container.trailingAnchor)
+        ])
+
+        return container
+    }
+    
     private func updateEmptyView() {
         emptyView.isHidden = !viewModel.reservations.isEmpty
         tableView.isHidden = viewModel.reservations.isEmpty
@@ -73,6 +105,7 @@ final class AllReservationsVC: UIViewController {
         viewModel.fetchReservations { [weak self] in
             DispatchQueue.main.async {
                 self?.hideLoadingIndicator()
+                self?.updateHeaderTitle()
                 self?.tableView.reloadData()
                 self?.updateEmptyView()
             }
@@ -93,6 +126,7 @@ final class AllReservationsVC: UIViewController {
 
         vc.onFilterSelected = { [weak self] selected in
             vm.currentFilter = selected
+            self?.updateHeaderTitle()
             self?.tableView.reloadData()
             self?.updateEmptyView()
         }
