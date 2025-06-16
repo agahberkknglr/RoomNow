@@ -742,6 +742,18 @@ extension FirebaseManager: FirebaseManagerProtocol {
     }
 
 
+    func fetchAllHotels(completion: @escaping (Result<[Hotel], Error>) -> Void) {
+        Firestore.firestore().collection("hotels").getDocuments { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                let hotels = snapshot?.documents.compactMap {
+                    try? $0.data(as: Hotel.self)
+                } ?? []
+                completion(.success(hotels))
+            }
+        }
+    }
 
 
     
