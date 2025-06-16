@@ -30,7 +30,7 @@ final class UserCell: UITableViewCell {
         profileImageView.contentMode = .scaleAspectFill
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
         profileImageView.image = UIImage(systemName: "person.crop.circle.fill")
-        profileImageView.tintColor = .systemGray
+        profileImageView.tintColor = .appAccent
 
         nameLabel.font = .boldSystemFont(ofSize: 16)
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
