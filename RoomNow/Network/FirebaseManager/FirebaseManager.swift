@@ -723,6 +723,23 @@ extension FirebaseManager: FirebaseManagerProtocol {
         }
     }
 
+    func fetchReservations(forUserId userId: String, completion: @escaping (Result<[Reservation], Error>) -> Void) {
+        let db = Firestore.firestore()
+        db.collection("users")
+            .document(userId)
+            .collection("reservations")
+            .order(by: "reservedAt", descending: true)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    let reservations = snapshot?.documents.compactMap {
+                        try? $0.data(as: Reservation.self)
+                    } ?? []
+                    completion(.success(reservations))
+                }
+            }
+    }
 
 
 
