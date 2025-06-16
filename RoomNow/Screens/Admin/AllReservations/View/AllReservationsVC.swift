@@ -26,7 +26,12 @@ final class AllReservationsVC: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupTableView()
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(showFilterOptions))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "line.3.horizontal.decrease.circle"),
+            style: .plain,
+            target: self,
+            action: #selector(showFilterOptions)
+        )
     }
     
     override func viewWillAppear(_ animated: Bool) {
