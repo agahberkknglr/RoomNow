@@ -26,7 +26,6 @@ final class RoomListVC: UIViewController {
         view.backgroundColor = .appBackground
         setupTableView()
         setupNavBar()
-        loadRooms()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -73,8 +72,10 @@ final class RoomListVC: UIViewController {
     }
     
     private func loadRooms() {
+        showLoadingIndicator()
         viewModel.fetchRooms {
             DispatchQueue.main.async {
+                self.hideLoadingIndicator()
                 self.tableView.reloadData()
             }
         }

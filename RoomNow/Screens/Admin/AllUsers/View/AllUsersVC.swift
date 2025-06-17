@@ -41,8 +41,10 @@ final class AllUsersVC: UIViewController {
     }
 
     private func fetchData() {
+        showLoadingIndicator()
         viewModel.fetchUsers { [weak self] in
             guard let self = self else { return }
+            self.hideLoadingIndicator()
             self.updateHeaderTitle()
             self.tableView.reloadData()
         }

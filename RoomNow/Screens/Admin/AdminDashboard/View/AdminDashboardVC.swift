@@ -53,8 +53,10 @@ final class AdminDashboardVC: UIViewController {
     }
 
     private func bindViewModel() {
+        showLoadingIndicator()
         viewModel.didUpdate = { [weak self] in
             DispatchQueue.main.async {
+                self?.hideLoadingIndicator()
                 self?.tableView.reloadData()
             }
         }
