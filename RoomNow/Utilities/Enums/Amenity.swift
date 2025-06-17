@@ -72,7 +72,6 @@ extension Amenity {
     static func from(string: String) -> Amenity? {
         return Amenity.allCases.first { $0.rawValue.lowercased() == string.lowercased() }
     }
-
 }
 
 
