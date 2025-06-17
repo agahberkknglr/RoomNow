@@ -12,7 +12,7 @@ final class NetworkManager {
     private init() {}
 
     func sendChatMessage(_ message: String, completion: @escaping (Result<ParsedSearchData, Error>) -> Void) {
-        guard let url = URL(string: "https://roomnow.app.n8n.cloud/webhook/chatbot-roomnow-v2") else {
+        guard let url = URL(string: "https://roomnowv2.app.n8n.cloud/webhook/chatbot-roomnow-v2") else {
             completion(.failure(NSError(domain: "Invalid URL", code: 0)))
             return
         }
@@ -27,13 +27,13 @@ final class NetworkManager {
 
         URLSession.shared.dataTask(with: request) { data, _, error in
             if let error = error {
-                print("❌ Request error:", error)
+                print(" Request error:", error)
                 completion(.failure(error))
                 return
             }
 
             guard let data = data, !data.isEmpty else {
-                print("❌ Received empty response from chatbot.")
+                print(" Received empty response from chatbot.")
                 completion(.failure(NSError(domain: "Empty JSON response", code: -2)))
                 return
             }
