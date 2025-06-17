@@ -51,6 +51,7 @@ extension FirebaseManager: FirebaseManagerProtocol {
 
         db.collection("hotels")
             .whereField("city", isEqualTo: searchParameters.destination.lowercased())
+            .whereField("isAvailable", isEqualTo: true)
             .getDocuments { snapshot, error in
                 if let error = error {
                     completion(.failure(error))
