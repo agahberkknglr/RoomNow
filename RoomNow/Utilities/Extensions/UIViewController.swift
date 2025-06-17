@@ -6,8 +6,10 @@
 //
 
 import UIKit
+import ObjectiveC
 
 private var loadingIndicatorKey: UInt8 = 0
+private var blurEffectKey: UInt8 = 0
 
 extension UIViewController {
 
@@ -62,6 +64,7 @@ extension UIViewController {
         present(alert, animated: true)
     }
     
+    
     private var loadingIndicator: UIActivityIndicatorView {
         if let existing = objc_getAssociatedObject(self, &loadingIndicatorKey) as? UIActivityIndicatorView {
             return existing
@@ -80,13 +83,46 @@ extension UIViewController {
         objc_setAssociatedObject(self, &loadingIndicatorKey, spinner, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         return spinner
     }
+    
+    private var blurEffectView: UIVisualEffectView {
+        if let existing = objc_getAssociatedObject(self, &blurEffectKey) as? UIVisualEffectView {
+            return existing
+        }
+
+        let blurEffect = UIBlurEffect(style: .regular)
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+        blurView.alpha = 0.0
+
+        view.addSubview(blurView)
+        NSLayoutConstraint.activate([
+            blurView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            blurView.topAnchor.constraint(equalTo: view.topAnchor),
+            blurView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        objc_setAssociatedObject(self, &blurEffectKey, blurView, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        return blurView
+    }
 
     func showLoadingIndicator() {
+        let blur = blurEffectView
+        view.bringSubviewToFront(blur)
+        view.bringSubviewToFront(loadingIndicator)
+
+        UIView.animate(withDuration: 0.25) {
+            blur.alpha = 1.0
+        }
         loadingIndicator.startAnimating()
     }
 
     func hideLoadingIndicator() {
-        loadingIndicator.stopAnimating()
+        UIView.animate(withDuration: 0.25, animations: {
+            self.blurEffectView.alpha = 0.0
+        }) { _ in
+            self.loadingIndicator.stopAnimating()
+        }
     }
 }
 
