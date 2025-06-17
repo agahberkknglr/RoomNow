@@ -25,7 +25,8 @@ final class ResultVC: UIViewController {
         return label
     }()
     private var isFirstAppearance = true
-    
+    private let refreshControl = UIRefreshControl()
+
     init(searchParameters: HotelSearchParameters) {
         let vm = ResultVM(searchParameters: searchParameters)
         self.viewModel = vm
@@ -78,6 +79,7 @@ extension ResultVC: ResultVMDelegate {
     func didFetchHotels() {
         DispatchQueue.main.async {
             self.hideLoadingIndicator()
+            self.refreshControl.endRefreshing()
             self.collectionView.reloadData()
             self.emptyLabel.isHidden = self.viewModel.hotelRooms.count > 0
         }
@@ -90,7 +92,24 @@ extension ResultVC: ResultVCProtocol {
         setupCollectionView()
         setupEmptyLabel()
         viewModel.fetchHotels()
+        setupFilterButton()
     }
+    
+    private func setupFilterButton() {
+        let filterButton = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"), style: .plain, target: self, action: #selector(openFilterVC))
+        navigationItem.rightBarButtonItem = filterButton
+    }
+    
+    @objc private func openFilterVC() {
+        let currentFilter = (viewModel as? ResultVM)?.currentFilter
+        let filterVC = FilterSortVC(currentFilter: currentFilter)
+        filterVC.onApplyFilter = { [weak self] options in
+            (self?.viewModel as? ResultVM)?.applyFilter(options)
+        }
+        let nav = UINavigationController(rootViewController: filterVC)
+        present(nav, animated: true)
+    }
+
     
     private func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
@@ -104,6 +123,9 @@ extension ResultVC: ResultVCProtocol {
         collectionView.delegate = self
         collectionView.backgroundColor = view.backgroundColor
         
+        refreshControl.addTarget(self, action: #selector(refreshHotels), for: .valueChanged)
+        collectionView.refreshControl = refreshControl
+        
         view.addSubview(collectionView)
         
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -115,6 +137,10 @@ extension ResultVC: ResultVCProtocol {
         ])
     }
     
+    @objc private func refreshHotels() {
+        viewModel.fetchHotels()
+    }
+    
     private func setupEmptyLabel() {
         view.addSubview(emptyLabel)
         emptyLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -124,16 +150,20 @@ extension ResultVC: ResultVCProtocol {
             emptyLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
+    
+    private func applyFilterAndSort(_ options: HotelFilterOptions) {
+        viewModel.applyFilter(options)
+    }
 }
 
 extension ResultVC: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel.hotelRooms.count
+        return viewModel.filteredHotelRooms.count
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeue(HotelCell.self, for: indexPath)
-        let item = viewModel.hotelRooms[indexPath.item]
+        let item = viewModel.filteredHotelRooms[indexPath.item]
         let cellVM = HotelCellVM(hotel: item.hotel, rooms: item.rooms, searchParams: viewModel.searchParameters)
         cell.configure(with: cellVM)
         return cell
@@ -142,7 +172,7 @@ extension ResultVC: UICollectionViewDataSource {
 
 extension ResultVC: UICollectionViewDelegate{
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let item = viewModel.hotelRooms[indexPath.item]
+        let item = viewModel.filteredHotelRooms[indexPath.item]
         let detailVM = HotelDetailVM(hotel: item.hotel, rooms: item.rooms, searchParams: viewModel.searchParameters)
         let detailVC = HotelDetailVC(viewModel: detailVM)
         navigationController?.pushViewController(detailVC, animated: true)
