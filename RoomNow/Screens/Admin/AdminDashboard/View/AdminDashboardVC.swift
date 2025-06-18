@@ -34,7 +34,7 @@ final class AdminDashboardVC: UIViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
-            action: #selector(addHotelTapped)
+            action: #selector(addTapped)
         )
         
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -61,12 +61,32 @@ final class AdminDashboardVC: UIViewController {
             }
         }
     }
+    
+    @objc private func addTapped() {
+        let actionSheet = UIAlertController(title: "Add New", message: nil, preferredStyle: .actionSheet)
+        
+        actionSheet.addAction(UIAlertAction(title: "Add Hotel", style: .default, handler: { [weak self] _ in
+            let vc = AdminAddEditHotelVC()
+            vc.hidesBottomBarWhenPushed = true
+            self?.navigationController?.pushViewController(vc, animated: true)
+        }))
+        
+        actionSheet.addAction(UIAlertAction(title: "Add City", style: .default, handler: { [weak self] _ in
+            let vc = AdminAddCityVC()
+            vc.hidesBottomBarWhenPushed = true
+            self?.navigationController?.pushViewController(vc, animated: true)
+        }))
+        
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
 
-    @objc private func addHotelTapped() {
-        let vc = AdminAddEditHotelVC()
-        vc.hidesBottomBarWhenPushed = true
-        navigationController?.pushViewController(vc, animated: true)
+        
+        if let popover = actionSheet.popoverPresentationController {
+            popover.barButtonItem = navigationItem.rightBarButtonItem
+        }
+
+        present(actionSheet, animated: true)
     }
+
     
     private func presentCityFilter() {
         let cities = viewModel.cities
