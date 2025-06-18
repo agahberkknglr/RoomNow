@@ -8,9 +8,9 @@
 import Foundation
 
 struct HotelSearchParameters {
-    let destination: String
-    let checkInDate: Date
-    let checkOutDate: Date
-    let guestCount: Int
-    let roomCount: Int
+    var destination: String
+    var checkInDate: Date
+    var checkOutDate: Date
+    var guestCount: Int
+    var roomCount: Int
 }
