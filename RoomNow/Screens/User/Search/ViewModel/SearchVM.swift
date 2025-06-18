@@ -22,6 +22,7 @@ protocol SearchVMProtocol: AnyObject {
     func getRoomButtonTitle() -> String
     func getDateButtonTitle() -> String
     func getDestinationTitle() -> String
+    func getSelectedCityName() -> String?
     func isSearchEnabled() -> Bool
     func getSearchParameters() -> HotelSearchParameters?
     func saveRecentSearch()
@@ -79,6 +80,10 @@ extension SearchVM: SearchVMProtocol {
         selectedAdults = adults
         selectedChildren = children
         delegate?.updateUI()
+    }
+    
+    func getSelectedCityName() -> String? {
+        return selectedCity?.name
     }
 
     func getDestinationTitle() -> String {
