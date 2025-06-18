@@ -32,7 +32,9 @@ extension FirebaseManager: FirebaseManagerProtocol {
     
     func fetchCities(completion: @escaping (Result<[City], Error>) -> Void) {
         let db = Firestore.firestore()
-        db.collection("cities").getDocuments { snapshot, error in
+        db.collection("cities")
+            .order(by: "name")
+            .getDocuments { snapshot, error in
             if let error = error {
                 completion(.failure(error))
                 return
@@ -755,10 +757,72 @@ extension FirebaseManager: FirebaseManagerProtocol {
             }
         }
     }
+    
+    func cityExists(named name: String, completion: @escaping (Bool) -> Void) {
+        let lowercasedName = name.lowercased()
 
+        Firestore.firestore().collection("cities")
+            .whereField("name", isEqualTo: lowercasedName)
+            .limit(to: 1)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error checking city: \(error)")
+                    completion(false)
+                    return
+                }
 
+                let exists = !(snapshot?.documents.isEmpty ?? true)
+                completion(exists)
+            }
+    }
+
+    func addCityIfNotExists(name: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        cityExists(named: name) { exists in
+            if exists {
+                completion(.failure(NSError(domain: "CityError", code: 0, userInfo: [NSLocalizedDescriptionKey: "City already exists."])))
+                return
+            }
+
+            let data: [String: Any] = [
+                "name": name.lowercased()
+            ]
+
+            Firestore.firestore().collection("cities").addDocument(data: data) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
+            }
+        }
+    }
     
     
+    func deleteCity(withId id: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        Firestore.firestore().collection("cities").document(id).delete { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+    func isCityInUse(cityName: String, completion: @escaping (Bool) -> Void) {
+        Firestore.firestore().collection("hotels")
+            .whereField("city", isEqualTo: cityName.lowercased())
+            .limit(to: 1)
+            .getDocuments { snapshot, error in
+                if let error = error {
+                    print("Error checking city usage:", error)
+                    completion(true)
+                    return
+                }
+
+                let inUse = !(snapshot?.documents.isEmpty ?? true)
+                completion(inUse)
+            }
+    }
     
     
     
