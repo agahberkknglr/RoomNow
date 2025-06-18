@@ -50,12 +50,15 @@ final class DestinationVC: UIViewController {
         lbl.translatesAutoresizingMaskIntoConstraints = false
         return lbl
     }()
-
+    
+    private var initialSelectedCity: String?
+    
     private let viewModel: DestinationVMProtocol
     weak var delegate: DestinationVCDelegate?
 
-    init(viewModel: DestinationVMProtocol = DestinationVM()) {
+    init(viewModel: DestinationVMProtocol = DestinationVM(), selectedCity: String? = nil) {
         self.viewModel = viewModel
+        self.initialSelectedCity = selectedCity
         super.init(nibName: nil, bundle: nil)
         self.viewModel.delegate = self
     }
@@ -68,15 +71,24 @@ final class DestinationVC: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .appBackground
         setupUI()
+        setupClearButton()
         tableView.delegate = self
         tableView.dataSource = self
         searchTextField.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        viewModel.fetchCities()
+
+        if let city = initialSelectedCity, !city.isEmpty {
+            searchTextField.text = city
+            let trimmedCity = city.trimmingCharacters(in: .whitespacesAndNewlines)
+            viewModel.fetchCities(initialFilter: trimmedCity)
+        } else {
+            viewModel.fetchCities(initialFilter: nil)
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        searchTextField.becomeFirstResponder()
         navigationController?.setNavigationBarHidden(true, animated: false)
     }
 
@@ -104,21 +116,39 @@ final class DestinationVC: UIViewController {
             initialPlaceholderLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
+    
+    private func setupClearButton() {
+        let clearButton = UIButton(type: .system)
+        clearButton.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+        clearButton.tintColor = .gray
+        clearButton.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
+        clearButton.addTarget(self, action: #selector(clearSearchText), for: .touchUpInside)
+        
+        searchTextField.rightView = clearButton
+        searchTextField.rightViewMode = .whileEditing
+    }
+
+    @objc private func clearSearchText() {
+        searchTextField.text = ""
+        viewModel.filterCities(with: "")
+    }
 }
 
 // MARK: - ViewModel Delegate
 
 extension DestinationVC: DestinationVMDelegate {
     func didUpdateCityList() {
+        let isInitialSelection = !(initialSelectedCity?.isEmpty ?? true)
         let hasQuery = !(searchTextField.text?.isEmpty ?? true)
         let hasResults = viewModel.numberOfCities > 0
 
-        initialPlaceholderLabel.isHidden = hasQuery
-        tableView.isHidden = !hasResults || !hasQuery
-        emptyLabel.isHidden = hasResults || !hasQuery
+        initialPlaceholderLabel.isHidden = hasQuery || isInitialSelection
+        tableView.isHidden = !hasResults || (!hasQuery && !isInitialSelection)
+        emptyLabel.isHidden = hasResults || (!hasQuery && !isInitialSelection)
 
         tableView.reloadData()
     }
+
 
     func didFailToLoadCities(error: Error) {
         print("Failed to load cities: \(error.localizedDescription)")
