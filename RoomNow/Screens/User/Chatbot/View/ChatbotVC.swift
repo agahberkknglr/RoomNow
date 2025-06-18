@@ -366,8 +366,6 @@ extension ChatbotVC: UITextViewDelegate {
 
 extension ChatbotVC: ChatbotVMDelegate {
     func didReceiveSearchData(_ data: ParsedSearchData) {
-        print("📩 Received parsed search data:", data)
-
         guard !data.destination.isEmpty else {
             appendMessage("❌ I couldn't understand the destination. Could you try again?", sender: .bot)
             return
@@ -411,6 +409,8 @@ extension ChatbotVC: ChatbotVMDelegate {
             searchNav.setViewControllers([rootSearchVC], animated: false)
         }
 
+        self.navigationController?.popToRootViewController(animated: false)
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             tabBarVC.selectedIndex = 2
         }
