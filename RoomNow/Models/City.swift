@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
-struct City: Decodable {
-    var id: String?
+struct City: Codable {
+    @DocumentID var id: String?
     let name: String
 }
