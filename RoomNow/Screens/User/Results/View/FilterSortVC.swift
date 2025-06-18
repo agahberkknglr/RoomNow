@@ -28,6 +28,8 @@ final class FilterSortVC: UIViewController {
     private var selectedMinRating: Double?
     private var selectedAmenities: [Amenity] = []
     private let availableAmenities: [Amenity] = Amenity.allCases
+    private var showAllAmenities = false
+
 
     
     init(currentFilter: HotelFilterOptions?) {
@@ -106,7 +108,7 @@ extension FilterSortVC: UITableViewDataSource, UITableViewDelegate {
         case .rating:
             return 5
         case .amenities:
-            return availableAmenities.count
+            return showAllAmenities ? availableAmenities.count + 1 : min(5, availableAmenities.count) + 1
         }
     }
 
@@ -121,27 +123,44 @@ extension FilterSortVC: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let sec = Section(rawValue: indexPath.section) else { return UITableViewCell() }
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        cell.textLabel?.textAlignment = .natural
+        cell.textLabel?.textColor = .label
+        cell.textLabel?.font = .systemFont(ofSize: 17)
+        cell.imageView?.image = nil
+        cell.accessoryType = .none
 
         switch sec {
         case .sort:
             let sort = HotelFilterOptions.SortType.allCases[indexPath.row]
             cell.textLabel?.text = sort.rawValue
-            cell.imageView?.image = nil
             cell.accessoryType = (sort == selectedSort) ? .checkmark : .none
+
         case .rating:
             let rating = Double(indexPath.row + 1)
             cell.textLabel?.text = "\(rating)+ stars"
-            cell.imageView?.image = nil
             cell.accessoryType = (rating == selectedMinRating) ? .checkmark : .none
+
         case .amenities:
-            let amenity = availableAmenities[indexPath.row]
-            cell.textLabel?.text = amenity.title
-            cell.imageView?.image = amenity.icon
-            cell.accessoryType = selectedAmenities.contains(amenity) ? .checkmark : .none
+            let visibleCount = showAllAmenities ? availableAmenities.count : min(5, availableAmenities.count)
+            
+            if indexPath.row < visibleCount {
+                let amenity = availableAmenities[indexPath.row]
+                cell.textLabel?.text = amenity.title
+                cell.imageView?.image = amenity.icon
+                cell.imageView?.tintColor = .appAccent
+                cell.accessoryType = selectedAmenities.contains(amenity) ? .checkmark : .none
+            } else {
+                cell.textLabel?.text = showAllAmenities ? "Show Less" : "Show More"
+                cell.textLabel?.textAlignment = .center
+                cell.textLabel?.textColor = .appAccent
+            }
         }
+
         return cell
     }
+
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let sec = Section(rawValue: indexPath.section) else { return }
@@ -154,13 +173,19 @@ extension FilterSortVC: UITableViewDataSource, UITableViewDelegate {
             let rating = Double(indexPath.row + 1)
             selectedMinRating = (selectedMinRating == rating) ? nil : rating
         case .amenities:
-            let amenity = availableAmenities[indexPath.row]
-            if selectedAmenities.contains(amenity) {
-                selectedAmenities.removeAll { $0 == amenity }
+            if indexPath.row < min(availableAmenities.count, showAllAmenities ? availableAmenities.count : 5) {
+                let amenity = availableAmenities[indexPath.row]
+                if selectedAmenities.contains(amenity) {
+                    selectedAmenities.removeAll { $0 == amenity }
+                } else {
+                    selectedAmenities.append(amenity)
+                }
             } else {
-                selectedAmenities.append(amenity)
+                showAllAmenities.toggle()
             }
-            tableView.reloadRows(at: [indexPath], with: .automatic)
+
+            tableView.reloadSections([indexPath.section], with: .automatic)
+
 
         }
 
