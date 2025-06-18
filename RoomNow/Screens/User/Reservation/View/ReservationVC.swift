@@ -162,7 +162,7 @@ extension ReservationVC: UITableViewDataSource {
         case 2:
             let room = viewModel.selectedRooms[indexPath.row]
             let cell = tableView.dequeue(RoomInfoCell.self, for: indexPath)
-            cell.configure(room: room, typeName: room.description, nights: viewModel.numberOfNights, guest: viewModel.fullName)
+            cell.configure(room: room, typeName: room.description, nights: viewModel.numberOfNights, guest: viewModel.fullName, note: viewModel.note)
             return cell
 
         default:

@@ -12,6 +12,8 @@ final class RoomInfoCell: UITableViewCell {
     private let roomTypeLabel = UILabel()
     private let roomInfoLabel = UILabel()
     private let roomUserNameLabel = UILabel()
+    private let roomNoteLabel = UILabel()
+    
     private let view: UIView = {
         let view = UIView()
         view.backgroundColor = .appSecondaryBackground
@@ -31,6 +33,11 @@ final class RoomInfoCell: UITableViewCell {
     private func setupUI(){
         contentView.backgroundColor = .appBackground
 
+        [roomTypeLabel, roomInfoLabel, roomUserNameLabel, roomNoteLabel].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
+
         roomTypeLabel.font = .boldSystemFont(ofSize: 16)
         roomTypeLabel.textColor = .appPrimaryText
 
@@ -40,14 +47,11 @@ final class RoomInfoCell: UITableViewCell {
         roomUserNameLabel.font = .systemFont(ofSize: 14)
         roomUserNameLabel.textColor = .appAccent
 
-        roomTypeLabel.translatesAutoresizingMaskIntoConstraints = false
-        roomInfoLabel.translatesAutoresizingMaskIntoConstraints = false
-        roomUserNameLabel.translatesAutoresizingMaskIntoConstraints = false
+        roomNoteLabel.font = .italicSystemFont(ofSize: 14)
+        roomNoteLabel.textColor = .appSecondaryText
+        roomNoteLabel.numberOfLines = 0
 
         contentView.addSubview(view)
-        view.addSubview(roomTypeLabel)
-        view.addSubview(roomInfoLabel)
-        view.addSubview(roomUserNameLabel)
         view.pinToEdges(of: contentView, withInsets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
         
         NSLayoutConstraint.activate([
@@ -62,13 +66,18 @@ final class RoomInfoCell: UITableViewCell {
             roomUserNameLabel.topAnchor.constraint(equalTo: roomInfoLabel.bottomAnchor, constant: 4),
             roomUserNameLabel.leadingAnchor.constraint(equalTo: roomTypeLabel.leadingAnchor),
             roomUserNameLabel.trailingAnchor.constraint(equalTo: roomTypeLabel.trailingAnchor),
-            roomUserNameLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -12)
+
+            roomNoteLabel.topAnchor.constraint(equalTo: roomUserNameLabel.bottomAnchor, constant: 8),
+            roomNoteLabel.leadingAnchor.constraint(equalTo: roomTypeLabel.leadingAnchor),
+            roomNoteLabel.trailingAnchor.constraint(equalTo: roomTypeLabel.trailingAnchor),
+            roomNoteLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -12)
         ])
     }
     
-    func configure(room: Room, typeName: String, nights: Int, guest: String) {
+    func configure(room: Room, typeName: String, nights: Int, guest: String, note: String?) {
         roomTypeLabel.text = "\(typeName.capitalized) Room - #\(room.roomNumber)"
         roomInfoLabel.text = "\(room.bedCapacity) bed\(room.bedCapacity > 1 ? "s" : "") – ₺\(Int(room.price)) x \(nights) night\(nights > 1 ? "s" : "")"
         roomUserNameLabel.text = "Reserved for: \(guest.capitalized)"
+        roomNoteLabel.text = note?.isEmpty == false ? "Note: \(note!)" : ""
     }
 }

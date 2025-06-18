@@ -13,6 +13,8 @@ final class BookingRoomInfoCell: UITableViewCell {
     private let roomDescriptionLabel = UILabel()
     private let roomInfoLabel = UILabel()
     private let roomUserNameLabel = UILabel()
+    private let roomNoteLabel = UILabel()
+
     private let view: UIView = {
         let view = UIView()
         view.backgroundColor = .appSecondaryBackground
@@ -21,7 +23,6 @@ final class BookingRoomInfoCell: UITableViewCell {
         view.layer.masksToBounds = true
         return view
     }()
-    
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -35,26 +36,29 @@ final class BookingRoomInfoCell: UITableViewCell {
 
         roomTypeLabel.font = .boldSystemFont(ofSize: 16)
         roomTypeLabel.textColor = .appPrimaryText
+
         roomInfoLabel.font = .systemFont(ofSize: 14)
         roomInfoLabel.textColor = .appSecondaryText
+
         roomDescriptionLabel.font = .systemFont(ofSize: 14)
         roomDescriptionLabel.textColor = .appSecondaryText
         roomDescriptionLabel.numberOfLines = 0
+
         roomUserNameLabel.font = .systemFont(ofSize: 14)
         roomUserNameLabel.textColor = .appAccent
 
-        roomTypeLabel.translatesAutoresizingMaskIntoConstraints = false
-        roomInfoLabel.translatesAutoresizingMaskIntoConstraints = false
-        roomDescriptionLabel.translatesAutoresizingMaskIntoConstraints = false
-        roomUserNameLabel.translatesAutoresizingMaskIntoConstraints = false
+        roomNoteLabel.font = .italicSystemFont(ofSize: 14)
+        roomNoteLabel.textColor = .appSecondaryText
+        roomNoteLabel.numberOfLines = 0
+
+        [roomTypeLabel, roomInfoLabel, roomDescriptionLabel, roomUserNameLabel, roomNoteLabel].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
 
         contentView.addSubview(view)
-        view.addSubview(roomTypeLabel)
-        view.addSubview(roomInfoLabel)
-        view.addSubview(roomDescriptionLabel)
-        view.addSubview(roomUserNameLabel)
         view.pinToEdges(of: contentView, withInsets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
-        
+
         NSLayoutConstraint.activate([
             roomTypeLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 12),
             roomTypeLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -71,14 +75,19 @@ final class BookingRoomInfoCell: UITableViewCell {
             roomUserNameLabel.topAnchor.constraint(equalTo: roomDescriptionLabel.bottomAnchor, constant: 4),
             roomUserNameLabel.leadingAnchor.constraint(equalTo: roomDescriptionLabel.leadingAnchor),
             roomUserNameLabel.trailingAnchor.constraint(equalTo: roomDescriptionLabel.trailingAnchor),
-            roomUserNameLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -12)
+            
+            roomNoteLabel.topAnchor.constraint(equalTo: roomUserNameLabel.bottomAnchor, constant: 8),
+            roomNoteLabel.leadingAnchor.constraint(equalTo: roomUserNameLabel.leadingAnchor),
+            roomNoteLabel.trailingAnchor.constraint(equalTo: roomUserNameLabel.trailingAnchor),
+            roomNoteLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -12)
         ])
     }
     
-    func configure(roomNumber: String, typeName: String, nights: Int, guestName: String, roomDescription: String?) {
+    func configure(roomNumber: String, typeName: String, nights: Int, guestName: String, roomDescription: String?, note: String?) {
         roomTypeLabel.text = typeName.capitalized
         roomInfoLabel.text = "Room No: \(roomNumber) • \(nights) night\(nights > 1 ? "s" : "")"
         roomDescriptionLabel.text = roomDescription ?? ""
         roomUserNameLabel.text = "Reservation for: \(guestName)"
+        roomNoteLabel.text = note?.isEmpty == false ? "Note: \(note!)" : ""
     }
 }

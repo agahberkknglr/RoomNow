@@ -237,8 +237,9 @@ extension BookingDetailVC: UITableViewDataSource {
             let nights = viewModel.numberOfNights
             let guest = reservation.fullName
             let desc = room?.description
+            let note = viewModel.reservation.note
             let cell = tableView.dequeue(BookingRoomInfoCell.self, for: indexPath)
-            cell.configure(roomNumber: roomNumber, typeName: typeName, nights: nights, guestName: guest, roomDescription: desc)
+            cell.configure(roomNumber: roomNumber, typeName: typeName, nights: nights, guestName: guest, roomDescription: desc, note: note)
             return cell
 
         case 2:
