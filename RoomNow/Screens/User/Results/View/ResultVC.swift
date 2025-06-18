@@ -41,7 +41,6 @@ final class ResultVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureVC()
-        viewModel.fetchHotels()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -81,7 +80,7 @@ extension ResultVC: ResultVMDelegate {
             self.hideLoadingIndicator()
             self.refreshControl.endRefreshing()
             self.collectionView.reloadData()
-            self.emptyLabel.isHidden = self.viewModel.hotelRooms.count > 0
+            self.emptyLabel.isHidden = self.viewModel.filteredHotelRooms.count > 0
         }
     }
 }
