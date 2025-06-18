@@ -78,8 +78,8 @@ final class OnboardingPageVC: UIViewController {
 
             imageView.topAnchor.constraint(equalTo: logoView.bottomAnchor, constant: 32),
             imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            imageView.widthAnchor.constraint(equalToConstant: 220),
-            imageView.heightAnchor.constraint(equalToConstant: 220),
+            imageView.widthAnchor.constraint(equalToConstant: 300),
+            imageView.heightAnchor.constraint(equalToConstant: 300),
 
             titleLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 40),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
