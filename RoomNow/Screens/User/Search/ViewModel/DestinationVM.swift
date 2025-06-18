@@ -16,7 +16,7 @@ protocol DestinationVMProtocol: AnyObject {
     var delegate: DestinationVMDelegate? { get set }
     var numberOfCities: Int { get }
     func city(at index: Int) -> City?
-    func fetchCities()
+    func fetchCities(initialFilter: String?)
     func filterCities(with query: String)
 }
 
@@ -27,6 +27,7 @@ final class DestinationVM: DestinationVMProtocol {
     private let firebaseManager: FirebaseManagerProtocol
     private var allCities: [City] = []
     private var filteredCities: [City] = []
+    private var initialFilterQuery: String?
 
     init(firebaseManager: FirebaseManagerProtocol = FirebaseManager.shared) {
         self.firebaseManager = firebaseManager
@@ -40,15 +41,26 @@ final class DestinationVM: DestinationVMProtocol {
         guard index >= 0 && index < filteredCities.count else { return nil }
         return filteredCities[index]
     }
+    
+    func fetchCities(initialFilter: String? = nil) {
+        self.initialFilterQuery = initialFilter
 
-    func fetchCities() {
         firebaseManager.fetchCities { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let cities):
                     self?.allCities = cities
-                    self?.filteredCities = cities
+
+                    if let query = self?.initialFilterQuery, !query.isEmpty {
+                        self?.filteredCities = cities.filter {
+                            $0.name.lowercased().hasPrefix(query.lowercased())
+                        }
+                    } else {
+                        self?.filteredCities = cities
+                    }
+
                     self?.delegate?.didUpdateCityList()
+
                 case .failure(let error):
                     self?.delegate?.didFailToLoadCities(error: error)
                 }
