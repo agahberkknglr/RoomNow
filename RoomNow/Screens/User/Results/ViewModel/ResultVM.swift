@@ -10,7 +10,7 @@ import Foundation
 protocol ResultVMProtocol {
     var hotelRooms: [(hotel: Hotel, rooms: [Room])] { get }
     var filteredHotelRooms: [(hotel: Hotel, rooms: [Room])] { get }
-    var searchParameters: HotelSearchParameters { get }
+    var searchParameters: HotelSearchParameters { get set }
     var delegate: ResultVMDelegate? { get set }
     var currentFilter: HotelFilterOptions? { get }
     func fetchHotels()
@@ -26,7 +26,7 @@ final class ResultVM: ResultVMProtocol {
     weak var delegate: ResultVMDelegate?
     private(set) var hotelRooms: [(hotel: Hotel, rooms: [Room])] = []
     private(set) var filteredHotelRooms: [(hotel: Hotel, rooms: [Room])] = []
-    let searchParameters: HotelSearchParameters
+    var searchParameters: HotelSearchParameters
     private(set) var currentFilter: HotelFilterOptions? = nil
 
 
