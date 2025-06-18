@@ -116,19 +116,24 @@ final class ReservationVC: UIViewController {
     private func navigateAfterBooking() {
         guard let tabBarController = self.tabBarController else { return }
 
-        // Switch to the Bookings tab
-        tabBarController.selectedIndex = 2
-
-        // Dismiss to root if this VC was presented modally
+        // Reset navigation stack of all tabs (or at least index 0 - Search)
+        if let searchNav = tabBarController.viewControllers?[0] as? UINavigationController {
+            searchNav.popToRootViewController(animated: false)
+        }
+        if let savedNav = tabBarController.viewControllers?[1] as? UINavigationController {
+            savedNav.popToRootViewController(animated: false)
+        }
+        if let bookingsNav = tabBarController.viewControllers?[2] as? UINavigationController {
+            bookingsNav.popToRootViewController(animated: false)
+        }
+        // Dismiss any modally presented view (e.g. BookingConfirmVC was presented modally)
         if let presented = tabBarController.presentedViewController {
             presented.dismiss(animated: true)
         }
-
-        // Or pop to root if this VC is inside a nav controller
-        if let nav = tabBarController.viewControllers?[2] as? UINavigationController {
-            nav.popToRootViewController(animated: true)
-        }
+        // Switch to the Bookings tab
+        tabBarController.selectedIndex = 2
     }
+
 }
 
 extension ReservationVC: UITableViewDataSource {
