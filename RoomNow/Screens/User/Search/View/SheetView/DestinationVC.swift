@@ -54,7 +54,6 @@ final class DestinationVC: UIViewController {
     private let viewModel: DestinationVMProtocol
     weak var delegate: DestinationVCDelegate?
 
-    // Dependency injection
     init(viewModel: DestinationVMProtocol = DestinationVM()) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
