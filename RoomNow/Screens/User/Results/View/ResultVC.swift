@@ -154,7 +154,8 @@ final class ResultVC: UIViewController {
     }
     
     @objc private func openDestinationSheet() {
-        let vc = DestinationVC()
+        let selectedCity = viewModel.searchParameters.destination
+        let vc = DestinationVC(selectedCity: selectedCity)
         vc.delegate = self
         presentBottomSheet(with: vc, detents: [.large()])
     }
