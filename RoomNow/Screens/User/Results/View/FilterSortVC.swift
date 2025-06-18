@@ -117,7 +117,7 @@ extension FilterSortVC: UITableViewDataSource, UITableViewDelegate {
         switch sec {
         case .sort: return "Sort By"
         case .rating: return "Minimum Rating"
-        case .amenities: return "Amenities"
+        case .amenities: return "Facilities"
         }
     }
 
