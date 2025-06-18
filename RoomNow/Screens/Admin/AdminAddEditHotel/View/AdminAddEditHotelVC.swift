@@ -143,6 +143,7 @@ final class AdminAddEditHotelVC: UIViewController {
 
         styledField("Location (e.g. Taksim)", locationField)
         locationField.applyButtonStyleLook()
+        locationField.autocorrectionType = .no
         locationField.constrainHeight(to: 48)
 
         let descLabel = UILabel()
