@@ -149,10 +149,12 @@ final class SearchVC: UIViewController {
 
 
     @objc private func openDestinationSheet() {
-        let destinationVC = DestinationVC()
+        let selectedCity = viewModel.getSelectedCityName()
+        let destinationVC = DestinationVC(selectedCity: selectedCity)
         destinationVC.delegate = self
         presentBottomSheet(with: destinationVC, detents: [.large()])
     }
+
 
     @objc private func openDateSheet() {
         let dateVC = DateVC()
