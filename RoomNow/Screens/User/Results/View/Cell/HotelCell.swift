@@ -14,8 +14,7 @@ final class HotelCell: UICollectionViewCell {
     
     private let hotelImageView = UIImageView()
     private let hotelNameLabel = UILabel()
-    private let ratingLabel = UILabel()
-    private let ratingImage = UIImageView()
+    private let starStack = UIStackView()
     private let locationLabel = UILabel()
     private let locationImage = UIImageView()
     private let priceLabel = UILabel()
@@ -47,15 +46,11 @@ final class HotelCell: UICollectionViewCell {
         hotelNameLabel.textColor = .appPrimaryText
         hotelNameLabel.numberOfLines = 2
         
-        ratingImage.contentMode = .scaleAspectFit
-        ratingImage.image = UIImage(systemName: "star.fill")
-        ratingImage.layer.cornerRadius = 12
-        ratingImage.clipsToBounds = true
-        ratingImage.tintColor = .appAccent
-        
-        ratingLabel.font = .systemFont(ofSize: 14)
-        ratingLabel.textColor = .appPrimaryText
-        
+        starStack.axis = .horizontal
+        starStack.spacing = 1 
+        starStack.alignment = .leading
+        starStack.distribution = .fill
+
         locationImage.contentMode = .scaleAspectFit
         locationImage.image = UIImage(systemName: "mappin")
         locationImage.layer.cornerRadius = 12
@@ -87,7 +82,10 @@ final class HotelCell: UICollectionViewCell {
         saveButton.setContentCompressionResistancePriority(.required, for: .horizontal)
         saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
         
-        let ratStack = UIStackView(arrangedSubviews: [ratingImage, ratingLabel])
+        let spacer = UIView()
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        
+        let ratStack = UIStackView(arrangedSubviews: [starStack, spacer])
         ratStack.axis = .horizontal
         ratStack.spacing = 4
         
@@ -113,9 +111,6 @@ final class HotelCell: UICollectionViewCell {
             hotelImageView.widthAnchor.constraint(equalToConstant: 120),
             hotelImageView.heightAnchor.constraint(equalToConstant: 210),
             
-            ratingImage.heightAnchor.constraint(equalToConstant: 24),
-            ratingImage.widthAnchor.constraint(equalToConstant: 24),
-            
             locationImage.widthAnchor.constraint(equalToConstant: 24),
             locationImage.widthAnchor.constraint(equalToConstant: 24),
             
@@ -135,7 +130,7 @@ final class HotelCell: UICollectionViewCell {
         self.viewModel = viewModel
 
         hotelNameLabel.text = viewModel.hotelName
-        ratingLabel.text = viewModel.hotelRatingText
+        starStack.setStars(from: viewModel.hotelRatingText)
         locationLabel.text = viewModel.hotelLocation
 
         if let firstRoom = viewModel.roomCombination.first {

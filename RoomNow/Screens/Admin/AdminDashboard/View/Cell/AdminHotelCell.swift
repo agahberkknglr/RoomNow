@@ -12,7 +12,7 @@ final class AdminHotelCell: UITableViewCell {
     private let hotelImageView = UIImageView()
     private let titleLabel = UILabel()
     private let subtitleLabel = UILabel()
-    private let ratingLabel = UILabel()
+    private let starStack = UIStackView()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -34,10 +34,20 @@ final class AdminHotelCell: UITableViewCell {
         titleLabel.font = .boldSystemFont(ofSize: 16)
         subtitleLabel.font = .systemFont(ofSize: 14)
         subtitleLabel.textColor = .secondaryLabel
-        ratingLabel.font = .systemFont(ofSize: 14)
-        ratingLabel.textColor = .systemYellow
 
-        let stack = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel, ratingLabel])
+        starStack.axis = .horizontal
+        starStack.spacing = 1
+        starStack.alignment = .center
+        starStack.distribution = .fill
+        
+        let spacer = UIView()
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        
+        let ratStack = UIStackView(arrangedSubviews: [starStack, spacer])
+        ratStack.axis = .horizontal
+        ratStack.spacing = 4
+
+        let stack = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel, ratStack])
         stack.axis = .vertical
         stack.spacing = 4
 
@@ -63,7 +73,7 @@ final class AdminHotelCell: UITableViewCell {
     func configure(with hotel: Hotel) {
         titleLabel.text = hotel.name
         subtitleLabel.text = hotel.city.capitalized
-        ratingLabel.text = "★ \(hotel.rating)"
+        starStack.setStars(from: hotel.rating)
         hotelImageView.setImage(fromBase64: hotel.imageUrls.first)
     }
 }

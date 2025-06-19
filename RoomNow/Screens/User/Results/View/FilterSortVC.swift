@@ -139,8 +139,39 @@ extension FilterSortVC: UITableViewDataSource, UITableViewDelegate {
 
         case .rating:
             let rating = Double(indexPath.row + 1)
-            cell.textLabel?.text = "\(rating)+ stars"
+            cell.textLabel?.text = nil
+
+            cell.contentView.subviews
+                .filter { $0.tag == 999 }
+                .forEach { $0.removeFromSuperview() }
+
+            let starStack = UIStackView()
+            starStack.axis = .horizontal
+            starStack.spacing = 2
+            starStack.alignment = .center
+            starStack.tag = 999
+
+            for _ in 0..<Int(rating) {
+                let star = UIImageView(image: UIImage(systemName: "star.fill"))
+                star.tintColor = .appAccent
+                star.contentMode = .scaleAspectFit
+                star.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate([
+                    star.widthAnchor.constraint(equalToConstant: 16),
+                    star.heightAnchor.constraint(equalToConstant: 16)
+                ])
+                starStack.addArrangedSubview(star)
+            }
+
+            cell.contentView.addSubview(starStack)
+            starStack.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                starStack.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+                starStack.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 16)
+            ])
+
             cell.accessoryType = (rating == selectedMinRating) ? .checkmark : .none
+
 
         case .amenities:
             let visibleCount = showAllAmenities ? availableAmenities.count : min(5, availableAmenities.count)
