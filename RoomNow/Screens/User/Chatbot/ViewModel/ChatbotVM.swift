@@ -366,8 +366,10 @@ final class ChatbotVM {
             ])
             return
         }
+
         guard
             let hotel = selectedHotel,
+            let hotelId = hotel.id,
             !selectedRooms.isEmpty,
             let parsed = lastSearchData
         else {
@@ -389,51 +391,69 @@ final class ChatbotVM {
             ])
             return
         }
-        
-        let roomNumbers = selectedRooms.map { $0.roomNumber }
-        
-        let nights = Calendar.current.dateComponents([.day], from: checkIn, to: checkOut).day ?? 1
 
-        let totalPrice = selectedRooms.reduce(0) {
-            $0 + (Int($1.price) * nights)
-        }
-
-        let reservation = Reservation(
-            hotelId: hotel.id ?? "",
-            hotelName: hotel.name,
-            city: hotel.city,
-            checkInDate: checkIn,
-            checkOutDate: checkOut,
-            guestCount: parsed.guestCount,
-            roomCount: selectedRooms.count,
-            selectedRoomNumbers: roomNumbers,
-            totalPrice: totalPrice,
-            fullName: userInfo.name ?? "",
-            email: userInfo.email ?? "",
-            phone: userInfo.phone ?? "",
-            note: userInfo.note,
-            reservedAt: Date(),
-            status: .active,
-            completedAt: nil,
-            cancelledAt: nil
-        )
-
-        FirebaseManager.shared.saveReservation(reservation) { [weak self] result in
+        FirebaseManager.shared.fetchHotel(by: hotelId) { [weak self] result in
             guard let self = self else { return }
+
             switch result {
-            case .success:
-                self.updateMultipleRoomDatesForChat(
-                    roomIds: self.selectedRooms.compactMap { $0.id },
-                    checkIn: checkIn,
-                    checkOut: checkOut
+            case .success(let latestHotel):
+                guard latestHotel.isAvailable == true else {
+                    self.delegate?.didReceiveHotelMessages([
+                        ChatMessage(sender: .bot, text: "❌ This hotel is currently inactive. Please choose another hotel.", type: .text, payload: nil)
+                    ])
+                    return
+                }
+
+                let nights = Calendar.current.dateComponents([.day], from: checkIn, to: checkOut).day ?? 1
+
+                let roomNumbers = self.selectedRooms.map { $0.roomNumber }
+                let totalPrice = self.selectedRooms.reduce(0) {
+                    $0 + (Int($1.price) * nights)
+                }
+
+                let reservation = Reservation(
+                    hotelId: hotelId,
+                    hotelName: latestHotel.name,
+                    city: latestHotel.city,
+                    checkInDate: checkIn,
+                    checkOutDate: checkOut,
+                    guestCount: parsed.guestCount,
+                    roomCount: self.selectedRooms.count,
+                    selectedRoomNumbers: roomNumbers,
+                    totalPrice: totalPrice,
+                    fullName: self.userInfo.name ?? "",
+                    email: self.userInfo.email ?? "",
+                    phone: self.userInfo.phone ?? "",
+                    note: self.userInfo.note,
+                    reservedAt: Date(),
+                    status: .active,
+                    completedAt: nil,
+                    cancelledAt: nil
                 )
+
+                FirebaseManager.shared.saveReservation(reservation) { result in
+                    switch result {
+                    case .success:
+                        self.updateMultipleRoomDatesForChat(
+                            roomIds: self.selectedRooms.compactMap { $0.id },
+                            checkIn: checkIn,
+                            checkOut: checkOut
+                        )
+                    case .failure(let error):
+                        self.delegate?.didReceiveHotelMessages([
+                            ChatMessage(sender: .bot, text: "❌ Booking failed: \(error.localizedDescription)", type: .text, payload: nil)
+                        ])
+                    }
+                }
+
             case .failure(let error):
                 self.delegate?.didReceiveHotelMessages([
-                    ChatMessage(sender: .bot, text: "❌ Booking failed: \(error.localizedDescription)", type: .text, payload: nil)
+                    ChatMessage(sender: .bot, text: "❌ Failed to fetch hotel status: \(error.localizedDescription)", type: .text, payload: nil)
                 ])
             }
         }
     }
+
 
     private func updateMultipleRoomDatesForChat(roomIds: [String], checkIn: Date, checkOut: Date) {
         let group = DispatchGroup()

@@ -51,48 +51,62 @@ final class ReservationVM {
             completion(.failure(error))
             return
         }
-
-        let roomIds = selectedRooms.compactMap { $0.id }
-
-        FirebaseManager.shared.checkRoomAvailability(
-            roomIds: roomIds,
-            startDate: searchParams.checkInDate,
-            endDate: searchParams.checkOutDate
-        ) { [weak self] result in
+        
+        FirebaseManager.shared.fetchHotel(by: hotelId) { [weak self] result in
             switch result {
-            case .success(let allAvailable):
-                guard allAvailable else {
-                    let error = NSError(domain: "ReservationError", code: 1, userInfo: [NSLocalizedDescriptionKey: "One or more rooms are no longer available."])
+            case .success(let latestHotel):
+                guard latestHotel.isAvailable == true else {
+                    let error = NSError(domain: "ReservationError", code: 1, userInfo: [NSLocalizedDescriptionKey: "This hotel is currently inactive. Please try another hotel."])
                     completion(.failure(error))
                     return
                 }
 
                 guard let self = self else { return }
 
-                let reservation = Reservation(
-                    hotelId: hotelId,
-                    hotelName: hotel.name,
-                    city: hotel.city,
-                    checkInDate: self.searchParams.checkInDate,
-                    checkOutDate: self.searchParams.checkOutDate,
-                    guestCount: self.searchParams.guestCount,
-                    roomCount: self.selectedRooms.count,
-                    selectedRoomNumbers: self.selectedRooms.map { $0.roomNumber },
-                    totalPrice: self.totalPrice,
-                    fullName: self.fullName,
-                    email: self.email,
-                    phone: self.phone,
-                    note: self.note?.isEmpty == true ? nil : self.note,
-                    reservedAt: Date(),
-                    status: .active,
-                    completedAt: nil,
-                    cancelledAt: nil
-                )
+                let roomIds = self.selectedRooms.compactMap { $0.id }
 
-                FirebaseManager.shared.saveReservation(reservation) { result in
+                FirebaseManager.shared.checkRoomAvailability(
+                    roomIds: roomIds,
+                    startDate: self.searchParams.checkInDate,
+                    endDate: self.searchParams.checkOutDate
+                ) { result in
                     switch result {
-                    case .success:
-                        self.updateRoomDates(completion: completion)
+                    case .success(let allAvailable):
+                        guard allAvailable else {
+                            let error = NSError(domain: "ReservationError", code: 2, userInfo: [NSLocalizedDescriptionKey: "One or more rooms are no longer available."])
+                            completion(.failure(error))
+                            return
+                        }
+
+                        let reservation = Reservation(
+                            hotelId: hotelId,
+                            hotelName: latestHotel.name,
+                            city: latestHotel.city,
+                            checkInDate: self.searchParams.checkInDate,
+                            checkOutDate: self.searchParams.checkOutDate,
+                            guestCount: self.searchParams.guestCount,
+                            roomCount: self.selectedRooms.count,
+                            selectedRoomNumbers: self.selectedRooms.map { $0.roomNumber },
+                            totalPrice: self.totalPrice,
+                            fullName: self.fullName,
+                            email: self.email,
+                            phone: self.phone,
+                            note: self.note?.isEmpty == true ? nil : self.note,
+                            reservedAt: Date(),
+                            status: .active,
+                            completedAt: nil,
+                            cancelledAt: nil
+                        )
+
+                        FirebaseManager.shared.saveReservation(reservation) { result in
+                            switch result {
+                            case .success:
+                                self.updateRoomDates(completion: completion)
+                            case .failure(let error):
+                                completion(.failure(error))
+                            }
+                        }
+
                     case .failure(let error):
                         completion(.failure(error))
                     }
