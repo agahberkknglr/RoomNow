@@ -42,26 +42,10 @@ Welcome to RoomNow. This is an iOS hotel reservation app where users can search,
 - 👥 List all users with filter & search options.
 
 ## Screenshots
+| Register | Sign In | 
+|-----------------------------------|-----------------------------------|
+| <img src="/Screenshots/register.png" width="250"/> | <img src="/Screenshots/signin.png" width="250"/> 
 
-<table>
-  <tr>
-    <th>Sign In</th>
-    <th>Register</th>
-    <th>Search</th>
-    <th>Result</th>
-    <th>Detail</th>
-    <th>RoomSelect</th>
-    <th>Personal Info</th>
-    <th>Booking Summary</th>
-  </tr>
-  <tr>
-    <td><img src="Screenshots/signin.png" style="height:400px; width:auto;" /></td>
-    <td><img src="Screenshots/register.png" style="height:400px; width:auto;" /></td>
-    <td><img src="Screenshots/search.png" style="height:400px; width:auto;" /></td>
-    <td><img src="Screenshots/result.png" style="height:400px; width:auto;" /></td>
-    <td><img src="Screenshots/detail.png" style="height:400px; width:auto;" /></td>
-    <td><img src="Screenshots/roomselect.png" style="height:400px; width:auto;" /></td>
-    <td><img src="Screenshots/info.png" style="height:400px; width:auto;" /></td>
-    <td><img src="Screenshots/bookingsum.png" style="height:400px; width:auto;" /></td>
-  </tr>
-</table>
+| Search | Result | Detail | Room Selection | Personal Info | Booking Confirm |
+|-----------------------------------|-----------------------------------|-----------------------------------|-----------------------------------|-----------------------------------|-----------------------------------|
+|<img src="/Screenshots/search.png" width="250"/> | <img src="/Screenshots/result.png" width="250"/> | <img src="/Screenshots/detail.png" width="250"/> | <img src="/Screenshots/roomselect.png" width="250"/> | <img src="/Screenshots/info.png" width="250"/> | <img src="/Screenshots/bookingsum.png" width="250"/>
