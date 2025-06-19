@@ -93,7 +93,7 @@ final class HotelDetailVM: HotelDetailVMProtocol {
 
     var hotelName: String { hotel.name }
     var location: String { hotel.location }
-    var ratingText: String { "\(hotel.rating)" }
+    var ratingText: String { "\(Int(hotel.rating))" }
     var imageUrls: [String] { hotel.imageUrls }
 
     var checkInDateText: String {

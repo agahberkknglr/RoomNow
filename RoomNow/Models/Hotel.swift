@@ -27,7 +27,7 @@ extension Hotel {
             id: saved.hotelId,
             name: saved.hotelName,
             city: saved.city,
-            rating: 4.5,
+            rating: 4,
             location: "",
             description: "",
             latitude: 0.0,

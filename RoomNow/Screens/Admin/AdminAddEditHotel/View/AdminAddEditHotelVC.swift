@@ -120,7 +120,7 @@ final class AdminAddEditHotelVC: UIViewController {
         contentStack.addArrangedSubview(citySelectorButton)
 
         let ratingLabel = UILabel()
-        ratingLabel.text = "Hotel Rating"
+        ratingLabel.text = "Hotel Star"
         ratingLabel.applySubtitleSecondStyle()
 
         ratingStack.axis = .horizontal

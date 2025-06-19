@@ -90,8 +90,8 @@ final class AdminAddEditHotelVM {
         if location.isEmpty { return "Location is required." }
         if description.isEmpty { return "Description is required." }
 
-        guard let ratingVal = Double(rating), ratingVal >= 0 && ratingVal <= 5 else {
-            return "Rating must be a number between 0 and 5."
+        guard let ratingVal = Double(rating), ratingVal >= 1 && ratingVal <= 5 else {
+            return "Star must be a number between 1 and 5."
         }
 
         guard Double(latitude) != nil else {

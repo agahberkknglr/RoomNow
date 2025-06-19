@@ -29,7 +29,7 @@ final class HotelCellVM {
     var hotelId: String? { hotel.id }
     var hotelName: String { hotel.name }
     var hotelLocation: String { hotel.location }
-    var hotelRatingText: String { "\(hotel.rating)" }
+    var hotelRatingText: String { "\(Int(hotel.rating))" }
     var hotelImageUrl: String? { return hotel.imageUrls.first }
     
     private func findValidRoomCombination() -> [Room] {
