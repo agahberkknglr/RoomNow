@@ -259,8 +259,16 @@ extension ChatbotVC: UITableViewDataSource {
             }
             
             let cell = tableView.dequeue(HotelChatCell.self, for: indexPath)
-            cell.configure(with: hotelData.hotel, rooms: hotelData.rooms, showAvatar: message.showAvatar)
-            
+            guard let parsed = viewModel.lastSearchData else { return UITableViewCell() }
+            let params = parsed.toHotelSearchParameters()
+
+            cell.configure(
+                with: hotelData.hotel,
+                rooms: hotelData.rooms,
+                showAvatar: message.showAvatar,
+                searchParams: params
+            )
+
             cell.onViewDetails = { [weak self] in
                 guard let self = self else {
                     print("self is nil, can't navigate")

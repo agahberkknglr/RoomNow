@@ -30,10 +30,19 @@ final class HotelChatCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(with hotel: Hotel, rooms: [Room], showAvatar: Bool) {
+    func configure(with hotel: Hotel, rooms: [Room], showAvatar: Bool, searchParams: HotelSearchParameters) {
+        let vm = HotelCellVM(hotel: hotel, rooms: rooms, searchParams: searchParams)
+        let nights = Calendar.current.dateComponents([.day], from: searchParams.checkInDate, to: searchParams.checkOutDate).day ?? 1
+        let combo = vm.roomCombination
+        let totalPrice = combo.reduce(0) { $0 + Int($1.price) * nights }
+
+        if !combo.isEmpty {
+            priceLabel.text = "💸 ₺\(totalPrice) total"
+        } else {
+            priceLabel.text = "💸 Not available"
+        }
         nameLabel.text = "🏨 \(hotel.name)"
         locationLabel.text = "📍 \(hotel.city.capitalized), \(hotel.location)"
-        priceLabel.text = "💸 ₺\(Int(rooms.first?.price ?? 0)) / night"
         avatarLabel.isHidden = !showAvatar
     }
 
