@@ -60,9 +60,25 @@ final class ResultVM: ResultVMProtocol {
         if let sort = options.sortBy {
             switch sort {
             case .priceAsc:
-                filtered.sort { $0.rooms.first?.price ?? .greatestFiniteMagnitude < $1.rooms.first?.price ?? .greatestFiniteMagnitude }
+                filtered.sort {
+                    let combo1 = HotelCellVM(hotel: $0.hotel, rooms: $0.rooms, searchParams: searchParameters).roomCombination
+                    let combo2 = HotelCellVM(hotel: $1.hotel, rooms: $1.rooms, searchParams: searchParameters).roomCombination
+
+                    let price1 = combo1.reduce(0) { $0 + Int($1.price) }
+                    let price2 = combo2.reduce(0) { $0 + Int($1.price) }
+
+                    return price1 < price2
+                }
             case .priceDesc:
-                filtered.sort { $0.rooms.first?.price ?? 0 > $1.rooms.first?.price ?? 0 }
+                filtered.sort {
+                    let combo1 = HotelCellVM(hotel: $0.hotel, rooms: $0.rooms, searchParams: searchParameters).roomCombination
+                    let combo2 = HotelCellVM(hotel: $1.hotel, rooms: $1.rooms, searchParams: searchParameters).roomCombination
+
+                    let price1 = combo1.reduce(0) { $0 + Int($1.price) }
+                    let price2 = combo2.reduce(0) { $0 + Int($1.price) }
+
+                    return price1 > price2
+                }
             case .ratingAsc:
                 filtered.sort { $0.hotel.rating < $1.hotel.rating }
             case .ratingDesc:
