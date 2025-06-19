@@ -43,6 +43,25 @@ Welcome to RoomNow. This is an iOS hotel reservation app where users can search,
 
 ## Screenshots
 
-| Sign In | Register | Search | Result | Detail | RoomSelect | Personal Info | Booking Summary |
-|---------|---------|---------|---------|---------|---------|---------|---------|
-| ![signin](Screenshots/signin.png) | ![register](Screenshots/register.png) | ![search](Screenshots/search.png) | ![result](Screenshots/result.png) | ![detail](Screenshots/detail.png) | ![roomselect](Screenshots/roomselect.png) | ![info](Screenshots/info.png) | ![bookingsum](Screenshots/bookingsum.png) |
+<table>
+  <tr>
+    <th>Sign In</th>
+    <th>Register</th>
+    <th>Search</th>
+    <th>Result</th>
+    <th>Detail</th>
+    <th>RoomSelect</th>
+    <th>Personal Info</th>
+    <th>Booking Summary</th>
+  </tr>
+  <tr>
+    <td><img src="Screenshots/signin.png" height="400"/></td>
+    <td><img src="Screenshots/register.png" height="400"/></td>
+    <td><img src="Screenshots/search.png" height="400"/></td>
+    <td><img src="Screenshots/result.png" height="400"/></td>
+    <td><img src="Screenshots/detail.png" height="400"/></td>
+    <td><img src="Screenshots/roomselect.png" height="400"/></td>
+    <td><img src="Screenshots/info.png" height="400"/></td>
+    <td><img src="Screenshots/bookingsum.png" height="400"/></td>
+  </tr>
+</table>
