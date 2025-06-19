@@ -55,13 +55,13 @@ Welcome to RoomNow. This is an iOS hotel reservation app where users can search,
     <th>Booking Summary</th>
   </tr>
   <tr>
-    <td><img src="Screenshots/signin.png" height="400"/></td>
-    <td><img src="Screenshots/register.png" height="400"/></td>
-    <td><img src="Screenshots/search.png" height="400"/></td>
-    <td><img src="Screenshots/result.png" height="400"/></td>
-    <td><img src="Screenshots/detail.png" height="400"/></td>
-    <td><img src="Screenshots/roomselect.png" height="400"/></td>
-    <td><img src="Screenshots/info.png" height="400"/></td>
-    <td><img src="Screenshots/bookingsum.png" height="400"/></td>
+    <td><img src="Screenshots/signin.png" style="height:400px; width:auto;" /></td>
+    <td><img src="Screenshots/register.png" style="height:400px; width:auto;" /></td>
+    <td><img src="Screenshots/search.png" style="height:400px; width:auto;" /></td>
+    <td><img src="Screenshots/result.png" style="height:400px; width:auto;" /></td>
+    <td><img src="Screenshots/detail.png" style="height:400px; width:auto;" /></td>
+    <td><img src="Screenshots/roomselect.png" style="height:400px; width:auto;" /></td>
+    <td><img src="Screenshots/info.png" style="height:400px; width:auto;" /></td>
+    <td><img src="Screenshots/bookingsum.png" style="height:400px; width:auto;" /></td>
   </tr>
 </table>
