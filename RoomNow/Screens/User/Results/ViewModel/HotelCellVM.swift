@@ -38,18 +38,27 @@ final class HotelCellVM {
         }
 
         if searchParams.roomCount == 1 {
-            return availableRooms.first(where: { $0.bedCapacity >= searchParams.guestCount }).map { [$0] } ?? []
+            return availableRooms
+                .filter { $0.bedCapacity >= searchParams.guestCount }
+                .sorted { $0.price < $1.price }
+                .prefix(1)
+                .map { $0 }
         } else {
-            let combinations = availableRooms.combinations(ofCount: searchParams.roomCount)
-            for combo in combinations {
-                let totalBeds = combo.reduce(0) { $0 + $1.bedCapacity }
-                if totalBeds >= searchParams.guestCount {
-                    return combo
+            let combinations = availableRooms
+                .combinations(ofCount: searchParams.roomCount)
+                .filter { combo in
+                    combo.reduce(0) { $0 + $1.bedCapacity } >= searchParams.guestCount
                 }
-            }
-            return []
+                .sorted {
+                    let total0 = $0.reduce(0) { $0 + Int($1.price) }
+                    let total1 = $1.reduce(0) { $0 + Int($1.price) }
+                    return total0 < total1
+                }
+
+            return combinations.first ?? []
         }
     }
+
 
 
     func loadSavedStatus(completion: @escaping () -> Void) {

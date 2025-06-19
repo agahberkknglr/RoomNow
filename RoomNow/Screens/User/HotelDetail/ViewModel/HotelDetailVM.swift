@@ -230,17 +230,28 @@ final class HotelDetailVM: HotelDetailVMProtocol {
             $0.isAvailable(for: searchParams.checkInDate, checkOut: searchParams.checkOutDate)
         }
 
-        let combinations = filteredRooms.combinations(ofCount: searchParams.roomCount)
-        
-        for combo in combinations {
-            let totalBeds = combo.reduce(0) { $0 + $1.bedCapacity }
-            if totalBeds >= searchParams.guestCount {
-                return combo
-            }
+        if searchParams.roomCount == 1 {
+            return filteredRooms
+                .filter { $0.bedCapacity >= searchParams.guestCount }
+                .sorted { $0.price < $1.price }
+                .prefix(1)
+                .map { $0 }
+        } else {
+            let combinations = filteredRooms
+                .combinations(ofCount: searchParams.roomCount)
+                .filter { combo in
+                    combo.reduce(0) { $0 + $1.bedCapacity } >= searchParams.guestCount
+                }
+                .sorted {
+                    let total0 = $0.reduce(0) { $0 + Int($1.price) }
+                    let total1 = $1.reduce(0) { $0 + Int($1.price) }
+                    return total0 < total1
+                }
+
+            return combinations.first ?? []
         }
-        
-        return []
     }
+
 }
 
 
