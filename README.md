@@ -46,6 +46,21 @@ Welcome to RoomNow. This is an iOS hotel reservation app where users can search,
 |-----------------------------------|-----------------------------------|
 | <img src="/Screenshots/register.png" width="250"/> | <img src="/Screenshots/signin.png" width="250"/> 
 
+### User
+
 | Search | Result | Detail | Room Selection | Personal Info | Booking Confirm |
 |-----------------------------------|-----------------------------------|-----------------------------------|-----------------------------------|-----------------------------------|-----------------------------------|
 |<img src="/Screenshots/search.png" width="250"/> | <img src="/Screenshots/result.png" width="250"/> | <img src="/Screenshots/detail.png" width="250"/> | <img src="/Screenshots/roomselect.png" width="250"/> | <img src="/Screenshots/info.png" width="250"/> | <img src="/Screenshots/bookingsum.png" width="250"/>
+
+| Bookings | Bookings Detail | Chat | Chat Booking Confirm |
+|-----------------------------------|-----------------------------------|-----------------------------------|-----------------------------------|
+|<img src="/Screenshots/bookings.png" width="250"/> |<img src="/Screenshots/bookingsdetail.png" width="250"/> |<img src="/Screenshots/chat assistant.png" width="250"/> |<img src="/Screenshots/chat confirm booking.png" width="250"/> 
+
+### Admin
+| Dashboard | Add Hotel | Edit Hotel | Room List | Add/Edit Room |
+|-----------------------------------|-----------------------------------|-----------------------------------|-----------------------------------|-----------------------------------|
+|<img src="/Screenshots/dashboard.png" width="250"/> | <img src="/Screenshots/addhotel.png" width="250"/> | <img src="/Screenshots/edithotel.png" width="250"/> | <img src="/Screenshots/roomlist.png" width="250"/> | <img src="/Screenshots/editroom.png" width="250"/> 
+
+| Tools | All Reservations | All Users | Analytics |
+|-----------------------------------|-----------------------------------|-----------------------------------|-----------------------------------|
+|<img src="/Screenshots/tools.png" width="250"/> | <img src="/Screenshots/allreservations.png" width="250"/> | <img src="/Screenshots/allusers.png" width="250"/> | <img src="/Screenshots/analytics.png" width="250"/>  
